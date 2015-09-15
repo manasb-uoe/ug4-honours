@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enthusiast94/ug4-honours.git"
+  },
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "latest",
+    "morgan": "latest"
+  },
+  "devDependencies": {
+    "nodemon": "latest"
+  },
+  "author": "Manas Bajaj"
+}
