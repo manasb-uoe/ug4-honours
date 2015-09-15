@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "express": "latest",
-    "morgan": "latest"
+    "morgan": "latest",
+    "mongoose": "latest",
+    "body-parser": "latest",
+    "jsonwebtoken": "latest"
   },
   "devDependencies": {
     "nodemon": "latest"
