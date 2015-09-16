@@ -15,7 +15,12 @@
     "morgan": "latest",
     "mongoose": "latest",
     "body-parser": "latest",
-    "jsonwebtoken": "latest"
+    "validator": "latest",
+    "bcrypt-nodejs": "latest",
+    "jsonwebtoken": "latest",
+    "validator": "latest",
+    "async": "latest",
+    "underscore": "latest"
   },
   "devDependencies": {
     "nodemon": "latest"
