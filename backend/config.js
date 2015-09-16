@@ -3,5 +3,6 @@
  */
 
 module.exports = {
-    database: "mongodb://localhost/ug4_honours_db"
+    database: "mongodb://localhost/ug4_honours_db",
+    secret: "this_is_a_very_long_secret"
 };

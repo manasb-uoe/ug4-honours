@@ -26,6 +26,15 @@ var userSchema = new mongoose.Schema({
 
 
 /**
+ * Static methods
+ */
+
+userSchema.statics.findOneByEmail = function (email, callback) {
+    this.model("User").findOne({email: email}, callback);
+};
+
+
+/**
  * Instance methods
  */
 
@@ -57,7 +66,7 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
                 if (!validator.isEmail(self.email))
                     return mainCallback(new Error("Invalid email format."));
 
-                self.model('User').findOne({email: self.email}, function (err, email) {
+                self.model('User').findOneByEmail(self.email, function (err, email) {
                     if (err)
                         return mainCallback(err);
 
@@ -93,8 +102,6 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
             return mainCallback();
         }
     ]);
-
-
 };
 
 userSchema.methods.hashPassword = function (callback) {
@@ -115,5 +122,12 @@ userSchema.methods.hashPassword = function (callback) {
     });
 };
 
+userSchema.methods.comparePassword = function (password, callback) {
+    bcrypt.compare(password, this.password, function (err, match) {
+        if (err) return callback(err);
+
+        return callback(null, match);
+    });
+};
 
 module.exports = mongoose.model("User", userSchema);

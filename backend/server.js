@@ -9,6 +9,7 @@ var bodyParser = require("body-parser");
 var config = require("./config");
 var responsesMiddleware = require("./middleware/responses");
 var userRoutes = require("./controllers/user_controller");
+var authRoutes = require("./controllers/auth_controller");
 
 /**
  * Configuration
@@ -35,11 +36,11 @@ app.use(responsesMiddleware);
 
 
 /**
- * Register API routes
+ * Register API routes. All routes will be prefixed with /api.
  */
 
-// all routes will be prefixed with /api
 app.use("/api", userRoutes);
+app.use("/api", authRoutes);
 
 
 /**
