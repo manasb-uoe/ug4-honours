@@ -8,7 +8,7 @@
  */
 module.exports = function (req, res, next) {
     var requestedUserId = req.params.user_id;
-    var currentUserId = req.decodedPayload._id;
+    var currentUserId = req.decodedPayload.id;
 
     if (requestedUserId !== currentUserId) return res.sendError(403, "You are not allowed to do that.");
 

@@ -55,6 +55,10 @@ router.route("/users")
         User.find(function (err, users) {
             if (err) return res.sendError(500, err.message);
 
+            users.forEach(function (user) {
+                user = user.toJSON();
+            });
+
             res.sendOk(users);
         });
     });

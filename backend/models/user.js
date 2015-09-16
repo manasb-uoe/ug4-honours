@@ -38,6 +38,22 @@ userSchema.statics.findOneByEmail = function (email, callback) {
  * Instance methods
  */
 
+userSchema.methods.toJSON = function() {
+    var obj = this.toObject();
+
+    // replace _id key with id
+    obj.id = obj._id;
+    delete obj._id;
+
+    // delete version key
+    delete obj.__v;
+
+    // delete password hash
+    delete obj.password;
+
+    return obj;
+};
+
 userSchema.methods.validateInfo = function (options, mainCallback) {
 
     var settings = _.extend({
