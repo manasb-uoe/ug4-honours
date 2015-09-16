@@ -6,6 +6,7 @@ var express = require("express");
 var router = express.Router();
 var User = require("../models/user");
 var async = require("async");
+var authTokenService = require("../services/auth_token");
 
 router.route("/users")
 
@@ -32,8 +33,13 @@ router.route("/users")
                 user.save(function (err) {
                     if (err) return res.sendError(500, err.message);
 
-                    return res.sendOk();
-                })
+                    // finally, issue auth token
+                    authTokenService.issueToken(user, function (err, token) {
+                        if (err) return res.sendError(err.message);
+
+                        return res.sendOk({token: token});
+                    });
+                });
             });
         });
     })
