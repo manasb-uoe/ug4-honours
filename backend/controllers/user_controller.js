@@ -52,4 +52,83 @@ router.route("/users")
     });
 
 
+router.route("/users/:user_id")
+
+    /**
+     * PUT updated user info
+     */
+
+    .put(function (req, res) {
+        User.findById(req.params.user_id, function (err, user) {
+            if (!user)
+                return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
+
+            if (err)
+                return res.sendError(500, err.message);
+
+            // only validate email if it is provided and is not the same as the current email address
+            var shouldValidateEmail = (req.body.email != undefined) && (req.body.email.trim() !== user.email);
+
+            if (req.body.name)
+                user.name = req.body.name.trim();
+            if (req.body.email)
+                user.email = req.body.email.trim();
+            if (req.body.password)
+                user.password = req.body.password.trim();
+
+            async.series([
+                function (callback) {
+                    // perform validation
+                    user.validateInfo({
+                        shouldValidateEmail: shouldValidateEmail,
+                        shouldValidatePassword: req.body.password != undefined // only validate password if it is provided
+                    }, function (err) {
+                        if (err)
+                            return res.sendError(400, err.message);
+
+                        return callback(null);
+                    });
+                },
+                function (callback) {
+                    // now that validation has been performed, hash password before saving user
+                    if (req.body.password) {
+                        user.hashPassword(function (err) {
+                            if (err)
+                                return res.sendError(500, err.message);
+
+                            return callback(null);
+                        });
+                    } else {
+                        return callback(null);
+                    }
+                },
+                function () {
+                    // finally, save user
+                    user.save(function (err) {
+                        if (err)
+                            return res.sendError(500, err.message);
+
+                        return res.sendOk();
+                    });
+                }
+            ]);
+        });
+    })
+
+    /**
+     * DELETE user
+     */
+
+    .delete(function (req, res) {
+        User.findByIdAndRemove(req.params.user_id, function (err, user) {
+            if (!user)
+                return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
+
+            if (err)
+                return res.sendError(500, err.message);
+
+            return res.sendOk();
+        });
+    });
+
 module.exports = router;
