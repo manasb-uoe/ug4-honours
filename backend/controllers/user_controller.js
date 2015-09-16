@@ -7,11 +7,12 @@ var router = express.Router();
 var User = require("../models/user");
 var async = require("async");
 var authTokenService = require("../services/auth_token");
+var authenticationMiddleware = require("../middleware/authentication");
 
 router.route("/users")
 
     /**
-     * POST new user
+     * POST new user.
      */
 
     .post(function (req, res) {
@@ -46,10 +47,10 @@ router.route("/users")
 
 
     /**
-     * GET all users
+     * GET all users.
      */
 
-    .get(function (req, res) {
+    .get(authenticationMiddleware, function (req, res) {
         User.find(function (err, users) {
             if (err) return res.sendError(500, err.message);
 
@@ -61,10 +62,10 @@ router.route("/users")
 router.route("/users/:user_id")
 
     /**
-     * PUT updated user info
+     * PUT updated user info.
      */
 
-    .put(function (req, res) {
+    .put(authenticationMiddleware, function (req, res) {
         User.findById(req.params.user_id, function (err, user) {
             if (!user)
                 return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
@@ -121,11 +122,12 @@ router.route("/users/:user_id")
         });
     })
 
+
     /**
-     * DELETE user
+     * DELETE user.
      */
 
-    .delete(function (req, res) {
+    .delete(authenticationMiddleware, function (req, res) {
         User.findByIdAndRemove(req.params.user_id, function (err, user) {
             if (!user)
                 return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
