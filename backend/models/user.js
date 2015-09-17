@@ -68,7 +68,7 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
     async.series([
         function (callback) {
             if (settings.shouldValidateName) {
-                if (!self.name || self.name.trim().length == 0)
+                if (!self.name || self.name.length == 0)
                     return mainCallback(new Error("Name is required."));
             }
 
@@ -99,7 +99,6 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
             if (settings.shouldValidatePassword) {
                 if (!self.password) return mainCallback(new Error("Password is required."));
 
-                self.password = self.password.trim();
                 if (!validator.isLength(self.password, 6))
                     return mainCallback(new Error("Password must be at least 6 characters long."));
 
