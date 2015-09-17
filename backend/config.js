@@ -3,6 +3,9 @@
  */
 
 module.exports = {
-    database: "mongodb://localhost/ug4_honours_db",
+    database: {
+        dev: "mongodb://localhost/ug4_honours_db",
+        test: "mongodb://localhost/ug4_honours_test_db"
+    },
     secret: "this_is_a_very_long_secret"
 };
