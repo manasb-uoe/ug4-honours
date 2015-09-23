@@ -8,7 +8,7 @@
     "url": "https://github.com/enthusiast94/ug4-honours.git"
   },
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon server.js",
     "test": "mocha tests"
   },
   "dependencies": {

@@ -16,16 +16,7 @@ var errorHandlerMiddleware = require("./middleware/404_error_handler");
 // define express app
 var app = express();
 
-var ApiExecutionModeEnum = Object.freeze({
-    DEV: "dev",
-    TEST: "test"
-});
-
-function configure(apiExecutionMode) {
-    if (apiExecutionMode !== ApiExecutionModeEnum.DEV && apiExecutionMode !== ApiExecutionModeEnum.TEST) {
-        throw new Error("Invalid api execution mode. Allowed values are: " + Object.keys(ApiExecutionModeEnum));
-    }
-
+function configure() {
     // use morgan to log HTTP requests to the console
     app.use(morgan("dev"));
 
@@ -33,8 +24,8 @@ function configure(apiExecutionMode) {
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
 
-    // connect to db depending on the provided execution mode
-    mongoose.connect(apiExecutionMode === ApiExecutionModeEnum.DEV ? config.database.dev : config.database.test);
+    // connect to dev db
+    mongoose.connect(config.database.dev);
 
     // add custom methods for sending API responses to res object
     app.use(responsesMiddleware);
@@ -45,15 +36,12 @@ function configure(apiExecutionMode) {
 
     // add 404 error handling middleware in order to send custom message when no route matches client's request
     app.use(errorHandlerMiddleware);
-
 }
 
-function start(apiExecutionMode, port) {
-    configure(apiExecutionMode);
-    app.listen(port);
-}
+/**
+ * Main entry point
+ */
 
-module.exports = {
-    start: start,
-    ApiExecutionModeEnum: ApiExecutionModeEnum
-};
+configure();
+
+app.listen(config.apiServerPort);
