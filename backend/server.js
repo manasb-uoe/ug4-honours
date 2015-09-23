@@ -16,16 +16,27 @@ var errorHandlerMiddleware = require("./middleware/404_error_handler");
 // define express app
 var app = express();
 
-function configure() {
-    // use morgan to log HTTP requests to the console
-    app.use(morgan("dev"));
+var ApiExecutionModeEnum = Object.freeze({
+    DEV: "dev",
+    TEST: "test"
+});
+
+function configure(apiExecutionMode) {
+    if (apiExecutionMode !== ApiExecutionModeEnum.DEV && apiExecutionMode !== ApiExecutionModeEnum.TEST) {
+        throw new Error("Invalid api execution mode. Allowed values are: " + Object.keys(ApiExecutionModeEnum));
+    }
+
+    // use morgan (only in dev execution mode) to log HTTP requests to the console
+    if (apiExecutionMode === ApiExecutionModeEnum.DEV) {
+        app.use(morgan("dev"));
+    }
 
     // configure body parser, which will let us get data from a POST request
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
 
-    // connect to dev db
-    mongoose.connect(config.database.dev);
+    // connect to db depending on the provided execution mode
+    mongoose.connect(apiExecutionMode === ApiExecutionModeEnum.DEV ? config.database.dev : config.database.test);
 
     // add custom methods for sending API responses to res object
     app.use(responsesMiddleware);
@@ -38,10 +49,13 @@ function configure() {
     app.use(errorHandlerMiddleware);
 }
 
-/**
- * Main entry point
- */
+function start(apiExecutionMode) {
+    configure(apiExecutionMode);
+    app.listen(config.apiServerPort);
+}
 
-configure();
-
-app.listen(config.apiServerPort);
+module.exports = {
+    app: app,
+    start: start,
+    ApiExecutionModeEnum: ApiExecutionModeEnum
+};
