@@ -71,6 +71,20 @@ router.route("/users")
 router.route("/users/:user_id")
 
     /**
+     * GET user.
+     */
+
+    .get(authenticationMiddleware, function (req, res) {
+        User.findById(req.params.user_id, function (err, user) {
+            if (!user) return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
+
+            if (err) return res.sendError(500, err.message);
+
+            return res.sendOk(user.toJSON());
+        });
+    })
+
+    /**
      * PUT updated user info.
      */
 
