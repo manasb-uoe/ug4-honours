@@ -24,6 +24,6 @@ module.exports = function (req, res, next) {
         // add decoded payload to req object so that it can be used by other middleware
         req.decodedPayload = decoded;
 
-        next();
+        return next();
     });
 };
