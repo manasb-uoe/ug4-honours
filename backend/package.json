@@ -8,7 +8,8 @@
     "url": "https://github.com/enthusiast94/ug4-honours.git"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "test": "mocha tests"
   },
   "dependencies": {
     "express": "latest",
@@ -24,7 +25,9 @@
     "underscore": "latest"
   },
   "devDependencies": {
-    "nodemon": "latest"
+    "nodemon": "latest",
+    "chai": "latest",
+    "mocha": "latest"
   },
   "author": "Manas Bajaj"
 }
