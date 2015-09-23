@@ -75,4 +75,34 @@ describe("Test suite", function () {
         });
 
     });
+
+    describe("Routes", function () {
+
+        // drop database after all routing tests have been executed
+        after(function (done) {
+            mongoose.connection.db.dropDatabase();
+            return done();
+        });
+
+        describe("User + Authentication", function () {
+
+            describe("POST new user", function () {
+
+                it("should return bad request error when trying to create user without name", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Name is required.");
+
+                            return done();
+                        });
+                });
+            });
+        });
+    });
 });
