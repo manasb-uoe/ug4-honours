@@ -598,6 +598,72 @@ describe("Test suite", function () {
                     });
                 });
             });
+
+            describe("DELETE api/users/user_id", function () {
+
+                it("should return unauthorized error when user is not authenticated", function (done) {
+                    api.delete("/api/users/bla")
+                        .expect("Content-Type", /json/)
+                        .expect(401)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
+
+                            return done();
+                        });
+                });
+
+                it("should return forbidden error when user is authenticated but user_id param is not the same " +
+                    "as their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        api.delete("/api/users/bla")
+                            .set({"Authorization": "Bearer " + res.body.data.token})
+                            .expect(403)
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, false);
+                                assert.equal(res.body.error.code, 403);
+
+                                return done();
+                            });
+                    });
+                });
+
+                it("should successfully delete user when user is authenticated and user_id param is the same as " +
+                    "their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.delete("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .expect(200)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, true);
+
+                                    // make sure that the user has been deleted
+                                    User.find(function (err, users) {
+                                        if (err) return done(err);
+
+                                        assert.equal(users.length, 0);
+
+                                        return done();
+                                    });
+                                });
+                        });
+                    });
+                });
+            });
         });
     });
 });
