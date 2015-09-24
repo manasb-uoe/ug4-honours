@@ -318,66 +318,66 @@ describe("Test suite", function () {
                     });
                 });
             });
-        });
 
-        describe("GET api/users/user_id", function () {
+            describe("GET api/users/user_id", function () {
 
-            it("should return unauthorized error when user is not authenticated", function (done) {
-                api.get("/api/users/bla")
-                    .expect("Content-Type", /json/)
-                    .expect(401)
-                    .end(function (err, res) {
-                        if (err) return done(err);
+                it("should return unauthorized error when user is not authenticated", function (done) {
+                    api.get("/api/users/bla")
+                        .expect("Content-Type", /json/)
+                        .expect(401)
+                        .end(function (err, res) {
+                            if (err) return done(err);
 
-                        assert.equal(res.body.success, false);
-                        assert.equal(res.body.error.code, 401);
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
 
-                        return done();
+                            return done();
+                        });
+                });
+
+                it("should return not found error when user is authenticated but user_id param is incorrect",
+                    function (done) {
+                        util.createUser(api, util.user1_sample_data, function (err, res) {
+                            if (err) return done(err);
+
+                            api.get("/api/users/bla")
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .expect(404)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+                                    assert.equal(res.body.success, false);
+                                    return done();
+                                });
+                        });
                     });
-            });
 
-            it("should return not found error when user is authenticated but user_id param is incorrect",
-                function (done) {
+                it("should return user when user is authenticated and user_id param is correct", function (done) {
                     util.createUser(api, util.user1_sample_data, function (err, res) {
                         if (err) return done(err);
 
-                        api.get("/api/users/bla")
-                            .set({"Authorization": "Bearer " + res.body.data.token})
-                            .expect(404)
-                            .end(function (err, res) {
-                                if (err) return done(err);
-                                assert.equal(res.body.success, false);
-                                return done();
-                            });
-                    });
-                });
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
 
-            it("should return user when user is authenticated and user_id param is correct", function (done) {
-                util.createUser(api, util.user1_sample_data, function (err, res) {
-                    if (err) return done(err);
+                            api.get("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .expect(200)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
 
-                    // retrieve user id from token
-                    authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
-                       if (err) return done(err);
+                                    assert.equal(res.body.success, true);
 
-                        api.get("/api/users/" + decoded.id)
-                            .set({"Authorization": "Bearer " + res.body.data.token})
-                            .expect(200)
-                            .end(function (err, res) {
-                                if (err) return done(err);
+                                    // make sure that the returned details match, and only required fields are returned
+                                    var user = res.body.data;
+                                    assert.equal(user.name, util.user1_sample_data.name);
+                                    assert.equal(user.email, util.user1_sample_data.email);
+                                    assert.isDefined(user.createdAt);
+                                    assert.isUndefined(user.password);
+                                    assert.isDefined(user.id);
 
-                                assert.equal(res.body.success, true);
-
-                                // make sure that the returned details match, and only required fields are returned
-                                var user = res.body.data;
-                                assert.equal(user.name, util.user1_sample_data.name);
-                                assert.equal(user.email, util.user1_sample_data.email);
-                                assert.isDefined(user.createdAt);
-                                assert.isUndefined(user.password);
-                                assert.isDefined(user.id);
-
-                                return done();
-                            });
+                                    return done();
+                                });
+                        });
                     });
                 });
             });
