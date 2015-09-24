@@ -7,8 +7,10 @@ var User = require("../models/user");
 var assert = require("chai").assert;
 var util = require("./util");
 var server = require("../server");
+var supertest = require("supertest");
+
 server.start(server.ApiExecutionModeEnum.TEST); // start server in test execution mode
-var api = require("supertest")(server.app);
+var api = supertest(server.app);
 
 describe("Test suite", function () {
 
@@ -78,10 +80,12 @@ describe("Test suite", function () {
 
     describe("Routes", function () {
 
-        // drop database after all routing tests have been executed
-        after(function (done) {
-            mongoose.connection.db.dropDatabase();
-            return done();
+        // clear user collection after every test
+        afterEach(function (done) {
+            User.remove({}, function (err) {
+                if (err) return done(err);
+                return done();
+            });
         });
 
         describe("User + Authentication", function () {
@@ -102,6 +106,173 @@ describe("Test suite", function () {
                             return done();
                         });
                 });
+
+                it("should return bad request error when trying to create user without email", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name
+                        })
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Email is required.");
+
+                            return done();
+                        });
+                });
+
+                it("should return bad request error when trying to create user with invalid email " +
+                    "format", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email + "@@@"
+                        })
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Invalid email format.");
+
+                            return done();
+                        });
+                });
+
+                it("should return bad request error when trying to create user without password", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email
+                        })
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Password is required.");
+
+                            return done();
+                        });
+                });
+
+                it("should return bad request error when trying to create user with invalid password " +
+                    "(<6 characters)", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email,
+                            password: util.user1_sample_data.password.substr(0, 5)
+                        })
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Password must be at least 6 characters long.");
+
+                            return done();
+                        });
+                });
+
+                it("should return bad request error when trying to create user with invalid password " +
+                    "(includes special characters other than underscore)", function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email,
+                            password: util.user1_sample_data.password + "@#$"
+                        })
+                        .expect(400)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 400);
+                            assert.equal(res.body.error.message, "Password cannot contain special characters other than underscore.");
+
+                            return done();
+                        });
+                });
+
+                it("should successfully create new user and return auth token if input validation passes",
+                    function (done) {
+                    api.post("/api/users")
+                        .expect("Content-Type", /json/)
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email,
+                            password: util.user1_sample_data.password
+                        })
+                        .expect(200)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, true);
+                            assert.isDefined(res.body.data.token, true);
+
+                            User.find(function (err, users) {
+                                if (err) return done(err);
+
+                                // make sure only one user is created
+                                assert.equal(users.length, 1);
+
+                                var user = users[0];
+
+                                // make sure that new user's name and password match the provided ones
+                                assert.equal(user.name, util.user1_sample_data.name);
+                                assert.equal(user.email, util.user1_sample_data.email);
+
+                                // make sure stored password is not the same as the one provided
+                                // (i.e. it should be hashed)
+                                assert.notEqual(user.password, util.user1_sample_data.password);
+
+                                // make sure createdAt is defined
+                                assert.isDefined(user.createdAt);
+
+                                return done();
+                            });
+                        });
+                });
+
+                it("should return bad request error when trying to create new user with existing user's" +
+                    " email", function (done) {
+                    var user = new User(util.user1_sample_data);
+
+                    user.save(function (err) {
+                        if (err) return done(err);
+
+                        api.post("/api/users")
+                            .expect("Content-Type", /json/)
+                            .send({
+                                name: util.user1_sample_data.name,
+                                email: util.user1_sample_data.email,
+                                password: util.user1_sample_data.password
+                            })
+                            .expect(400)
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, false);
+                                assert.equal(res.body.error.code, 400);
+                                assert.equal(res.body.error.message,
+                                    "Another user with the same email address already exists.");
+
+                                return done();
+                            });
+                    });
+                })
             });
         });
     });

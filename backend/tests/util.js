@@ -6,7 +6,7 @@ module.exports = {
     user1_sample_data: {
         name: "name1",
         email: "testemail@test.com",
-        password: "123456",
+        password: "123456_",
         createdAt: 5000
     }
 };
