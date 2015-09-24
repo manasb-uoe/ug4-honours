@@ -335,7 +335,7 @@ describe("Test suite", function () {
                         });
                 });
 
-                it("should return not found error when user is authenticated but user_id param is incorrect",
+                it("should return not found error when user is authenticated but user_id param is the same as their own user id",
                     function (done) {
                         util.createUser(api, util.user1_sample_data, function (err, res) {
                             if (err) return done(err);
@@ -354,7 +354,7 @@ describe("Test suite", function () {
                         });
                     });
 
-                it("should return user when user is authenticated and user_id param is correct", function (done) {
+                it("should return user when user is authenticated and user_id param is the same as their own user id", function (done) {
                     util.createUser(api, util.user1_sample_data, function (err, res) {
                         if (err) return done(err);
 
