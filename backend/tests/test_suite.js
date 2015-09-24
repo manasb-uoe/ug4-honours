@@ -664,6 +664,103 @@ describe("Test suite", function () {
                     });
                 });
             });
+
+            describe("POST api/authenticate", function () {
+
+                it("should return unauthorized error if email is not provided", function (done) {
+                    api.post("/api/authenticate")
+                        .expect(401)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
+                            assert.equal(res.body.error.message, "Email and password are required.");
+
+                            return done();
+                        });
+                });
+
+                it("should return unauthorized error if password is not provided", function (done) {
+                    api.post("/api/authenticate")
+                        .expect(401)
+                        .send({email: util.user1_sample_data.email})
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
+                            assert.equal(res.body.error.message, "Email and password are required.");
+
+                            return done();
+                        });
+                });
+
+                it("should return unauthorized error if incorrect email is provided", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        api.post("/api/authenticate")
+                            .expect(401)
+                            .send({
+                                email: util.user1_sample_data.email + "@",
+                                password: util.user1_sample_data.password
+                            })
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, false);
+                                assert.equal(res.body.error.code, 401);
+                                assert.equal(res.body.error.message, "Incorrect email or password.");
+
+                                return done();
+                            });
+                    });
+                });
+
+                it("should return unauthorized error if incorrect password is provided", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        api.post("/api/authenticate")
+                            .expect(401)
+                            .send({
+                                email: util.user1_sample_data.email,
+                                password: util.user1_sample_data.password + "@"
+                            })
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, false);
+                                assert.equal(res.body.error.code, 401);
+                                assert.equal(res.body.error.message, "Incorrect email or password.");
+
+                                return done();
+                            });
+                    });
+                });
+
+                it("should successfully return auth token if correct credentials are provided", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        api.post("/api/authenticate")
+                            .expect(200)
+                            .send({
+                                email: util.user1_sample_data.email,
+                                password: util.user1_sample_data.password
+                            })
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, true);
+                                assert.isDefined(res.body.data.token);
+
+                                return done();
+                            });
+                    });
+                });
+            });
         });
     });
 });
