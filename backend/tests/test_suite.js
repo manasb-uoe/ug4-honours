@@ -292,33 +292,27 @@ describe("Test suite", function () {
                 });
 
                 it("should return a list of all users when user is authenticated", function (done) {
-                    api.post("/api/users")
-                        .send({
-                            name: util.user1_sample_data.name,
-                            email: util.user1_sample_data.email,
-                            password: util.user1_sample_data.password
-                        })
-                        .end(function (err, res) {
-                            if (err) return done(err);
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
 
-                            api.get("/api/users")
-                                .set({"Authorization": "Bearer " + res.body.data.token})
-                                .expect(200)
-                                .end(function (err, res) {
-                                    if (err) return done(err);
+                        api.get("/api/users")
+                            .set({"Authorization": "Bearer " + res.body.data.token})
+                            .expect(200)
+                            .end(function (err, res) {
+                                if (err) return done(err);
 
-                                    // make sure that the returned details match, and only required fields are returned
-                                    var users = res.body.data;
-                                    assert.equal(users.length, 1);
-                                    assert.equal(users[0].name, util.user1_sample_data.name);
-                                    assert.equal(users[0].email, util.user1_sample_data.email);
-                                    assert.isDefined(users[0].createdAt);
-                                    assert.isUndefined(users[0].password);
-                                    assert.isDefined(users[0].id);
+                                // make sure that the returned details match, and only required fields are returned
+                                var users = res.body.data;
+                                assert.equal(users.length, 1);
+                                assert.equal(users[0].name, util.user1_sample_data.name);
+                                assert.equal(users[0].email, util.user1_sample_data.email);
+                                assert.isDefined(users[0].createdAt);
+                                assert.isUndefined(users[0].password);
+                                assert.isDefined(users[0].id);
 
-                                    return done();
-                                })
-                        });
+                                return done();
+                            });
+                    });
                 });
             });
         });
