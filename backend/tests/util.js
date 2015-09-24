@@ -5,7 +5,13 @@
 module.exports = {
     user1_sample_data: {
         name: "name1",
-        email: "testemail@test.com",
+        email: "testemail1@test.com",
+        password: "123456_",
+        createdAt: 5000
+    },
+    user2_sample_data: {
+        name: "name2",
+        email: "testemail2@test.com",
         password: "123456_",
         createdAt: 5000
     },

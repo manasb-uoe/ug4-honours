@@ -345,7 +345,10 @@ describe("Test suite", function () {
                                 .expect(404)
                                 .end(function (err, res) {
                                     if (err) return done(err);
+
                                     assert.equal(res.body.success, false);
+                                    assert.equal(res.body.error.code, 404);
+
                                     return done();
                                 });
                         });
@@ -376,6 +379,220 @@ describe("Test suite", function () {
                                     assert.isDefined(user.id);
 
                                     return done();
+                                });
+                        });
+                    });
+                });
+            });
+
+            describe("PUT api/users/user_id", function () {
+
+                it("should return unauthorized error when user is not authenticated", function (done) {
+                    api.put("/api/users/bla")
+                        .expect("Content-Type", /json/)
+                        .expect(401)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
+
+                            return done();
+                        });
+                });
+
+                it("should return forbidden error when user is authenticated but user_id param is not the same " +
+                    "as their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        api.put("/api/users/bla")
+                            .set({"Authorization": "Bearer " + res.body.data.token})
+                            .expect(403)
+                            .end(function (err, res) {
+                                if (err) return done(err);
+
+                                assert.equal(res.body.success, false);
+                                assert.equal(res.body.error.code, 403);
+
+                                return done();
+                            });
+                    });
+                });
+
+                it("should return bad request error if new email is of incorrect format, when user is authenticated and user_id param " +
+                    "is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.put("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .send({
+                                    email: util.user2_sample_data.email + "@@"
+                                })
+                                .expect(400)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, false);
+                                    assert.equal(res.body.error.code, 400);
+
+                                    return done();
+                                });
+                        });
+                    });
+                });
+
+                it("should return bad request error if new email belongs to existing user, when user is authenticated and user_id param " +
+                    "is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        util.createUser(api, util.user2_sample_data, function (err, res) {
+                            if (err) return done(err);
+
+                            // retrieve user id from token
+                            authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                                if (err) return done(err);
+
+                                api.put("/api/users/" + decoded.id)
+                                    .set({"Authorization": "Bearer " + res.body.data.token})
+                                    .send({
+                                        email: util.user1_sample_data.email
+                                    })
+                                    .expect(400)
+                                    .end(function (err, res) {
+                                        if (err) return done(err);
+
+                                        assert.equal(res.body.success, false);
+                                        assert.equal(res.body.error.code, 400);
+
+                                        return done();
+                                    });
+                            });
+                        });
+                    });
+                });
+
+                it("should return bad request error if new password is too short, when user is authenticated and user_id param " +
+                    "is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.put("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .send({
+                                    password: util.user2_sample_data.password.substring(0, 5)
+                                })
+                                .expect(400)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, false);
+                                    assert.equal(res.body.error.code, 400);
+
+                                    return done();
+                                });
+                        });
+                    });
+                });
+
+                it("should return bad request error if new password contains special characters other than " +
+                    "underscore, when user is authenticated and user_id param is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.put("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .send({
+                                    password: util.user2_sample_data.password + "@%#"
+                                })
+                                .expect(400)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, false);
+                                    assert.equal(res.body.error.code, 400);
+
+                                    return done();
+                                });
+                        });
+                    });
+                });
+
+                it("should not return bad request error if new email is the same as previous email, when user is" +
+                    " authenticated and user_id param is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(res.body.data.token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.put("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .send({
+                                    email: util.user1_sample_data.email
+                                })
+                                .expect(200)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, true);
+
+                                    return done();
+                                });
+                        });
+                    });
+                });
+
+                it("should successfully update user with new details, when user is authenticated and user_id param" +
+                    " is their own user id", function (done) {
+                    util.createUser(api, util.user1_sample_data, function (err, res) {
+                        if (err) return done(err);
+
+                        var token = res.body.data.token;
+
+                        // retrieve user id from token
+                        authTokenService.verifyToken(token, function (err, decoded) {
+                            if (err) return done(err);
+
+                            api.put("/api/users/" + decoded.id)
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .send({
+                                    name: util.user2_sample_data.name,
+                                    email: util.user2_sample_data.email
+                                })
+                                .expect(200)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    assert.equal(res.body.success, true);
+
+                                    // retrieve user and make sure user details have been updated
+                                    api.get("/api/users/" + decoded.id)
+                                        .set({"Authorization": "Bearer " + token})
+                                        .end(function (err, res) {
+                                            if (err) return done(err);
+
+                                            var user = res.body.data;
+                                            assert.equal(user.name, util.user2_sample_data.name);
+                                            assert.equal(user.email, util.user2_sample_data.email);
+
+                                            return done();
+                                        });
                                 });
                         });
                     });
