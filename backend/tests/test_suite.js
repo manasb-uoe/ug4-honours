@@ -90,7 +90,7 @@ describe("Test suite", function () {
 
         describe("User + Authentication", function () {
 
-            describe("POST new user", function () {
+            describe("POST api/users", function () {
 
                 it("should return bad request error when trying to create user without name", function (done) {
                     api.post("/api/users")
@@ -208,43 +208,43 @@ describe("Test suite", function () {
 
                 it("should successfully create new user and return auth token if input validation passes",
                     function (done) {
-                    api.post("/api/users")
-                        .expect("Content-Type", /json/)
-                        .send({
-                            name: util.user1_sample_data.name,
-                            email: util.user1_sample_data.email,
-                            password: util.user1_sample_data.password
-                        })
-                        .expect(200)
-                        .end(function (err, res) {
-                            if (err) return done(err);
-
-                            assert.equal(res.body.success, true);
-                            assert.isDefined(res.body.data.token, true);
-
-                            User.find(function (err, users) {
+                        api.post("/api/users")
+                            .expect("Content-Type", /json/)
+                            .send({
+                                name: util.user1_sample_data.name,
+                                email: util.user1_sample_data.email,
+                                password: util.user1_sample_data.password
+                            })
+                            .expect(200)
+                            .end(function (err, res) {
                                 if (err) return done(err);
 
-                                // make sure only one user is created
-                                assert.equal(users.length, 1);
+                                assert.equal(res.body.success, true);
+                                assert.isDefined(res.body.data.token, true);
 
-                                var user = users[0];
+                                User.find(function (err, users) {
+                                    if (err) return done(err);
 
-                                // make sure that new user's name and password match the provided ones
-                                assert.equal(user.name, util.user1_sample_data.name);
-                                assert.equal(user.email, util.user1_sample_data.email);
+                                    // make sure only one user is created
+                                    assert.equal(users.length, 1);
 
-                                // make sure stored password is not the same as the one provided
-                                // (i.e. it should be hashed)
-                                assert.notEqual(user.password, util.user1_sample_data.password);
+                                    var user = users[0];
 
-                                // make sure createdAt is defined
-                                assert.isDefined(user.createdAt);
+                                    // make sure that new user's name and password match the provided ones
+                                    assert.equal(user.name, util.user1_sample_data.name);
+                                    assert.equal(user.email, util.user1_sample_data.email);
 
-                                return done();
+                                    // make sure stored password is not the same as the one provided
+                                    // (i.e. it should be hashed)
+                                    assert.notEqual(user.password, util.user1_sample_data.password);
+
+                                    // make sure createdAt is defined
+                                    assert.isDefined(user.createdAt);
+
+                                    return done();
+                                });
                             });
-                        });
-                });
+                    });
 
                 it("should return bad request error when trying to create new user with existing user's" +
                     " email", function (done) {
@@ -273,6 +273,53 @@ describe("Test suite", function () {
                             });
                     });
                 })
+            });
+
+            describe("GET api/users", function () {
+
+                it("should return unauthorized error when user is not authenticated", function (done) {
+                    api.get("/api/users")
+                        .expect("Content-Type", /json/)
+                        .expect(401)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            assert.equal(res.body.success, false);
+                            assert.equal(res.body.error.code, 401);
+
+                            return done();
+                        });
+                });
+
+                it("should return a list of all users when user is authenticated", function (done) {
+                    api.post("/api/users")
+                        .send({
+                            name: util.user1_sample_data.name,
+                            email: util.user1_sample_data.email,
+                            password: util.user1_sample_data.password
+                        })
+                        .end(function (err, res) {
+                            if (err) return done(err);
+
+                            api.get("/api/users")
+                                .set({"Authorization": "Bearer " + res.body.data.token})
+                                .expect(200)
+                                .end(function (err, res) {
+                                    if (err) return done(err);
+
+                                    // make sure that the returned details match, and only required fields are returned
+                                    var users = res.body.data;
+                                    assert.equal(users.length, 1);
+                                    assert.equal(users[0].name, util.user1_sample_data.name);
+                                    assert.equal(users[0].email, util.user1_sample_data.email);
+                                    assert.isDefined(users[0].createdAt);
+                                    assert.isUndefined(users[0].password);
+                                    assert.isDefined(users[0].id);
+
+                                    return done();
+                                })
+                        });
+                });
             });
         });
     });
