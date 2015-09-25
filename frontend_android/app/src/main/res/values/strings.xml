@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">EdinFit</string>
 
-    <string name="hello_world">Hello world!</string>
+    <!-- Actions -->
     <string name="action_settings">Settings</string>
+    <string name="action_login">Login</string>
+    <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
+
+    <!-- Labels-->
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+
 </resources>
