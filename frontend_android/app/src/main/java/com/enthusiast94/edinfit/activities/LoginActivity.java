@@ -6,7 +6,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.LoginEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
+import com.enthusiast94.edinfit.fragments.LoginAndSignupHeadlessFragment;
 import com.enthusiast94.edinfit.fragments.LoginFragment;
 import com.enthusiast94.edinfit.fragments.SignupFragment;
 
@@ -16,24 +18,28 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String LOGIN_FRAGMENT_TAG = "loginFragmentTag";
     private static final String SIGNUP_FRAGMENT_TAG = "signupFragmentTag";
+    private static final String LOGIN_AND_SIGNUP_HEADLESS_FRAGMENT_TAG = "loginAndSignupHeadlessFragment";
+    private LoginAndSignupHeadlessFragment loginAndSignupHeadlessFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        loginAndSignupHeadlessFragment = (LoginAndSignupHeadlessFragment)
+                getSupportFragmentManager().findFragmentByTag(LOGIN_AND_SIGNUP_HEADLESS_FRAGMENT_TAG);
+        if (loginAndSignupHeadlessFragment == null) {
+            loginAndSignupHeadlessFragment = new LoginAndSignupHeadlessFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(loginAndSignupHeadlessFragment, LOGIN_AND_SIGNUP_HEADLESS_FRAGMENT_TAG)
+                    .commit();
+        }
+
         if (getSupportFragmentManager().findFragmentByTag(LOGIN_FRAGMENT_TAG) == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container_framelayout, new LoginFragment(), LOGIN_FRAGMENT_TAG)
                     .commit();
         }
-    }
-
-    public void onEventMainThread(ShowSignupFragmentEvent event) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container_framelayout, new SignupFragment(), SIGNUP_FRAGMENT_TAG)
-                .addToBackStack(null)
-                .commit();
     }
 
     @Override
@@ -55,5 +61,16 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    /**
+     * EventBus event handling methods
+     */
+
+    public void onEventMainThread(ShowSignupFragmentEvent event) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container_framelayout, new SignupFragment(), SIGNUP_FRAGMENT_TAG)
+                .addToBackStack(null)
+                .commit();
     }
 }

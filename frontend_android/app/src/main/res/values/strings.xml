@@ -12,14 +12,13 @@
     <string name="label_email">Email</string>
     <string name="label_password">Password</string>
     <string name="label_confirm_password">Confirm password</string>
-    <string name="label_signup_for_appname">Sign up for EdinFit</string>
-    <string name="loggin_in">Logging in…</string>
-    <string name="signing_up">Signing up…</string>
+    <string name="label_loading">Loading…</string>
 
     <!-- Error messages -->
     <string name="error_required_field">This field is required</string>
     <string name="error_invalid_email">Invalid email address format</string>
     <string name="error_short_password">Password must be at least 6 characters long</string>
     <string name="error_passwords_do_not_match">Passwords do not match</string>
+    <string name="error_parsing">There was a problem parsing API response.</string>
 
 </resources>
