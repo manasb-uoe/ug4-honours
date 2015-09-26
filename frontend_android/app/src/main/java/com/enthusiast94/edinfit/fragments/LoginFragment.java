@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.AuthenticatedEvent;
 import com.enthusiast94.edinfit.events.LoginEvent;
 import com.enthusiast94.edinfit.events.OnLoginResponseEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
@@ -116,7 +117,7 @@ public class LoginFragment extends Fragment {
         setLoading(false);
 
         if (event.getError() == null) {
-            Toast.makeText(getActivity(), event.getUser().getAuthToken(), Toast.LENGTH_SHORT).show();
+            EventBus.getDefault().post(new AuthenticatedEvent(event.getUser()));
         } else {
             Toast.makeText(getActivity(), event.getError(), Toast.LENGTH_SHORT).show();
         }
