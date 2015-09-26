@@ -19,9 +19,9 @@ import cz.msebera.android.httpclient.Header;
 /**
  * Created by manas on 26-09-2015.
  */
-public class AuthenticationManager extends Manager {
+public class AuthenticationService extends BaseService {
 
-    public static final String TAG = AuthenticationManager.class.getSimpleName();
+    public static final String TAG = AuthenticationService.class.getSimpleName();
     private static final String USER_PREFS_KEY = "userPrefKey";
 
     public static void authenticate(String email, final String password, final Callback<User> callback) {

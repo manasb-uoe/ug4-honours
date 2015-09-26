@@ -7,7 +7,7 @@ import android.util.Log;
 import com.enthusiast94.edinfit.events.LoginEvent;
 import com.enthusiast94.edinfit.events.OnLoginResponseEvent;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.network.AuthenticationManager;
+import com.enthusiast94.edinfit.network.AuthenticationService;
 import com.enthusiast94.edinfit.network.Callback;
 
 import de.greenrobot.event.EventBus;
@@ -39,7 +39,7 @@ public class LoginAndSignupHeadlessFragment extends Fragment {
     }
 
     private void login(String email, String password) {
-        AuthenticationManager.authenticate(email, password, new Callback<User>() {
+        AuthenticationService.authenticate(email, password, new Callback<User>() {
 
             @Override
             public void onSuccess(User user) {
