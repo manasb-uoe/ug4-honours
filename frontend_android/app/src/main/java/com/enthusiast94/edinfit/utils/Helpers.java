@@ -1,8 +1,10 @@
 package com.enthusiast94.edinfit.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
@@ -45,5 +47,19 @@ public class Helpers {
         } else {
             return null;
         }
+    }
+
+    public static void writeToPrefs(Context context, String key, String value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putString(key, value).apply();
+    }
+
+    public static String readFromPrefs(Context context, String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(key, null);
+    }
+
+    public static void clearPrefs(Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().apply();
     }
 }
