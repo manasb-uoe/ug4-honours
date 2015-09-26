@@ -1,11 +1,11 @@
 package com.enthusiast94.edinfit.network;
 
 import android.util.Base64;
-import android.util.Log;
 
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -13,8 +13,6 @@ import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Arrays;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -24,6 +22,7 @@ import cz.msebera.android.httpclient.Header;
 public class AuthenticationManager extends Manager {
 
     public static final String TAG = AuthenticationManager.class.getSimpleName();
+    private static final String USER_PREFS_KEY = "userPrefKey";
 
     public static void authenticate(String email, final String password, final Callback<User> callback) {
         AsyncHttpClient client = getAsyncHttpClient();
@@ -47,6 +46,9 @@ public class AuthenticationManager extends Manager {
                     User user = gson.fromJson(decodedPayload, User.class);
                     user.setAuthToken(token);
 
+                    // persist user object in shared preferences as json string
+                    Helpers.writeToPrefs(App.getAppContext(), USER_PREFS_KEY, gson.toJson(user));
+
                     if (callback != null) callback.onSuccess(user);
                 } catch (JSONException e) {
                     if (callback != null)
@@ -65,5 +67,24 @@ public class AuthenticationManager extends Manager {
                 }
             }
         });
+    }
+
+    public static void deauthenticate() {
+        Helpers.clearPrefs(App.getAppContext());
+    }
+
+    public static User getAuthenticatedUser() {
+        String userJson = Helpers.readFromPrefs(App.getAppContext(), USER_PREFS_KEY);
+
+        if (userJson != null) {
+            Gson gson = new Gson();
+            return gson.fromJson(userJson, User.class);
+        }
+
+        return null;
+    }
+
+    public static boolean isUserAuthenticated() {
+        return Helpers.readFromPrefs(App.getAppContext(), USER_PREFS_KEY) != null;
     }
 }
