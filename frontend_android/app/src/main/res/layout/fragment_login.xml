@@ -38,6 +38,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/label_email"
                 android:inputType="textEmailAddress"
+                style="@style/EditText"
                 />
         </android.support.design.widget.TextInputLayout>
 
@@ -51,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/label_password"
                 android:inputType="textPassword"
+                style="@style/EditText"
                 />
         </android.support.design.widget.TextInputLayout>
 
