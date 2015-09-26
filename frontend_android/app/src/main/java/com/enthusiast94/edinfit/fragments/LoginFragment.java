@@ -34,12 +34,24 @@ public class LoginFragment extends Fragment {
     @BindString(R.string.error_required_field) String requiredFieldError;
     @BindString(R.string.label_loading) String loadingLabel;
     @BindString(R.string.action_login) String loginAction;
+    private boolean isLoading;
+    private static final String IS_LOADING_INSTANCE_STATE_KEY = "isLoadingInstanceStateKey";
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, view);
+
+        /**
+         * Start or stop loading based on the value of isLoading, which is retrieved from instance
+         * state
+         */
+
+        if (savedInstanceState != null) {
+            isLoading = savedInstanceState.getBoolean(IS_LOADING_INSTANCE_STATE_KEY);
+            setLoading(isLoading);
+        }
 
         return view;
     }
@@ -48,6 +60,12 @@ public class LoginFragment extends Fragment {
     public void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(IS_LOADING_INSTANCE_STATE_KEY, isLoading);
     }
 
     @Override
@@ -63,6 +81,8 @@ public class LoginFragment extends Fragment {
     }
 
     private void setLoading(boolean isLoading) {
+        LoginFragment.this.isLoading = isLoading;
+
         if (isLoading) {
             loginButton.setText(loadingLabel);
             loginButton.setEnabled(false);

@@ -39,6 +39,8 @@ public class SignupFragment extends Fragment {
     @BindString(R.string.error_passwords_do_not_match) String passwordsDoNotMatchError;
     @BindString(R.string.label_loading) String loadingLabel;
     @BindString(R.string.action_signup) String signupAction;
+    private boolean isLoading;
+    private static final String IS_LOADING_INSTANCE_STATE_KEY = "isLoadingInstanceStateKey";
 
     @Nullable
     @Override
@@ -60,6 +62,16 @@ public class SignupFragment extends Fragment {
             }
         });
 
+        /**
+         * Start or stop loading based on the value of isLoading, which is retrieved from instance
+         * state
+         */
+
+        if (savedInstanceState != null) {
+            isLoading = savedInstanceState.getBoolean(IS_LOADING_INSTANCE_STATE_KEY);
+            setLoading(isLoading);
+        }
+
         return view;
     }
 
@@ -67,6 +79,12 @@ public class SignupFragment extends Fragment {
     public void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(IS_LOADING_INSTANCE_STATE_KEY, isLoading);
     }
 
     @Override
@@ -83,6 +101,8 @@ public class SignupFragment extends Fragment {
     }
 
     private void setLoading(boolean isLoading) {
+        SignupFragment.this.isLoading = isLoading;
+
         if (isLoading) {
             signupButton.setEnabled(false);
             signupButton.setText(loadingLabel);
