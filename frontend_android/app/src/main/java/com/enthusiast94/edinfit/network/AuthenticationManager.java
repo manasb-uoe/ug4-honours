@@ -1,14 +1,20 @@
 package com.enthusiast94.edinfit.network;
 
+import android.util.Base64;
+import android.util.Log;
+
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
+import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -17,7 +23,9 @@ import cz.msebera.android.httpclient.Header;
  */
 public class AuthenticationManager extends Manager {
 
-    public static void authenticate(String email, String password, final Callback<User> callback) {
+    public static final String TAG = AuthenticationManager.class.getSimpleName();
+
+    public static void authenticate(String email, final String password, final Callback<User> callback) {
         AsyncHttpClient client = getAsyncHttpClient();
 
         RequestParams requestParams = new RequestParams();
@@ -29,7 +37,16 @@ public class AuthenticationManager extends Manager {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    User user = new User(null, null, null, 0, response.getJSONObject("data").getString("token"));
+                    // Decode JWT token's payload in order to retrieve user data as json
+                    String token = response.getJSONObject("data").getString("token");
+                    String decodedPayload =
+                            new String(Base64.decode(token.split("\\.")[1].getBytes(), Base64.DEFAULT));
+
+                    // parse the decoded payload and construct new user object
+                    Gson gson = new Gson();
+                    User user = gson.fromJson(decodedPayload, User.class);
+                    user.setAuthToken(token);
+
                     if (callback != null) callback.onSuccess(user);
                 } catch (JSONException e) {
                     if (callback != null)
