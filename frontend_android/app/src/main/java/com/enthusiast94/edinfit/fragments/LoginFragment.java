@@ -25,7 +25,6 @@ public class LoginFragment extends Fragment {
 
     @Bind(R.id.email_edittext) EditText emailEditText;
     @Bind(R.id.password_edittext) EditText passwordEditText;
-    @Bind(R.id.signup_textview) TextView signupTextView;
 
     @Nullable
     @Override
@@ -41,7 +40,7 @@ public class LoginFragment extends Fragment {
         Toast.makeText(getActivity(), "Login", Toast.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.signup_textview)
+    @OnClick(R.id.signup_button)
     public void showSignupFragment() {
         EventBus.getDefault().post(new ShowSignupFragmentEvent());
     }

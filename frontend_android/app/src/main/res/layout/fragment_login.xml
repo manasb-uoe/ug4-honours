@@ -28,33 +28,53 @@
             style="@style/TextAppearance.AppCompat.Display3"
             />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="fill_parent"
+        <GridLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="4"
+            android:layout_marginTop="@dimen/spacing_normal"
             >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_vertical"
+                android:src="@drawable/ic_action_communication_email"
+                android:layout_marginRight="@dimen/spacing_normal"
+                />
+
             <EditText
                 android:id="@+id/email_edittext"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/label_email"
                 android:inputType="textEmailAddress"
+                android:layout_gravity="fill_horizontal"
+                android:imeOptions="actionNext"
                 style="@style/EditText"
                 />
-        </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_vertical"
+                android:src="@drawable/ic_action_action_lock"
+                android:layout_marginRight="@dimen/spacing_normal"
+                />
+
             <EditText
                 android:id="@+id/password_edittext"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/label_password"
                 android:inputType="textPassword"
+                android:layout_gravity="fill_horizontal"
+                android:imeOptions="actionNext"
                 style="@style/EditText"
                 />
-        </android.support.design.widget.TextInputLayout>
+
+        </GridLayout>
 
         <Button
             android:id="@+id/login_button"
@@ -64,15 +84,15 @@
             android:layout_marginTop="@dimen/spacing_normal"
             />
 
-        <TextView
-            android:id="@+id/signup_textview"
+        <Button
+            android:id="@+id/signup_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/action_dont_have_account_sign_up"
             android:layout_gravity="center"
-            android:textColor="@color/primary_text_light"
             android:layout_marginTop="@dimen/spacing_huge"
-            android:clickable="true"
+            android:textAllCaps="false"
+            style="@style/Widget.AppCompat.Button.Borderless"
             />
 
     </LinearLayout>
