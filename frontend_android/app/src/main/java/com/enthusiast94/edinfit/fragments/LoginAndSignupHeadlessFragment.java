@@ -6,8 +6,10 @@ import android.util.Log;
 
 import com.enthusiast94.edinfit.events.LoginEvent;
 import com.enthusiast94.edinfit.events.OnLoginResponseEvent;
+import com.enthusiast94.edinfit.events.OnSignupResponseEvent;
+import com.enthusiast94.edinfit.events.SignupEvent;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.network.AuthenticationService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.network.Callback;
 
 import de.greenrobot.event.EventBus;
@@ -38,8 +40,13 @@ public class LoginAndSignupHeadlessFragment extends Fragment {
         EventBus.getDefault().unregister(this);
     }
 
-    private void login(String email, String password) {
-        AuthenticationService.authenticate(email, password, new Callback<User>() {
+
+    /**
+     * EventBus event handling methods
+     */
+
+    public void onEventMainThread(LoginEvent event) {
+        UserService.authenticate(event.getEmail(), event.getPassword(), new Callback<User>() {
 
             @Override
             public void onSuccess(User user) {
@@ -53,13 +60,19 @@ public class LoginAndSignupHeadlessFragment extends Fragment {
         });
     }
 
+    public void onEventMainThread(SignupEvent event) {
+        UserService.createUser(event.getName(), event.getEmail(), event.getPassword(),
+                new Callback<User>() {
 
-    /**
-     * EventBus event handling methods
-     */
+            @Override
+            public void onSuccess(User user) {
+                EventBus.getDefault().post(new OnSignupResponseEvent(null, user));
+            }
 
-    public void onEventMainThread(LoginEvent event) {
-        Log.i(TAG, "login event");
-        login(event.getEmail(), event.getPassword());
+            @Override
+            public void onFailure(String message) {
+                EventBus.getDefault().post(new OnSignupResponseEvent(message, null));
+            }
+        });
     }
 }

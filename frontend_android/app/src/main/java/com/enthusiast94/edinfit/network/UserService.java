@@ -14,24 +14,54 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by manas on 26-09-2015.
  */
-public class AuthenticationService extends BaseService {
+public class UserService extends BaseService {
 
-    public static final String TAG = AuthenticationService.class.getSimpleName();
+    public static final String TAG = UserService.class.getSimpleName();
     private static final String USER_PREFS_KEY = "userPrefKey";
 
+    /**
+     * POST api/authenticate
+     */
+
     public static void authenticate(String email, final String password, final Callback<User> callback) {
+        Map<String, String> userDetails = new HashMap<>();
+        userDetails.put("email", email);
+        userDetails.put("password", password);
+
+        createOrAuthenticateUser(API_BASE + "/authenticate", userDetails, callback);
+    }
+
+    /**
+     * POST api/users
+     */
+
+    public static void createUser(String name, String email, String password, Callback<User> callback) {
+        Map<String, String> userDetails = new HashMap<>();
+        userDetails.put("name", name);
+        userDetails.put("email", email);
+        userDetails.put("password", password);
+
+        createOrAuthenticateUser(API_BASE + "/users", userDetails, callback);
+    }
+
+    /**
+     * Common method for creating/authenticating users.
+     */
+
+    private static void createOrAuthenticateUser(String url, Map<String, String> userDetails,
+                                                 final Callback<User> callback) {
+        RequestParams requestParams = new RequestParams(userDetails);
+
         AsyncHttpClient client = getAsyncHttpClient();
-
-        RequestParams requestParams = new RequestParams();
-        requestParams.add("email", email);
-        requestParams.add("password", password);
-
-        client.post(API_BASE + "/authenticate", requestParams, new JsonHttpResponseHandler() {
+        client.post(url, requestParams, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

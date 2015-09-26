@@ -9,4 +9,16 @@
     app:layout_scrollFlags="scroll|enterAlways"
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    />
+    >
+
+    <ProgressBar
+        android:id="@+id/toolbar_circular_progress"
+        android:layout_width="@dimen/toolbar_circular_progress_width"
+        android:layout_height="@dimen/toolbar_circular_progress_height"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:layout_gravity="end"
+        android:visibility="gone"
+        />
+
+</android.support.v7.widget.Toolbar>
