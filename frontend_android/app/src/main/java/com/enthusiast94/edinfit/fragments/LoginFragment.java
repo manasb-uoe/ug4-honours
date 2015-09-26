@@ -7,13 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 26-09-2015.
@@ -21,7 +24,8 @@ import butterknife.OnClick;
 public class LoginFragment extends Fragment {
 
     @Bind(R.id.email_edittext) EditText emailEditText;
-    @Bind(R.id.email_password) EditText passwordEditText;
+    @Bind(R.id.password_edittext) EditText passwordEditText;
+    @Bind(R.id.signup_textview) TextView signupTextView;
 
     @Nullable
     @Override
@@ -35,6 +39,11 @@ public class LoginFragment extends Fragment {
     @OnClick(R.id.login_button)
     public void login() {
         Toast.makeText(getActivity(), "Login", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.signup_textview)
+    public void showSignupFragment() {
+        EventBus.getDefault().post(new ShowSignupFragmentEvent());
     }
 
     @Override
