@@ -11,10 +11,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.AuthenticatedEvent;
-import com.enthusiast94.edinfit.events.LoginEvent;
-import com.enthusiast94.edinfit.events.OnLoginResponseEvent;
+import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
+import com.enthusiast94.edinfit.events.OnAuthenticateResponseEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
+import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import butterknife.Bind;
@@ -119,7 +121,7 @@ public class LoginFragment extends Fragment {
         if (emailError == null && passwordError == null) {
             setLoading(true);
 
-            EventBus.getDefault().post(new LoginEvent(email, password));
+            UserService.authenticate(email, password, new AuthenticateCallback());
         }
     }
 
@@ -130,14 +132,32 @@ public class LoginFragment extends Fragment {
 
 
     /**
+     * Callback implementation that is passed onto UserService.authenticate().
+     */
+
+    private static class AuthenticateCallback implements Callback<User> {
+
+        @Override
+        public void onSuccess(User user) {
+            EventBus.getDefault().post(new OnAuthenticateResponseEvent(null, user));
+        }
+
+        @Override
+        public void onFailure(String message) {
+            EventBus.getDefault().post(new OnAuthenticateResponseEvent(message, null));
+        }
+    }
+
+
+    /**
      * EventBus event handling methods
      */
 
-    public void onEventMainThread(OnLoginResponseEvent event) {
+    public void onEventMainThread(OnAuthenticateResponseEvent event) {
         setLoading(false);
 
         if (event.getError() == null) {
-            EventBus.getDefault().post(new AuthenticatedEvent(event.getUser()));
+            EventBus.getDefault().post(new OnAuthenticatedEvent(event.getUser()));
         } else {
             Toast.makeText(getActivity(), event.getError(), Toast.LENGTH_SHORT).show();
         }

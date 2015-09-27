@@ -5,17 +5,12 @@ import com.enthusiast94.edinfit.models.User;
 /**
  * Created by manas on 26-09-2015.
  */
-public class OnSignupResponseEvent {
-    private String error;
+public class OnAuthenticatedEvent {
+
     private User user;
 
-    public OnSignupResponseEvent(String error, User user) {
-        this.error = error;
+    public OnAuthenticatedEvent(User user) {
         this.user = user;
-    }
-
-    public String getError() {
-        return error;
     }
 
     public User getUser() {

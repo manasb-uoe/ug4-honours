@@ -13,9 +13,11 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.AuthenticatedEvent;
-import com.enthusiast94.edinfit.events.OnSignupResponseEvent;
-import com.enthusiast94.edinfit.events.SignupEvent;
+import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
+import com.enthusiast94.edinfit.events.OnCreateUserResponseCallback;
+import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import butterknife.Bind;
@@ -159,7 +161,25 @@ public class SignupFragment extends Fragment {
         if (nameError == null && emailError == null && passwordError == null && doPasswordsMatch) {
             setLoading(true);
 
-            EventBus.getDefault().post(new SignupEvent(name, email, password));
+            UserService.createUser(name, email, password, new CreateUserCallback());
+        }
+    }
+
+
+    /**
+     * Callback implementation that is passed onto UserService.createUser().
+     */
+
+    private static class CreateUserCallback implements Callback<User> {
+
+        @Override
+        public void onSuccess(User user) {
+            EventBus.getDefault().post(new OnCreateUserResponseCallback(null, user));
+        }
+
+        @Override
+        public void onFailure(String message) {
+            EventBus.getDefault().post(new OnCreateUserResponseCallback(message, null));
         }
     }
 
@@ -168,11 +188,11 @@ public class SignupFragment extends Fragment {
      * EventBus event handling methods
      */
 
-    public void onEventMainThread(OnSignupResponseEvent event) {
+    public void onEventMainThread(OnCreateUserResponseCallback event) {
         setLoading(false);
 
         if (event.getError() == null) {
-            EventBus.getDefault().post(new AuthenticatedEvent(event.getUser()));
+            EventBus.getDefault().post(new OnAuthenticatedEvent(event.getUser()));
         } else {
             Toast.makeText(getActivity(), event.getError(), Toast.LENGTH_SHORT).show();
         }

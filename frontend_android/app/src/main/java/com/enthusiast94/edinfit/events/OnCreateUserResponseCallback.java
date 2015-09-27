@@ -5,12 +5,11 @@ import com.enthusiast94.edinfit.models.User;
 /**
  * Created by manas on 26-09-2015.
  */
-public class OnLoginResponseEvent {
-
+public class OnCreateUserResponseCallback {
     private String error;
     private User user;
 
-    public OnLoginResponseEvent(String error, User user) {
+    public OnCreateUserResponseCallback(String error, User user) {
         this.error = error;
         this.user = user;
     }
