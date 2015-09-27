@@ -88,13 +88,7 @@ public class UserService extends BaseService {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                if (callback != null) {
-                    try {
-                        callback.onFailure(errorResponse.getJSONObject("error").getString("message"));
-                    } catch (JSONException e) {
-                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
-                    }
-                }
+                onFailureCommon(statusCode, errorResponse, callback);
             }
         });
     }
