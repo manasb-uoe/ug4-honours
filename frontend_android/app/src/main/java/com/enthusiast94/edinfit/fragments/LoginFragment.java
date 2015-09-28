@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
-import com.enthusiast94.edinfit.events.OnAuthenticateResponseEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.Callback;
@@ -150,8 +149,27 @@ public class LoginFragment extends Fragment {
 
 
     /**
-     * EventBus event handling methods
+     * EventBus events and event handling methods
      */
+
+    private static class OnAuthenticateResponseEvent {
+
+        private String error;
+        private User user;
+
+        public OnAuthenticateResponseEvent(String error, User user) {
+            this.error = error;
+            this.user = user;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public User getUser() {
+            return user;
+        }
+    }
 
     public void onEventMainThread(OnAuthenticateResponseEvent event) {
         setLoading(false);
