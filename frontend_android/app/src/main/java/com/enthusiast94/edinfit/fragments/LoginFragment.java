@@ -29,6 +29,7 @@ import de.greenrobot.event.EventBus;
  */
 public class LoginFragment extends Fragment {
 
+    private static final String TAG = LoginFragment.class.getSimpleName();
     @Bind(R.id.email_edittext) EditText emailEditText;
     @Bind(R.id.password_edittext) EditText passwordEditText;
     @Bind(R.id.login_button) Button loginButton;
@@ -36,7 +37,13 @@ public class LoginFragment extends Fragment {
     @BindString(R.string.label_loading) String loadingLabel;
     @BindString(R.string.action_login) String loginAction;
     private boolean isLoading;
-    private static final String IS_LOADING_INSTANCE_STATE_KEY = "isLoadingInstanceStateKey";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setRetainInstance(true);
+    }
 
     @Nullable
     @Override
@@ -44,35 +51,15 @@ public class LoginFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, view);
 
+
         /**
-         * Start or stop loading based on the value of isLoading, which is retrieved from instance
-         * state
+         * Start or stop loading based on the value of isLoading, which was retained on config
+         * change.
          */
 
-        if (savedInstanceState != null) {
-            isLoading = savedInstanceState.getBoolean(IS_LOADING_INSTANCE_STATE_KEY);
-            setLoading(isLoading);
-        }
+        setLoading(isLoading);
 
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(IS_LOADING_INSTANCE_STATE_KEY, isLoading);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -120,64 +107,27 @@ public class LoginFragment extends Fragment {
         if (emailError == null && passwordError == null) {
             setLoading(true);
 
-            UserService.authenticate(email, password, new AuthenticateCallback());
+            UserService.authenticate(email, password, new Callback<User>() {
+
+                @Override
+                public void onSuccess(User data) {
+                    setLoading(false);
+
+                    EventBus.getDefault().post(new OnAuthenticatedEvent(data));
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    setLoading(false);
+
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
     @OnClick(R.id.signup_button)
     public void showSignupFragment() {
         EventBus.getDefault().post(new ShowSignupFragmentEvent());
-    }
-
-
-    /**
-     * Callback implementation that is passed onto UserService.authenticate().
-     */
-
-    private static class AuthenticateCallback implements Callback<User> {
-
-        @Override
-        public void onSuccess(User user) {
-            EventBus.getDefault().post(new OnAuthenticateResponseEvent(null, user));
-        }
-
-        @Override
-        public void onFailure(String message) {
-            EventBus.getDefault().post(new OnAuthenticateResponseEvent(message, null));
-        }
-    }
-
-
-    /**
-     * EventBus events and event handling methods
-     */
-
-    private static class OnAuthenticateResponseEvent {
-
-        private String error;
-        private User user;
-
-        public OnAuthenticateResponseEvent(String error, User user) {
-            this.error = error;
-            this.user = user;
-        }
-
-        public String getError() {
-            return error;
-        }
-
-        public User getUser() {
-            return user;
-        }
-    }
-
-    public void onEventMainThread(OnAuthenticateResponseEvent event) {
-        setLoading(false);
-
-        if (event.getError() == null) {
-            EventBus.getDefault().post(new OnAuthenticatedEvent(event.getUser()));
-        } else {
-            Toast.makeText(getActivity(), event.getError(), Toast.LENGTH_SHORT).show();
-        }
     }
 }
