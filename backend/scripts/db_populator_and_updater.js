@@ -40,11 +40,11 @@ function getJSON(path, onResult) {
 
 
 /**
- * DB collection population methods
+ * DB collection population/update methods
  */
 
-function populateStops(cbA) {
-    console.log("Populating Stops...");
+function upsertStops(cbA) {
+    console.log("Upserting Stops...");
 
     Stop.find({}, function (err, stops) {
         if (err) throw err;
@@ -92,8 +92,8 @@ function populateStops(cbA) {
     });
 }
 
-function populateServices(cbA) {
-    console.log("Populating Services...");
+function upsertServices(cbA) {
+    console.log("Upserting Services...");
 
     Service.find({}, function (err, services) {
         if (err) throw err;
@@ -145,10 +145,10 @@ mongoose.connection.once("open", function () {
     console.time("\nExecution time: ");
 
     async.series([
-        populateStops,
-        populateServices,
+        upsertStops,
+        upsertServices,
         function () {
-            console.log("END OF DB POPULATION SCRIPT");
+            console.log("----------------------");
             console.timeEnd("\nExecution time: ");
             process.exit(0);
         }
