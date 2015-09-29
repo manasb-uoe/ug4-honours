@@ -8,5 +8,6 @@ module.exports = {
         test: "mongodb://localhost/ug4_honours_test_db"
     },
     apiServerPort: 4000,
-    secret: "this_is_a_very_long_secret"
+    secret: "this_is_a_very_long_secret",
+    tfeApiKey: "0c627af5849e23b0b030bc7352550884"
 };
