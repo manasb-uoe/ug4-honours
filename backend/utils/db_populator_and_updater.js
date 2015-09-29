@@ -136,22 +136,26 @@ function upsertServices(cbA) {
 }
 
 
-/**
- * Script entry point
- */
+function runAsStandaloneScript() {
+    mongoose.connect(config.database.test);
+    mongoose.connection.once("open", function () {
+        console.time("\nExecution time: ");
 
-mongoose.connect(config.database.test);
-mongoose.connection.once("open", function () {
-    console.time("\nExecution time: ");
+        async.series([
+            upsertStops,
+            upsertServices,
+            function () {
+                console.log("----------------------");
+                console.timeEnd("\nExecution time: ");
+                process.exit(0);
+            }
+        ]);
+    });
+}
 
-    async.series([
-        upsertStops,
-        upsertServices,
-        function () {
-            console.log("----------------------");
-            console.timeEnd("\nExecution time: ");
-            process.exit(0);
-        }
-    ]);
-});
 
+module.exports = {
+    upsertStops: upsertStops,
+    upsertServices: upsertServices,
+    runAsStandaloneScript: runAsStandaloneScript
+};
