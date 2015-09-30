@@ -137,7 +137,7 @@ function upsertServices(cbA) {
 
 
 function runAsStandaloneScript() {
-    mongoose.connect(config.database.test);
+    mongoose.connect(config.database.dev);
     mongoose.connection.once("open", function () {
         console.time("\nExecution time: ");
 
