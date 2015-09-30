@@ -57,7 +57,7 @@ function upsertStops(cbA) {
                 function (stopJson, cbB) {
                     // ensure that keys match schema
                     stopJson.stopId = stopJson.stop_id;
-                    stopJson.location = [0, 0];
+                    stopJson.location = [stopJson.longitude, stopJson.latitude];
 
                     // only keep required data
                     delete stopJson.atco_code;
