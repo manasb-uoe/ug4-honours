@@ -15,4 +15,20 @@ var stopSchema = new mongoose.Schema({
     services: [String]
 });
 
+/**
+ * Instance methods
+ */
+
+stopSchema.methods.toJSON = function() {
+    var obj = this.toObject();
+
+    // delete _id since stopId is used as an id
+    delete obj._id;
+
+    // delete version key
+    delete obj.__v;
+
+    return obj;
+};
+
 module.exports = mongoose.model("Stop", stopSchema);
