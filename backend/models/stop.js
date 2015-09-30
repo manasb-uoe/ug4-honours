@@ -3,6 +3,8 @@
  */
 
 var mongoose = require("mongoose");
+var helpers = require("../utils/helpers");
+var async = require("async");
 
 var stopSchema = new mongoose.Schema({
     id: false,
@@ -14,6 +16,61 @@ var stopSchema = new mongoose.Schema({
     destinations: [String],
     services: [String]
 });
+
+
+/**
+ * Static methods
+ */
+
+stopSchema.statics.upsertAll = function (cbA) {
+
+    var Stop = mongoose.model("Stop");
+
+    Stop.find({}, function (err, stops) {
+        if (err) return cbA(err);
+
+        helpers.getApiJson("/api/v1/stops", function (statusCode, stopsJson) {
+            if (statusCode != 200) return cbA(new Error("HTTP status code not OK (" + statusCode + ")."));
+
+            async.each(
+                stopsJson.stops,
+                function (stopJson, cbB) {
+                    // ensure that keys match schema
+                    stopJson.stopId = stopJson.stop_id;
+                    stopJson.location = [stopJson.longitude, stopJson.latitude];
+
+                    // only keep required data
+                    delete stopJson.atco_code;
+                    delete stopJson.identifier;
+                    delete stopJson.orientation;
+                    delete stopJson.locality;
+                    delete stopJson.latitude;
+                    delete stopJson.longitude;
+
+                    // if stops already exist, simply update them with new data, else create and insert new stops
+                    if (stops.length == 0) {
+                        var stop = new Stop(stopJson);
+                        stop.save(function (err) {
+                            if (err) return cbB(err);
+
+                            return cbB();
+                        });
+                    } else {
+                        Stop.findOneAndUpdate({stopId: stopJson.stopId}, stopJson, function (err) {
+                            if (err) return cbB(err);
+
+                            return cbB();
+                        });
+                    }
+                },
+                function (err) {
+                    return cbA(err);
+                }
+            );
+        });
+    });
+};
+
 
 /**
  * Instance methods
