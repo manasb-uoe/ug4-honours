@@ -2,17 +2,24 @@ package com.enthusiast94.edinfit.activities;
 
 import android.content.res.Configuration;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.fragments.ActivityFragment;
+import com.enthusiast94.edinfit.fragments.GoFragment;
+import com.enthusiast94.edinfit.fragments.NearbyFragment;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.UserService;
 
@@ -26,9 +33,10 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.name_textview) TextView navNameTextVeiew;
     @Bind(R.id.email_textview) TextView navEmailTextView;
+    @Bind(R.id.viewpager) ViewPager viewPager;
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private int selectedNavMenuItemIndex;
-    private static final String SELECTED_NAV_MENU_ITEM_INDEX_KEY = "selectedNavMenuItemIndex";
+    private int selectedPageIndex;
+    private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,23 +79,48 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                selectNavMenuItem(menuItem);
+                int menuItemIndex = getMenuItemIndex(menuItem, navView.getMenu());
+
+                if (menuItemIndex < MainPagerAdapter.FRAGMENT_COUNT) {
+                    navigateToPage(menuItemIndex);
+                }
+
                 return false;
             }
         });
 
         /**
-         * Select navigation view menu item based on saved instance state, ensuring that the
-         * right item is selected after configuration changes
+         * Setup view pager
+         */
+
+        viewPager.setAdapter(new MainPagerAdapter());
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                MainActivity.this.onPageSelected(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+
+        /**
+         * Navigate to viewpager page based on the page index in saved instance state, ensuring that
+         * the correct page is selected after configuration changes.
          */
 
         if (savedInstanceState == null) {
-            selectedNavMenuItemIndex = 0;
+            selectedPageIndex = 0;
         } else {
-            selectedNavMenuItemIndex = savedInstanceState.getInt(SELECTED_NAV_MENU_ITEM_INDEX_KEY);
+            selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
         }
 
-        selectNavMenuItem(navView.getMenu().getItem(selectedNavMenuItemIndex));
+        navigateToPage(selectedPageIndex);
     }
 
     private void populateNavViewHeader() {
@@ -98,12 +131,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void selectNavMenuItem(MenuItem menuItem) {
+    private void navigateToPage(int position) {
+        viewPager.setCurrentItem(position);
+        onPageSelected(position);
+    }
+
+    private void onPageSelected(int position) {
+        selectedPageIndex = position;
+
+        MenuItem menuItem = navView.getMenu().getItem(position);
         menuItem.setChecked(true);
-        drawerLayout.closeDrawers();
+
         setTitle(menuItem.getTitle());
 
-        selectedNavMenuItemIndex = getMenuItemIndex(menuItem, navView.getMenu());
+        drawerLayout.closeDrawers();
     }
 
     private int getMenuItemIndex(MenuItem menuItem, Menu menu) {
@@ -121,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
 
-        savedInstanceState.putInt(SELECTED_NAV_MENU_ITEM_INDEX_KEY, selectedNavMenuItemIndex);
+        savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
     }
 
     @Override
@@ -147,4 +188,27 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private class MainPagerAdapter extends FragmentPagerAdapter {
+
+        private static final int FRAGMENT_COUNT = 3;
+
+        public MainPagerAdapter() {
+            super(getSupportFragmentManager());
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0: return new ActivityFragment();
+                case 1: return new GoFragment();
+                case 2: return new NearbyFragment();
+                default: return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return FRAGMENT_COUNT;
+        }
+    }
 }
