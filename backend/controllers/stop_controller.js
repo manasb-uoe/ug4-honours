@@ -3,21 +3,25 @@
  */
 
 var express = require("express");
-var router = express.Router();
+var async = require("async");
 var Stop = require("../models/stop");
+var helpers = require("../utils/helpers");
 var authenticationMiddleware = require("../middleware/authentication");
+
+var router = express.Router();
 
 
 /**
  * Get nearby stops based on the provided geographical coordinates.
  */
 
-router.get("/stops/nearby", authenticationMiddleware, function (req, res, next) {
+router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
     if (!req.query.latitude || !req.query.longitude)
         return res.sendError(400, "Latitude and longitude query params are required.");
 
     var coords = [req.query.longitude, req.query.latitude];
     var limit = req.query.limit || 25;
+    var nearestStopsLimit = req.query.nearest_stops_limit || 3;
     var maxDistance = req.query.max_distance || 3;
 
     // we need to convert the distance to radians
@@ -35,7 +39,43 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res, next) 
         .exec(function (err, stops) {
             if (err) return res.sendError(500, err.message);
 
-            res.sendOk(stops);
+            // attach departures only to nearest stops
+            async.each(
+                stops,
+                function (stop, callback) {
+                    if (stops.indexOf(stop) < nearestStopsLimit) {
+                        async.series([
+                            function (callbackA) {
+                                if (stop.departures.length == 0) {
+                                    stop.updateDepartures(function (err) {
+                                        if (err) return callbackA(err);
+
+                                        return callbackA();
+                                    });
+                                } else {
+                                    return callbackA();
+                                }
+                            }
+                        ], function (err) {
+                            if (err) return callback(err);
+
+                            // filter out departures that do not belong to provided day
+                            stop.filterDepartures(helpers.getTodayApiCode(), function () {
+                                return callback();
+                            });
+                        });
+                    } else {
+                        stop.departures = [];
+
+                        return callback();
+                    }
+                },
+                function (err) {
+                    if (err) return res.sendError(500, err.message);
+
+                    return res.sendOk(stops);
+                }
+            );
         });
 });
 

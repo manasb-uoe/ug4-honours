@@ -3,8 +3,8 @@
  */
 
 var https = require("https");
+var moment = require("moment");
 var config = require("../config");
-
 
 /**
  * API GET request helper
@@ -32,4 +32,16 @@ module.exports.getApiJson = function(path, onResult) {
             onResult(res.statusCode, jsonOutput);
         });
     });
+};
+
+module.exports.getTodayApiCode = function () {
+    var day = moment().format("dddd");
+    var weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    if (weekdays.indexOf(day) > -1) {
+        return 0;
+    } else if (day == "Saturday") {
+        return 5;
+    } else {
+        return 6;
+    }
 };

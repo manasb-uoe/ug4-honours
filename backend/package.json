@@ -23,7 +23,8 @@
     "jsonwebtoken": "latest",
     "validator": "latest",
     "async": "latest",
-    "underscore": "latest"
+    "underscore": "latest",
+    "moment": "latest"
   },
   "devDependencies": {
     "nodemon": "latest",
