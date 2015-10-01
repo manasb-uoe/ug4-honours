@@ -63,10 +63,18 @@ stopSchema.statics.upsertAll = function (cbA) {
                             return cbB();
                         });
                     } else {
-                        Stop.findOneAndUpdate({stopId: stopJson.stopId}, stopJson, function (err) {
+                        Stop.findOneAndUpdate({stopId: stopJson.stopId}, stopJson, function (err, updatedStop) {
                             if (err) return cbB(err);
 
-                            return cbB();
+                            if (updatedStop.departures.length > 0) {
+                                updatedStop.updateDepartures(function (err) {
+                                    if (err) return cbB(err);
+
+                                    return cbB();
+                                });
+                            } else {
+                                return cbB();
+                            }
                         });
                     }
                 },
@@ -94,7 +102,7 @@ stopSchema.methods.toJSON = function() {
 
     // delete departure id
     obj.departures.forEach(function (departure) {
-       delete departure._id;
+        delete departure._id;
     });
 
     return obj;
