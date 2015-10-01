@@ -14,7 +14,14 @@ var stopSchema = new mongoose.Schema({
     location : {type: [Number] /* [<longitude>, <latitude?] */, index: '2d'},
     service_type: String,
     destinations: [String],
-    services: [String]
+    services: [String],
+    departures: [{
+        serviceName: String,
+        time: String,
+        destination: String,
+        day: Number,
+        validFrom: Number
+    }]
 });
 
 
@@ -85,7 +92,46 @@ stopSchema.methods.toJSON = function() {
     // delete version key
     delete obj.__v;
 
+    // delete departure id
+    obj.departures.forEach(function (departure) {
+       delete departure._id;
+    });
+
     return obj;
+};
+
+stopSchema.methods.updateDepartures = function (callback) {
+    var self = this;
+
+    helpers.getApiJson("/api/v1/timetables/" + this.stopId, function (statusCode, timetableJson) {
+        if (statusCode != 200) return callback(Error("HTTP status code not OK (" + statusCode + ")."));
+
+        // ensure that keys match schema and only keep required data
+        timetableJson.departures.forEach(function (departure) {
+            departure.serviceName = departure.service_name;
+            departure.validFrom = departure.valid_from;
+
+            delete departure.service_name;
+            delete departure.valid_from;
+            delete departure.note_id;
+        });
+        delete timetableJson.stop_id;
+        delete timetableJson.stop_name;
+
+        self.update({departures: timetableJson.departures}, function (err) {
+            if (err) return callback(err);
+
+            return callback();
+        });
+    });
+};
+
+stopSchema.methods.filterDepartures = function (day, callback) {
+    this.departures = this.departures.filter(function (departure) {
+        return departure.day == day;
+    });
+
+    return callback();
 };
 
 module.exports = mongoose.model("Stop", stopSchema);
