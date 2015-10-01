@@ -7,7 +7,7 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/primary"
     app:layout_scrollFlags="scroll|enterAlways"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     >
 
@@ -16,7 +16,6 @@
         android:layout_width="@dimen/toolbar_circular_progress_width"
         android:layout_height="@dimen/toolbar_circular_progress_height"
         android:indeterminate="true"
-        android:indeterminateTint="@android:color/white"
         android:layout_gravity="end"
         android:visibility="gone"
         />
