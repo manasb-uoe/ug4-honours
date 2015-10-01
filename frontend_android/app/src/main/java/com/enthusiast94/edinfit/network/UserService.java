@@ -60,7 +60,7 @@ public class UserService extends BaseService {
                                                  final Callback<User> callback) {
         RequestParams requestParams = new RequestParams(userDetails);
 
-        AsyncHttpClient client = getAsyncHttpClient();
+        AsyncHttpClient client = getAsyncHttpClient(false);
         client.post(url, requestParams, new JsonHttpResponseHandler() {
 
             @Override
