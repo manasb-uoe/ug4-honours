@@ -19,4 +19,5 @@
     <!-- Random -->
     <dimen name="toolbar_circular_progress_width">35dp</dimen>
     <dimen name="toolbar_circular_progress_height">35dp</dimen>
+    <dimen name="menu_nav_header_height">180dp</dimen>
 </resources>

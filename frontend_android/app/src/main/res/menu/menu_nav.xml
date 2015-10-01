@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_activity"
+            android:title="@string/label_activity"
+            />
+        <item
+            android:id="@+id/nav_go"
+            android:title="@string/label_go"
+            />
+        <item
+            android:id="@+id/nav_nearby"
+            android:title="@string/label_nearby"
+            />
+    </group>
+</menu>
