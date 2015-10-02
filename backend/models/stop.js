@@ -134,7 +134,11 @@ stopSchema.methods.updateDepartures = function (callback) {
     });
 };
 
-stopSchema.methods.filterDepartures = function (day, callback) {
+stopSchema.methods.filterDepartures = function (day, limit, callback) {
+    if (limit >= 0) {
+        this.departures = this.departures.slice(0, limit);         
+    }
+
     this.departures = this.departures.filter(function (departure) {
         return departure.day == day;
     });

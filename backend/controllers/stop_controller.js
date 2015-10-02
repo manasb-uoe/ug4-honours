@@ -22,6 +22,7 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
     var coords = [req.query.longitude, req.query.latitude];
     var limit = req.query.limit || 25;
     var nearestStopsLimit = req.query.nearest_stops_limit || 3;
+    var nearestStopsDeparturesLimit = req.query.nearest_stops_departures_limit || -1;
     var maxDistance = req.query.max_distance || 3;
 
     // we need to convert the distance to radians
@@ -59,8 +60,8 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
                         ], function (err) {
                             if (err) return callback(err);
 
-                            // filter out departures that do not belong to provided day
-                            stop.filterDepartures(helpers.getTodayApiCode(), function () {
+                            // filter out departures that do not belong to provided day and limit them using the provided limit 
+                            stop.filterDepartures(helpers.getTodayApiCode(), nearestStopsDeparturesLimit, function () {
                                 return callback();
                             });
                         });
