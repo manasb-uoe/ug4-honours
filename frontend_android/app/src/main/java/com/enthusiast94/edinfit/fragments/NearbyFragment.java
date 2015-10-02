@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.fragments;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,11 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.StopService;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +70,7 @@ public class NearbyFragment extends Fragment {
          * Load nearby stops from network
          */
 
-        if (savedInstanceState == null) {
+        if (nearbyStops.size() == 0) {
             loadNearbyStops();
         }
 
@@ -83,26 +86,35 @@ public class NearbyFragment extends Fragment {
     }
 
     private void loadNearbyStops() {
-        StopService.getNearbyStops(55.9425366, -3.2010753, NEARBY_STOPS_LIMIT, NEAREST_STOPS_LIMIT,
-                NEAREST_STOPS_DEPARTURES_LIMIT, ONLY_INCLUDE_UPCOMING_DEPARTURES, MAX_DISTANCE,
-                new Callback<List<Stop>>() {
+        Location lastUserLocation =
+                LocationServices.FusedLocationApi.getLastLocation(App.getGoogleApiClient());
 
-            @Override
-            public void onSuccess(List<Stop> data) {
-                nearbyStops = data;
+        if (lastUserLocation != null) {
+            StopService.getNearbyStops(lastUserLocation.getLatitude(), lastUserLocation.getLongitude(),
+                    NEARBY_STOPS_LIMIT, NEAREST_STOPS_LIMIT, NEAREST_STOPS_DEPARTURES_LIMIT,
+                    ONLY_INCLUDE_UPCOMING_DEPARTURES, MAX_DISTANCE,
+                    new Callback<List<Stop>>() {
 
-                if (getActivity() != null) {
-                    nearbyStopsAdapter.notifyDataSetChanged();
-                }
-            }
+                        @Override
+                        public void onSuccess(List<Stop> data) {
+                            nearbyStops = data;
 
-            @Override
-            public void onFailure(String message) {
-                if (getActivity() != null) {
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+                            if (getActivity() != null) {
+                                nearbyStopsAdapter.notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            if (getActivity() != null) {
+                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_location),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     private class NearbyStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

@@ -33,4 +33,5 @@
     <string name="error_passwords_do_not_match">Passwords do not match</string>
     <string name="error_parsing">There was a problem parsing API response.</string>
     <string name="error_request_time_out">The request timed out. Please try again.</string>
+    <string name="error_could_not_fetch_location">Error! Could not fetch your current location.</string>
 </resources>
