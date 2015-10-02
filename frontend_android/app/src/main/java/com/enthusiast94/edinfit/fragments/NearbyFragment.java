@@ -21,16 +21,13 @@ import com.enthusiast94.edinfit.network.StopService;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
 /**
  * Created by manas on 01-10-2015.
  */
 public class NearbyFragment extends Fragment {
 
     public static final String TAG = NearbyFragment.class.getSimpleName();
-    @Bind(R.id.nearby_stops_recyclerview) RecyclerView nearbyStopsRecyclerView;
+    private RecyclerView nearbyStopsRecyclerView;
     private NearbyStopsAdapter nearbyStopsAdapter;
     private List<Stop> nearbyStops = new ArrayList<>();
 
@@ -51,7 +48,12 @@ public class NearbyFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_nearby, container, false);
-        ButterKnife.bind(this, view);
+
+        /**
+         * Find views
+         */
+
+        nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
 
         /**
          * Setup nearby stops recycler view
@@ -75,7 +77,9 @@ public class NearbyFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+
+        nearbyStopsRecyclerView = null;
+        nearbyStopsAdapter = null;
     }
 
     private void loadNearbyStops() {
@@ -157,8 +161,6 @@ public class NearbyFragment extends Fragment {
 
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 departuresContainer = (LinearLayout) itemView.findViewById(R.id.departures_container);
-
-                ButterKnife.bind(this, itemView);
             }
 
             public void bindItem(Stop stop) {

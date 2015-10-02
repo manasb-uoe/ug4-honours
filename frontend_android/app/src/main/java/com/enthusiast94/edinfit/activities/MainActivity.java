@@ -22,17 +22,14 @@ import com.enthusiast94.edinfit.fragments.NearbyFragment;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.UserService;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
 public class MainActivity extends AppCompatActivity {
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.navigation_view) NavigationView navView;
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.name_textview) TextView navNameTextVeiew;
-    @Bind(R.id.email_textview) TextView navEmailTextView;
-    @Bind(R.id.viewpager) ViewPager viewPager;
+    private DrawerLayout drawerLayout;
+    private NavigationView navView;
+    private Toolbar toolbar;
+    private TextView navNameTextVeiew;
+    private TextView navEmailTextView;
+    private ViewPager viewPager;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private int selectedPageIndex;
     private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
@@ -41,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+
+        /**
+         * Find views
+         */
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navView = (NavigationView) findViewById(R.id.navigation_view);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
+        navEmailTextView = (TextView) findViewById(R.id.email_textview);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
 
         /**
          * Setup AppBar
