@@ -5,6 +5,7 @@
 var mongoose = require("mongoose");
 var helpers = require("../utils/helpers");
 var async = require("async");
+var moment = require("moment");
 
 var stopSchema = new mongoose.Schema({
     id: false,
@@ -134,14 +135,28 @@ stopSchema.methods.updateDepartures = function (callback) {
     });
 };
 
-stopSchema.methods.filterDepartures = function (day, limit, callback) {
-    if (limit >= 0) {
-        this.departures = this.departures.slice(0, limit);         
-    }
+stopSchema.methods.filterDepartures = function (day, limit, onlyInlcudeUpcomingDepartures, callback) {
+    var now = moment();
 
     this.departures = this.departures.filter(function (departure) {
-        return departure.day == day;
+        var due = moment(departure.time, "HH:mm");
+        var isUpcoming = due >= now && due <= (now.add(120, "minutes"));
+        
+        var doesDayMatch = departure.day == day;
+
+        var shouldKeep = false;
+        if (onlyInlcudeUpcomingDepartures) {
+            shouldKeep = doesDayMatch && isUpcoming;
+        } else {
+            shouldKeep = doesDayMatch;
+        }
+
+        return shouldKeep;
     });
+
+    if (limit >= 0) {
+        this.departures = this.departures.slice(0, limit);
+    }
 
     return callback();
 };

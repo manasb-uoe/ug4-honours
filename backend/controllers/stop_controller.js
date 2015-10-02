@@ -20,10 +20,11 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
         return res.sendError(400, "Latitude and longitude query params are required.");
 
     var coords = [req.query.longitude, req.query.latitude];
+    var maxDistance = req.query.max_distance || 3;
     var limit = req.query.limit || 25;
     var nearestStopsLimit = req.query.nearest_stops_limit || 3;
     var nearestStopsDeparturesLimit = req.query.nearest_stops_departures_limit || -1;
-    var maxDistance = req.query.max_distance || 3;
+    var onlyIncludeUpcomingDepartures = req.query.only_include_upcoming_departures === "true";
 
     // we need to convert the distance to radians
     // the radius of Earth is approximately 6371 kilometers
@@ -60,10 +61,13 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
                         ], function (err) {
                             if (err) return callback(err);
 
-                            // filter out departures that do not belong to provided day and limit them using the provided limit 
-                            stop.filterDepartures(helpers.getTodayApiCode(), nearestStopsDeparturesLimit, function () {
-                                return callback();
-                            });
+                            // filter out departures that do not belong to provided day and limit them using
+                            // the provided limit
+                            stop.filterDepartures(helpers.getTodayApiCode(), nearestStopsDeparturesLimit,
+                                onlyIncludeUpcomingDepartures, function () {
+
+                                    return callback();
+                                });
                         });
                     } else {
                         stop.departures = [];
