@@ -22,7 +22,8 @@ var stopSchema = new mongoose.Schema({
         destination: String,
         day: Number,
         validFrom: Number
-    }]
+    }],
+    distanceAway: Number
 });
 
 
@@ -135,27 +136,29 @@ stopSchema.methods.updateDepartures = function (callback) {
     });
 };
 
-stopSchema.methods.filterDepartures = function (day, limit, onlyInlcudeUpcomingDepartures, callback) {
+stopSchema.methods.filterDepartures = function (day, onlyInlcudeUpcomingDepartures, callback) {
     this.departures = this.departures.filter(function (departure) {
-        var now = moment();
-        var oneHourLater = moment().add(60, "minutes");
-
-        var due = moment(departure.time, "HH:mm");
-        var isUpcoming = due >= now && due <= (oneHourLater);
-        
         var doesDayMatch = departure.day == day;
 
         var shouldKeep = false;
 
         if (onlyInlcudeUpcomingDepartures) {
+            var now = moment();
+            var thirtyMinutesLater = moment().add(30, "minutes");
+
+            var due = moment(departure.time, "HH:mm");
+            var isUpcoming = due >= now && due <= (thirtyMinutesLater);
+
             shouldKeep = doesDayMatch && isUpcoming;
 
-            // humanize timestamp
-            var minutesToGo = moment.duration(due.diff(now)).get("minutes");
-            if (minutesToGo == 0) {
-                departure.time = "due";
-            } else {
-                departure.time = minutesToGo + " min";
+            if (shouldKeep) {
+                // humanize timestamp
+                var minutesToGo = moment.duration(due.diff(now)).get("minutes");
+                if (minutesToGo == 0) {
+                    departure.time = "due";
+                } else {
+                    departure.time = minutesToGo + " min";
+                }
             }
         } else {
             shouldKeep = doesDayMatch;
@@ -163,10 +166,6 @@ stopSchema.methods.filterDepartures = function (day, limit, onlyInlcudeUpcomingD
 
         return shouldKeep;
     });
-
-    if (limit >= 0) {
-        this.departures = this.departures.slice(0, limit);
-    }
 
     return callback();
 };

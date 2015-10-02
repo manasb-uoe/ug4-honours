@@ -20,15 +20,12 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
         return res.sendError(400, "Latitude and longitude query params are required.");
 
     var coords = [req.query.longitude, req.query.latitude];
-    var maxDistance = req.query.max_distance || 3;
     var limit = req.query.limit || 25;
-    var nearestStopsLimit = req.query.nearest_stops_limit || 3;
-    var nearestStopsDeparturesLimit = req.query.nearest_stops_departures_limit || -1;
     var onlyIncludeUpcomingDepartures = req.query.only_include_upcoming_departures === "true";
-
-    // we need to convert the distance to radians
-    // the radius of Earth is approximately 6371 kilometers
-    maxDistance = maxDistance / 6371;
+    var maxDistance = req.query.max_distance || 3; // km
+    // we need to convert the distance to radians the radius of Earth is approximately 6371 kilometers
+    maxDistance = maxDistance / 6371; // radians
+    var nearDistance = req.query.near_distance || 0.3; // km
 
     Stop
         .where("location")
@@ -45,7 +42,10 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
             async.each(
                 stops,
                 function (stop, callback) {
-                    if (stops.indexOf(stop) < nearestStopsLimit) {
+                    // add distance away from provided location
+                    stop.distanceAway = helpers.getDistanceBetweenPoints(coords, stop.location);
+
+                    if (stop.distanceAway < nearDistance) {
                         async.series([
                             function (callbackA) {
                                 if (stop.departures.length == 0) {
@@ -63,11 +63,10 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
 
                             // filter out departures that do not belong to provided day and limit them using
                             // the provided limit
-                            stop.filterDepartures(helpers.getTodayApiCode(), nearestStopsDeparturesLimit,
-                                onlyIncludeUpcomingDepartures, function () {
+                            stop.filterDepartures(helpers.getTodayApiCode(), onlyIncludeUpcomingDepartures, function () {
 
-                                    return callback();
-                                });
+                                return callback();
+                            });
                         });
                     } else {
                         stop.departures = [];
