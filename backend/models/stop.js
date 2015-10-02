@@ -138,10 +138,10 @@ stopSchema.methods.updateDepartures = function (callback) {
 stopSchema.methods.filterDepartures = function (day, limit, onlyInlcudeUpcomingDepartures, callback) {
     this.departures = this.departures.filter(function (departure) {
         var now = moment();
-        var twoHoursLater = moment().add(120, "minutes");
+        var oneHourLater = moment().add(60, "minutes");
 
         var due = moment(departure.time, "HH:mm");
-        var isUpcoming = due >= now && due <= (twoHoursLater);
+        var isUpcoming = due >= now && due <= (oneHourLater);
         
         var doesDayMatch = departure.day == day;
 
@@ -150,16 +150,13 @@ stopSchema.methods.filterDepartures = function (day, limit, onlyInlcudeUpcomingD
         if (onlyInlcudeUpcomingDepartures) {
             shouldKeep = doesDayMatch && isUpcoming;
 
-            // humanize departure time if the difference from current time is < 60 minutes
-            if (due < now.add(60, "minutes")) {
-                var minutesToGo = moment.duration(now.diff(due)).get("minutes");
-                if (minutesToGo == 0) {
-                    departure.time = "due";
-                } else {
-                    departure.time = minutesToGo + " min";
-                }
+            // humanize timestamp
+            var minutesToGo = moment.duration(due.diff(now)).get("minutes");
+            if (minutesToGo == 0) {
+                departure.time = "due";
+            } else {
+                departure.time = minutesToGo + " min";
             }
-
         } else {
             shouldKeep = doesDayMatch;
         }
