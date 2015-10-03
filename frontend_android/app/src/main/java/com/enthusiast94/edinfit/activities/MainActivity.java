@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.activities;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -11,22 +12,28 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.fragments.GoFragment;
 import com.enthusiast94.edinfit.fragments.NearbyFragment;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.UserService;
 
+import de.greenrobot.event.EventBus;
+
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navView;
     private Toolbar toolbar;
+    private View navHeaderContainer;
     private TextView navNameTextVeiew;
     private TextView navEmailTextView;
     private ViewPager viewPager;
@@ -37,96 +44,134 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         /**
-         * Find views
+         * Start login activity if user is not authenticated, else continue with this activity
          */
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navView = (NavigationView) findViewById(R.id.navigation_view);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
-        navEmailTextView = (TextView) findViewById(R.id.email_textview);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        if (!UserService.isUserAuthenticated()) {
+            goToLogin();
+        } else {
+            setContentView(R.layout.activity_main);
 
-        /**
-         * Setup AppBar
-         */
+            /**
+             * Register with default event bus
+             */
 
-        setSupportActionBar(toolbar);
+            EventBus.getDefault().register(this);
 
-        ActionBar appBar = getSupportActionBar();
-        if (appBar != null) {
-            appBar.setHomeButtonEnabled(true);
-            appBar.setDisplayHomeAsUpEnabled(true);
-        }
+            /**
+             * Find views
+             */
 
-        actionBarDrawerToggle = new ActionBarDrawerToggle(
-                this,
-                drawerLayout,
-                toolbar,
-                R.string.label_nav_open,
-                R.string.label_nav_close
-        );
-        actionBarDrawerToggle.syncState();
+            drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            navView = (NavigationView) findViewById(R.id.navigation_view);
+            toolbar = (Toolbar) findViewById(R.id.toolbar);
+            navHeaderContainer = findViewById(R.id.nav_header_container);
+            navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
+            navEmailTextView = (TextView) findViewById(R.id.email_textview);
+            viewPager = (ViewPager) findViewById(R.id.viewpager);
 
-        /**
-         * Populate nav view header with user details
-         */
+            /**
+             * Setup AppBar
+             */
 
-        populateNavViewHeader();
+            setSupportActionBar(toolbar);
 
-        /**
-         * Handle navigation view menu item clicks by displaying appropriate fragments/activities.
-         */
+            ActionBar appBar = getSupportActionBar();
+            if (appBar != null) {
+                appBar.setHomeButtonEnabled(true);
+                appBar.setDisplayHomeAsUpEnabled(true);
+            }
 
-        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            actionBarDrawerToggle = new ActionBarDrawerToggle(
+                    this,
+                    drawerLayout,
+                    toolbar,
+                    R.string.label_nav_open,
+                    R.string.label_nav_close
+            );
+            actionBarDrawerToggle.syncState();
 
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                int menuItemIndex = getMenuItemIndex(menuItem, navView.getMenu());
+            /**
+             * Populate nav view header with user details and bind event listeners
+             */
 
-                if (menuItemIndex < MainPagerAdapter.FRAGMENT_COUNT) {
-                    navigateToPage(menuItemIndex);
+            populateNavViewHeader();
+            navHeaderContainer.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    Intent startActivityIntent = new Intent(MainActivity.this, UserProfileActivity.class);
+                    startActivity(startActivityIntent);
+                }
+            });
+
+            /**
+             * Handle navigation view menu item clicks by displaying appropriate fragments/activities.
+             */
+
+            navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+                @Override
+                public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    int menuItemIndex = getMenuItemIndex(menuItem, navView.getMenu());
+
+                    if (menuItemIndex < MainPagerAdapter.FRAGMENT_COUNT) {
+                        navigateToPage(menuItemIndex);
+                    }
+
+                    return false;
+                }
+            });
+
+            /**
+             * Setup view pager
+             */
+
+            viewPager.setAdapter(new MainPagerAdapter());
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 }
 
-                return false;
+                @Override
+                public void onPageSelected(int position) {
+                    MainActivity.this.onPageSelected(position);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                }
+            });
+
+            /**
+             * Navigate to viewpager page based on the page index in saved instance state, ensuring that
+             * the correct page is selected after configuration changes.
+             */
+
+            if (savedInstanceState == null) {
+                selectedPageIndex = 0;
+            } else {
+                selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
             }
-        });
 
-        /**
-         * Setup view pager
-         */
-
-        viewPager.setAdapter(new MainPagerAdapter());
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                MainActivity.this.onPageSelected(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
-
-        /**
-         * Navigate to viewpager page based on the page index in saved instance state, ensuring that
-         * the correct page is selected after configuration changes.
-         */
-
-        if (savedInstanceState == null) {
-            selectedPageIndex = 0;
-        } else {
-            selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
+            navigateToPage(selectedPageIndex);
         }
+    }
 
-        navigateToPage(selectedPageIndex);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+        Log.i("DESTROY", "destroyed");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
     }
 
     private void populateNavViewHeader() {
@@ -164,11 +209,14 @@ public class MainActivity extends AppCompatActivity {
         return -1;
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
+    private void goToLogin() {
+        Intent startLActivityIntent = new Intent(this, LoginActivity.class);
+        finish();
+        startActivity(startLActivityIntent);
+    }
 
-        savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
+    public void onEventMainThread(OnDeauthenticatedEvent event) {
+        goToLogin();
     }
 
     @Override

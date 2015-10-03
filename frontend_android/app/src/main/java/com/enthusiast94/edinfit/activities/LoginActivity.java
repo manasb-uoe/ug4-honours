@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -95,5 +96,8 @@ public class LoginActivity extends AppCompatActivity {
     public void onEventMainThread(OnAuthenticatedEvent event) {
         Toast.makeText(this, getString(R.string.success_logged_in_as_base) + event.getUser().getName(), Toast.LENGTH_LONG)
                 .show();
+        Intent startActivityIntent = new Intent(this, MainActivity.class);
+        finish();
+        startActivity(startActivityIntent);
     }
 }
