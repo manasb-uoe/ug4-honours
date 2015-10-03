@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,10 +20,12 @@ import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.StopService;
-import com.google.android.gms.location.LocationServices;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by manas on 01-10-2015.
@@ -33,6 +36,11 @@ public class NearbyFragment extends Fragment {
     private RecyclerView nearbyStopsRecyclerView;
     private NearbyStopsAdapter nearbyStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView currentLocationTextView;
+    private TextView lastUpdatedAtTextView;
+    private String lastKnownUserLocationName;
+    private Date lastUpdatedAt;
+    private ImageButton refreshImageButton;
     private List<Stop> nearbyStops = new ArrayList<>();
 
     // nearby stops api endpoint params
@@ -58,6 +66,9 @@ public class NearbyFragment extends Fragment {
 
         nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
+        lastUpdatedAtTextView = (TextView) view.findViewById(R.id.last_updated_textview);
+        refreshImageButton = (ImageButton) view.findViewById(R.id.refresh_button);
 
         /**
          * Setup swipe refresh layout
@@ -72,8 +83,6 @@ public class NearbyFragment extends Fragment {
             }
         });
 
-
-
         /**
          * Setup nearby stops recycler view
          */
@@ -83,6 +92,18 @@ public class NearbyFragment extends Fragment {
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
         /**
+         * Set refresh button to reload nearby stops on click
+         */
+
+        refreshImageButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                loadNearbyStops();
+            }
+        });
+
+        /**
          * Load nearby stops from network
          */
 
@@ -90,6 +111,7 @@ public class NearbyFragment extends Fragment {
             loadNearbyStops();
         } else {
             nearbyStopsAdapter.notifyNearbyStopsChanged();
+            updateCurrentLocationAndLastUpdated();
         }
 
         return view;
@@ -106,23 +128,25 @@ public class NearbyFragment extends Fragment {
     private void loadNearbyStops() {
         setRefreshIndicatorVisiblity(true);
 
-        Location lastUserLocation =
-                LocationServices.FusedLocationApi.getLastLocation(App.getGoogleApiClient());
+        Location lastKnownUserLocation = App.getLastKnownUserLocation();
 
-        if (lastUserLocation != null) {
-            StopService.getNearbyStops(lastUserLocation.getLatitude(),
-                    lastUserLocation.getLongitude(), MAX_DISTANCE, NEAR_DISTANCE,
+        if (lastKnownUserLocation != null) {
+            StopService.getNearbyStops(lastKnownUserLocation.getLatitude(),
+                    lastKnownUserLocation.getLongitude(), MAX_DISTANCE, NEAR_DISTANCE,
                     ONLY_INCLUDE_UPCOMING_DEPARTURES, NEARBY_STOPS_LIMIT,
                     new Callback<List<Stop>>() {
 
                         @Override
                         public void onSuccess(List<Stop> data) {
                             nearbyStops = data;
+                            lastUpdatedAt = new Date();
 
                             if (getActivity() != null) {
                                 setRefreshIndicatorVisiblity(false);
 
                                 nearbyStopsAdapter.notifyNearbyStopsChanged();
+
+                                updateCurrentLocationAndLastUpdated();
                             }
                         }
 
@@ -138,6 +162,22 @@ public class NearbyFragment extends Fragment {
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_location),
                     Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void updateCurrentLocationAndLastUpdated() {
+        lastKnownUserLocationName = App.getLastKnownUserLocationName();
+        if (lastKnownUserLocationName != null) {
+            currentLocationTextView.setText(lastKnownUserLocationName);
+        } else {
+            currentLocationTextView.setText(getString(R.string.label_not_found));
+        }
+
+        if (lastUpdatedAt != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+            lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
+        } else {
+            lastUpdatedAtTextView.setText(R.string.label_not_found);
         }
     }
 

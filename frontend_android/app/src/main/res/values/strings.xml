@@ -23,6 +23,9 @@
     <string name="label_nearest_bus_stops">Nearest bus stops</string>
     <string name="label_farther_away">Farther away</string>
     <string name="label_no_upcoming_departure">No upcoming departure</string>
+    <string name="label_not_found">Not found</string>
+    <string name="label_last_updated">\u0020\u0020\u0020\u0020\u0020Last updated</string>
+    <string name="label_current_location">Current location</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -34,5 +37,6 @@
     <string name="error_passwords_do_not_match">Passwords do not match</string>
     <string name="error_parsing">There was a problem parsing API response.</string>
     <string name="error_request_time_out">The request timed out. Please try again.</string>
-    <string name="error_could_not_fetch_location">Error! Could not fetch your current location.</string>
+    <string name="error_could_not_fetch_location">Error! Could not fetch current user location.</string>
+    <string name="error_could_not_geocode_location">Error! Could not geocode current user location.</string>
 </resources>
