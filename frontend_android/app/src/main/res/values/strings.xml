@@ -20,7 +20,7 @@
     <string name="label_nav_open">Open navigation menu</string>
     <string name="label_nav_close">Close navigation menu</string>
     <string name="label_more_options">More options</string>
-    <string name="label_nearest_bus_stops">Nearest bus stops</string>
+    <string name="label_nearest_bus_stops">Nearest bus stops (\u003C5 min walk)</string>
     <string name="label_farther_away">Farther away</string>
     <string name="label_no_upcoming_departure">No upcoming departure</string>
     <string name="label_not_found">Not found</string>
