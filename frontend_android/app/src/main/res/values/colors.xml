@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#4CAF50</color>
-    <color name="primary_dark">#388E3C</color>
-    <color name="primary_light">#C8E6C9</color>
+    <color name="primary">#EEEEEE</color>
+    <color name="primary_2">#E8E8E8</color>
+    <color name="primary_dark">#B2B2B2</color>
+    <color name="primary_light">#E3ECF5</color>
     <color name="accent">#03A9F4</color>
     <color name="primary_text_light">@android:color/primary_text_light</color>
     <color name="secondary_text_light">@android:color/secondary_text_light</color>
     <color name="primary_text_dark">@android:color/primary_text_dark</color>
     <color name="secondary_text_dark">@android:color/secondary_text_dark</color>
-    <color name="background_light">#EEEEEE</color>
+    <color name="background_light">#FFFFFF</color>
     <color name="background_dark">@color/background_material_dark</color>
     <color name="divider">#B6B6B6</color>
 </resources>
