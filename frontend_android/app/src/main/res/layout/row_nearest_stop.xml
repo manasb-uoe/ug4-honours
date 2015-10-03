@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/spacing_7dp"
+    android:layout_marginRight="@dimen/spacing_7dp"
+    android:layout_marginTop="@dimen/spacing_7dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/spacing_tiny"
+        android:paddingLeft="@dimen/spacing_small"
+        android:paddingRight="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
+        >
+
+        <TextView
+            android:id="@+id/stop_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Title"
+            android:textStyle="bold"
+            android:layout_alignBottom="@+id/imageButton"
+            android:layout_alignTop="@+id/imageButton"
+            style="@style/TextAppearance.AppCompat.Body1"
+            />
+
+        <ImageButton
+            android:layout_width="@dimen/nearby_stop_more_options_button_width"
+            android:layout_height="@dimen/nearby_stop_more_options_button_height"
+            android:src="@drawable/ic_action_navigation_more_vert"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/label_more_options"
+            android:id="@+id/imageButton"
+            />
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/spacing_tiny"
+            android:paddingLeft="@dimen/spacing_small"
+            android:paddingRight="@dimen/spacing_small"
+            android:layout_below="@+id/stop_name_textview"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            >
+
+            <TextView
+                android:id="@+id/service_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginRight="@dimen/spacing_small"
+                />
+
+            <TextView
+                android:id="@+id/destination_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_marginRight="@dimen/spacing_small"
+                />
+
+            <TextView
+                android:id="@+id/time_textview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textStyle="bold"
+                android:gravity="center_vertical|right"
+                />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

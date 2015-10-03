@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -156,7 +155,8 @@ public class NearbyFragment extends Fragment {
 
         private LayoutInflater inflater;
         private final int HEADING_VIEW_TYPE = 0;
-        private final int STOP_VIEW_TYPE = 1;
+        private final int NEAREST_STOP_VIEW_TYPE = 1;
+        private final int FARTHER_STOP_VIEW_TYPE = 2;
         private int nearestStopCount;
 
         @Override
@@ -167,21 +167,23 @@ public class NearbyFragment extends Fragment {
 
             if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
+            } else if (viewType == NEAREST_STOP_VIEW_TYPE) {
+                return new NearestStopViewHolder(inflater.inflate(R.layout.row_nearest_stop, parent, false));
             } else {
-                return new NearbyStopViewHolder(inflater.inflate(R.layout.row_nearby_stop, parent, false));
+                return new FartherStopViewHolder(inflater.inflate(R.layout.row_farther_stop, parent, false));
             }
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (getItemViewType(position) == HEADING_VIEW_TYPE) {
-                ((HeadingViewHolder) holder).bindItem(position);
+            int viewType = getItemViewType(position);
+
+            if (viewType == HEADING_VIEW_TYPE) {
+                ((HeadingViewHolder) holder).bindItem((String) getItem(position));
+            } else if (viewType == NEAREST_STOP_VIEW_TYPE) {
+                ((NearestStopViewHolder) holder).bindItem((Stop) getItem(position));
             } else {
-                if (position <= nearestStopCount) {
-                    ((NearbyStopViewHolder) holder).bindItem(nearbyStops.get(position-1));
-                } else {
-                    ((NearbyStopViewHolder) holder).bindItem(nearbyStops.get(position-2));
-                }
+                ((FartherStopViewHolder) holder).bindItem((Stop) getItem(position));
             }
         }
 
@@ -192,10 +194,30 @@ public class NearbyFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0 || position == nearestStopCount + 1) {
+            Object item = getItem(position);
+
+            if (item instanceof String) {
                 return HEADING_VIEW_TYPE;
             } else {
-                return STOP_VIEW_TYPE;
+                if (((Stop) item).getDistanceAway() < NEAR_DISTANCE) {
+                    return NEAREST_STOP_VIEW_TYPE;
+                } else {
+                    return FARTHER_STOP_VIEW_TYPE;
+                }
+            }
+        }
+
+        private Object getItem(int position) {
+            if (position == 0) {
+                return getString(R.string.label_nearest_bus_stops);
+            } else if (position == nearestStopCount + 1) {
+                return getString(R.string.label_farther_away);
+            } else {
+                if (position < nearestStopCount) {
+                    return nearbyStops.get(position - 1);
+                } else {
+                    return nearbyStops.get(position-2);
+                }
             }
         }
 
@@ -213,41 +235,54 @@ public class NearbyFragment extends Fragment {
             this.notifyDataSetChanged();
         }
 
-        private class NearbyStopViewHolder extends RecyclerView.ViewHolder {
+        private class NearestStopViewHolder extends RecyclerView.ViewHolder {
 
             private TextView stopNameTextView;
-            private LinearLayout departuresContainer;
+            private TextView serviceNameTextView;
+            private TextView destinationTextView;
+            private TextView timeTextView;
 
-            public NearbyStopViewHolder(View itemView) {
+            public NearestStopViewHolder(View itemView) {
                 super(itemView);
 
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                departuresContainer = (LinearLayout) itemView.findViewById(R.id.departures_container);
+                serviceNameTextView =
+                        (TextView) itemView.findViewById(R.id.service_name_textview);
+                destinationTextView =
+                        (TextView) itemView.findViewById(R.id.destination_textview);
+                timeTextView =
+                        (TextView) itemView.findViewById(R.id.time_textview);
             }
 
             public void bindItem(Stop stop) {
                 stopNameTextView.setText(stop.getName());
 
-                // add upcoming departures to departures container
-                departuresContainer.removeAllViews();
-
-                for (Departure departure : stop.getDepartures()) {
-                    View departureView =
-                            inflater.inflate(R.layout.row_departure, departuresContainer, false);
-
-                    TextView serviceNameTextView =
-                            (TextView) departureView.findViewById(R.id.service_name_textview);
-                    TextView destinationTextView =
-                            (TextView) departureView.findViewById(R.id.destination_textview);
-                    TextView timeTextView =
-                            (TextView) departureView.findViewById(R.id.time_textview);
+                if (stop.getDepartures().size() > 0) {
+                    Departure departure = stop.getDepartures().get(0);
 
                     serviceNameTextView.setText(departure.getServiceName());
                     destinationTextView.setText(departure.getDestination());
                     timeTextView.setText(departure.getTime());
-
-                    departuresContainer.addView(departureView);
+                } else {
+                    serviceNameTextView.setText(getString(R.string.label_no_upcoming_departure));
+                    destinationTextView.setText("");
+                    timeTextView.setText("");
                 }
+            }
+        }
+
+        private class FartherStopViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextView;
+
+            public FartherStopViewHolder(View itemView) {
+                super(itemView);
+
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+            }
+
+            public void bindItem(Stop stop) {
+                stopNameTextView.setText(stop.getName());
             }
         }
 
@@ -261,12 +296,8 @@ public class NearbyFragment extends Fragment {
                 headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
             }
 
-            public void bindItem(int position) {
-                if (position == 0) {
-                    headingTextView.setText(getString(R.string.label_nearest_bus_stops));
-                } else {
-                    headingTextView.setText(getString(R.string.label_farther_away));
-                }
+            public void bindItem(String heading) {
+                headingTextView.setText(heading);
             }
         }
     }
