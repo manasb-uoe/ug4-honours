@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,14 +33,14 @@ public class NearbyFragment extends Fragment {
     public static final String TAG = NearbyFragment.class.getSimpleName();
     private RecyclerView nearbyStopsRecyclerView;
     private NearbyStopsAdapter nearbyStopsAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private List<Stop> nearbyStops = new ArrayList<>();
 
     // nearby stops api endpoint params
-    private static final int NEARBY_STOPS_LIMIT = 15;
-    private static final int NEAREST_STOPS_LIMIT = 3;
-    private static final int NEAREST_STOPS_DEPARTURES_LIMIT = 3;
+    private static final int NEARBY_STOPS_LIMIT = 25;
     private static final boolean ONLY_INCLUDE_UPCOMING_DEPARTURES = true;
-    private static final int MAX_DISTANCE = 1;
+    private static final int MAX_DISTANCE = 3;
+    private static final double NEAR_DISTANCE = 0.3;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +58,22 @@ public class NearbyFragment extends Fragment {
          */
 
         nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+
+        /**
+         * Setup swipe refresh layout
+         */
+
+        swipeRefreshLayout.setColorSchemeResources(R.color.accent);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                loadNearbyStops();
+            }
+        });
+
+
 
         /**
          * Setup nearby stops recycler view
@@ -72,6 +89,8 @@ public class NearbyFragment extends Fragment {
 
         if (nearbyStops.size() == 0) {
             loadNearbyStops();
+        } else {
+            nearbyStopsAdapter.notifyNearbyStopsChanged();
         }
 
         return view;
@@ -86,13 +105,15 @@ public class NearbyFragment extends Fragment {
     }
 
     private void loadNearbyStops() {
+        setRefreshIndicatorVisiblity(true);
+
         Location lastUserLocation =
                 LocationServices.FusedLocationApi.getLastLocation(App.getGoogleApiClient());
 
         if (lastUserLocation != null) {
-            StopService.getNearbyStops(lastUserLocation.getLatitude(), lastUserLocation.getLongitude(),
-                    NEARBY_STOPS_LIMIT, NEAREST_STOPS_LIMIT, NEAREST_STOPS_DEPARTURES_LIMIT,
-                    ONLY_INCLUDE_UPCOMING_DEPARTURES, MAX_DISTANCE,
+            StopService.getNearbyStops(lastUserLocation.getLatitude(),
+                    lastUserLocation.getLongitude(), MAX_DISTANCE, NEAR_DISTANCE,
+                    ONLY_INCLUDE_UPCOMING_DEPARTURES, NEARBY_STOPS_LIMIT,
                     new Callback<List<Stop>>() {
 
                         @Override
@@ -100,13 +121,17 @@ public class NearbyFragment extends Fragment {
                             nearbyStops = data;
 
                             if (getActivity() != null) {
-                                nearbyStopsAdapter.notifyDataSetChanged();
+                                setRefreshIndicatorVisiblity(false);
+
+                                nearbyStopsAdapter.notifyNearbyStopsChanged();
                             }
                         }
 
                         @Override
                         public void onFailure(String message) {
                             if (getActivity() != null) {
+                                setRefreshIndicatorVisiblity(false);
+
                                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -117,11 +142,22 @@ public class NearbyFragment extends Fragment {
         }
     }
 
+    private void setRefreshIndicatorVisiblity(final boolean visiblity) {
+        swipeRefreshLayout.post(new Runnable() {
+
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(visiblity);
+            }
+        });
+    }
+
     private class NearbyStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private LayoutInflater inflater;
         private final int HEADING_VIEW_TYPE = 0;
         private final int STOP_VIEW_TYPE = 1;
+        private int nearestStopCount;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -141,7 +177,7 @@ public class NearbyFragment extends Fragment {
             if (getItemViewType(position) == HEADING_VIEW_TYPE) {
                 ((HeadingViewHolder) holder).bindItem(position);
             } else {
-                if (position <= NEAREST_STOPS_LIMIT) {
+                if (position <= nearestStopCount) {
                     ((NearbyStopViewHolder) holder).bindItem(nearbyStops.get(position-1));
                 } else {
                     ((NearbyStopViewHolder) holder).bindItem(nearbyStops.get(position-2));
@@ -156,11 +192,25 @@ public class NearbyFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0 || position == NEAREST_STOPS_LIMIT + 1) {
+            if (position == 0 || position == nearestStopCount + 1) {
                 return HEADING_VIEW_TYPE;
             } else {
                 return STOP_VIEW_TYPE;
             }
+        }
+
+        private void notifyNearbyStopsChanged() {
+            // recalculate nearest stops count so that headings appear in the correct positions
+            nearestStopCount = 0;
+            for (Stop stop : nearbyStops) {
+                if (stop.getDistanceAway() < NEAR_DISTANCE) {
+                    nearestStopCount++;
+                } else {
+                    break;
+                }
+            }
+
+            this.notifyDataSetChanged();
         }
 
         private class NearbyStopViewHolder extends RecyclerView.ViewHolder {

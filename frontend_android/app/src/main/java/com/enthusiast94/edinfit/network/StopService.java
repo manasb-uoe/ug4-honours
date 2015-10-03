@@ -25,19 +25,17 @@ public class StopService extends BaseService {
 
     public static final String TAG = StopService.class.getSimpleName();
 
-    public static void getNearbyStops(Double latitude, Double longitude, int limit,
-                                      int nearestStopsLimit, int nearestStopsDeparturesLimit,
-                                      boolean onlyIncludeUpcomingDepartures, int maxDistance,
-                                      final Callback<List<Stop>> callback) {
+    public static void getNearbyStops(Double latitude, Double longitude, int maxDistance,
+                                      Double nearDistance, boolean onlyIncludeUpcomingDepartures,
+                                      int limit, final Callback<List<Stop>> callback) {
 
         RequestParams requestParams = new RequestParams();
         requestParams.put("latitude", latitude);
         requestParams.put("longitude", longitude);
         requestParams.put("limit", limit);
-        requestParams.put("nearest_stops_limit", nearestStopsLimit);
-        requestParams.put("nearest_stops_departures_limit", nearestStopsDeparturesLimit);
         requestParams.put("only_include_upcoming_departures", onlyIncludeUpcomingDepartures);
         requestParams.put("max_distance", maxDistance);
+        requestParams.put("near_distance", nearDistance);
 
         AsyncHttpClient client = getAsyncHttpClient(true);
         client.get(API_BASE + "/stops/nearby", requestParams, new JsonHttpResponseHandler() {

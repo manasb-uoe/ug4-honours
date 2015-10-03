@@ -13,9 +13,11 @@ public class Stop {
     private List<String> destinations;
     private List<String> services;
     private List<Departure> departures;
+    private Double distanceAway;
 
     public Stop(String id, String name, List<Double> location, String serviceType,
-                List<String> destinations, List<String> services, List<Departure> departures) {
+                List<String> destinations, List<String> services, List<Departure> departures,
+                Double distanceAway) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -23,6 +25,7 @@ public class Stop {
         this.services = services;
         this.serviceType = serviceType;
         this.departures = departures;
+        this.distanceAway = distanceAway;
     }
 
     public String getId() {
@@ -51,5 +54,9 @@ public class Stop {
 
     public List<Departure> getDepartures() {
         return departures;
+    }
+
+    public Double getDistanceAway() {
+        return distanceAway;
     }
 }
