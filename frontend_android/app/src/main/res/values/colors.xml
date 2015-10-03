@@ -11,5 +11,5 @@
     <color name="secondary_text_dark">@android:color/secondary_text_dark</color>
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">@color/background_material_dark</color>
-    <color name="divider">#B6B6B6</color>
+    <color name="divider">#E8E8E8</color>
 </resources>

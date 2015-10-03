@@ -1,89 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
+
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/spacing_7dp"
-    android:layout_marginRight="@dimen/spacing_7dp"
-    android:layout_marginTop="@dimen/spacing_7dp"
-    android:foreground="?attr/selectableItemBackground"
+    android:paddingTop="@dimen/spacing_tiny"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_small"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
     >
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <ImageView
+        android:id="@+id/bus_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_maps_directions_bus"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="@dimen/spacing_7dp"
+        />
+
+    <TextView
+        android:id="@+id/stop_name_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Title"
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/bus_imageview"
+        android:layout_alignBottom="@+id/bus_imageview"
+        android:layout_toLeftOf="@+id/imageButton"
+        android:layout_toStartOf="@+id/imageButton"
+        />
+
+    <ImageButton
+        android:layout_width="@dimen/nearby_stop_more_options_button_width"
+        android:layout_height="@dimen/nearby_stop_more_options_button_height"
+        android:src="@drawable/ic_action_navigation_more_vert"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:background="?attr/selectableItemBackground"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/label_more_options"
+        android:id="@+id/imageButton"
+        />
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
+        android:layout_below="@+id/stop_name_textview"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        />
+
+    <LinearLayout
+        android:id="@+id/departure_container"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/spacing_tiny"
-        android:paddingLeft="@dimen/spacing_small"
-        android:paddingRight="@dimen/spacing_small"
-        android:paddingBottom="@dimen/spacing_small"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        android:layout_below="@+id/divider1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
         >
 
         <TextView
-            android:id="@+id/stop_name_textview"
+            android:id="@+id/service_name_textview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="Title"
-            android:textStyle="bold"
-            android:layout_alignBottom="@+id/imageButton"
-            android:layout_alignTop="@+id/imageButton"
-            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_marginRight="@dimen/spacing_small"
             />
 
-        <ImageButton
-            android:layout_width="@dimen/nearby_stop_more_options_button_width"
-            android:layout_height="@dimen/nearby_stop_more_options_button_height"
-            android:src="@drawable/ic_action_navigation_more_vert"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:background="?attr/selectableItemBackground"
-            android:layout_alignParentEnd="true"
-            android:contentDescription="@string/label_more_options"
-            android:id="@+id/imageButton"
+        <TextView
+            android:id="@+id/destination_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginRight="@dimen/spacing_small"
             />
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="horizontal"
+        <TextView
+            android:id="@+id/time_textview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/spacing_tiny"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:layout_below="@+id/stop_name_textview"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentRight="true"
-            >
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:gravity="center_vertical|right"
+            />
 
-            <TextView
-                android:id="@+id/service_name_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:layout_marginRight="@dimen/spacing_small"
-                />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/destination_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:layout_marginRight="@dimen/spacing_small"
-                />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
+        android:layout_below="@+id/departure_container"
+        />
 
-            <TextView
-                android:id="@+id/time_textview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textStyle="bold"
-                android:gravity="center_vertical|right"
-                />
+</RelativeLayout>
 
-        </LinearLayout>
-
-    </RelativeLayout>
-
-</android.support.v7.widget.CardView>
