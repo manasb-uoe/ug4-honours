@@ -155,30 +155,19 @@ stopSchema.methods.updateDepartures = function (callback) {
     });
 };
 
-stopSchema.methods.filterDepartures = function (day, onlyInlcudeUpcomingDepartures, callback) {
-    var now = moment();
-    var thirtyMinutesLater = moment().add(30, "minutes");
+stopSchema.methods.filterDepartures = function (day, time, callback) {
+    time = time ? moment(time, "HH:mm") : undefined;
 
     this.departures = this.departures.filter(function (departure) {
         var doesDayMatch = departure.day == day;
 
         var shouldKeep = false;
 
-        if (onlyInlcudeUpcomingDepartures) {
+        if (time) {
             var due = moment(departure.time, "HH:mm");
-            var isUpcoming = due >= now;
+            var isUpcoming = due >= time;
 
             shouldKeep = doesDayMatch && isUpcoming;
-
-            // humanize timestamp if its <= 30 minutes away
-            if (shouldKeep && due <= (thirtyMinutesLater)) {
-                var minutesToGo = moment.duration(due.diff(now)).get("minutes");
-                if (minutesToGo == 0) {
-                    departure.time = "due";
-                } else {
-                    departure.time = minutesToGo + " min";
-                }
-            }
         } else {
             shouldKeep = doesDayMatch;
         }

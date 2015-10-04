@@ -10,7 +10,6 @@ var authenticationMiddleware = require("../middleware/authentication");
 
 var router = express.Router();
 
-
 /**
  * Get nearby stops based on the provided geographical coordinates.
  */
@@ -21,7 +20,7 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
 
     var coords = [req.query.longitude, req.query.latitude];
     var limit = req.query.limit || 25;
-    var onlyIncludeUpcomingDepartures = req.query.only_include_upcoming_departures === "true";
+    var time = req.query.time;
     var maxDistance = req.query.max_distance || 3; // km
     // we need to convert the distance to radians the radius of Earth is approximately 6371 kilometers
     maxDistance = maxDistance / 6371; // radians
@@ -65,7 +64,7 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
 
                             // filter out departures that do not belong to provided day and limit them using
                             // the provided limit
-                            stop.filterDepartures(helpers.getTodayApiCode(), onlyIncludeUpcomingDepartures, function () {
+                            stop.filterDepartures(helpers.getDayCode(), time, function () {
 
                                 return callback();
                             });

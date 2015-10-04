@@ -34,12 +34,15 @@ module.exports.getApiJson = function(path, onResult) {
     });
 };
 
-module.exports.getTodayApiCode = function () {
-    var day = moment().format("dddd");
-    var weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+module.exports.getDayCode = function (day) {
+    // set day to today if it is undefined
+    day = day || moment().format("dddd").toLowerCase();
+
+    var weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
+
     if (weekdays.indexOf(day) > -1) {
         return 0;
-    } else if (day == "Saturday") {
+    } else if (day == "saturday") {
         return 5;
     } else {
         return 6;
