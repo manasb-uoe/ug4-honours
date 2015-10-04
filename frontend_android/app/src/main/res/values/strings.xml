@@ -31,7 +31,9 @@
     <string name="label_member_since">Member since</string>
     <string name="label_departures">Departures</string>
     <string name="label_map">Map</string>
-
+    <string name="label_weekday">Weekday</string>
+    <string name="label_saturday">Saturday</string>
+    <string name="label_sunday">Sunday</string>
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
 

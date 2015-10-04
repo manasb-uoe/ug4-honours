@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
@@ -89,7 +90,7 @@ public class StopActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0: return new StopDeparturesFragment();
+                case 0: return StopDeparturesFragment.newInstance(stopId);
                 case 1: return new StopMapFragment();
                 default: return null;
             }

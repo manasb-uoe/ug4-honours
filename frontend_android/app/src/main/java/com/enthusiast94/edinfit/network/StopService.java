@@ -25,6 +25,33 @@ public class StopService extends BaseService {
 
     public static final String TAG = StopService.class.getSimpleName();
 
+    public static void getStop(String stopId,  final Callback<Stop> callback) {
+        RequestParams requestParams = new RequestParams();
+
+        AsyncHttpClient client = getAsyncHttpClient(true);
+        client.get(API_BASE + "/stops/" + stopId, requestParams, new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    Gson gson = new Gson();
+                    Stop stop = gson.fromJson(response.getJSONObject("data").toString(), Stop.class);
+
+                    if (callback != null) callback.onSuccess(stop);
+
+                } catch (JSONException e) {
+                    if (callback != null)
+                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                onFailureCommon(statusCode, errorResponse, callback);
+            }
+        });
+    }
+
     public static void getNearbyStops(Double latitude, Double longitude, int maxDistance,
                                       Double nearDistance, String time,
                                       int limit, final Callback<List<Stop>> callback) {
