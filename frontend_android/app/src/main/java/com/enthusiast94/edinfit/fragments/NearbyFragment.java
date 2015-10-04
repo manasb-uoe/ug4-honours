@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.fragments;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
@@ -275,8 +277,10 @@ public class NearbyFragment extends Fragment {
             this.notifyDataSetChanged();
         }
 
-        private class NearestStopViewHolder extends RecyclerView.ViewHolder {
+        private class NearestStopViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener{
 
+            private Stop stop;
             private TextView stopNameTextView;
             private TextView serviceNameTextView;
             private TextView destinationTextView;
@@ -285,6 +289,7 @@ public class NearbyFragment extends Fragment {
             public NearestStopViewHolder(View itemView) {
                 super(itemView);
 
+                // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 serviceNameTextView =
                         (TextView) itemView.findViewById(R.id.service_name_textview);
@@ -292,9 +297,14 @@ public class NearbyFragment extends Fragment {
                         (TextView) itemView.findViewById(R.id.destination_textview);
                 timeTextView =
                         (TextView) itemView.findViewById(R.id.time_textview);
+
+                // bind event listeners
+                itemView.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
+                this.stop = stop;
+
                 stopNameTextView.setText(stop.getName());
 
                 if (stop.getDepartures().size() > 0) {
@@ -309,20 +319,42 @@ public class NearbyFragment extends Fragment {
                     timeTextView.setText("");
                 }
             }
+
+            @Override
+            public void onClick(View v) {
+                if (stop != null) {
+                    startStopActivity(stop);
+                }
+            }
         }
 
-        private class FartherStopViewHolder extends RecyclerView.ViewHolder {
+        private class FartherStopViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener {
 
             private TextView stopNameTextView;
+            private Stop stop;
 
             public FartherStopViewHolder(View itemView) {
                 super(itemView);
 
+                // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+
+                // bind event listeners
+                itemView.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
+                this.stop = stop;
+
                 stopNameTextView.setText(stop.getName());
+            }
+
+            @Override
+            public void onClick(View v) {
+                if (stop != null) {
+                    startStopActivity(stop);
+                }
             }
         }
 
@@ -339,6 +371,13 @@ public class NearbyFragment extends Fragment {
             public void bindItem(String heading) {
                 headingTextView.setText(heading);
             }
+        }
+
+        private void startStopActivity(Stop stop) {
+            Intent startActivityIntent = new Intent(getActivity(), StopActivity.class);
+            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
+            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+            startActivity(startActivityIntent);
         }
     }
 }
