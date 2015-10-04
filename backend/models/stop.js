@@ -68,14 +68,26 @@ stopSchema.statics.upsertAll = function (cbA) {
                         Stop.findOneAndUpdate({stopId: stopJson.stopId}, stopJson, function (err, updatedStop) {
                             if (err) return cbB(err);
 
-                            if (updatedStop.departures.length > 0) {
-                                updatedStop.updateDepartures(function (err) {
+                            if (updatedStop) {
+                               if (updatedStop.departures.length > 0) {
+                                   updatedStop.updateDepartures(function (err) {
+                                       if (err) return cbB(err);
+
+                                       return cbB();
+                                   });
+                               } else {
+                                   return cbB();
+                               }
+                            } else {
+                                // if there's a stop that doesn't already exist in db, add it
+                                console.log("Inserting new stop: " + stopJson.stopId);
+
+                                var stop = new Stop(stopJson);
+                                stop.save(function (err) {
                                     if (err) return cbB(err);
 
                                     return cbB();
                                 });
-                            } else {
-                                return cbB();
                             }
                         });
                     }
