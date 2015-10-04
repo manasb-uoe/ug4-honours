@@ -53,10 +53,22 @@ serviceSchema.statics.upsertAll = function (cbA) {
                             return cbB();
                         });
                     } else {
-                        Service.findOneAndUpdate({name: serviceJson.name}, serviceJson, function (err) {
+                        Service.findOneAndUpdate({name: serviceJson.name}, serviceJson, function (err, updatedService) {
                             if (err) return cbB(err);
 
-                            return cbB();
+                            // if there's a service that doesn't already exist in db, add it
+                            if (!updatedService) {
+                                console.log("Inserting new service: " + serviceJson.name);
+
+                                var service = new Service(serviceJson);
+                                service.save(function (err) {
+                                    if (err) return cbB(err);
+
+                                    return cbB();
+                                });
+                            } else {
+                                return cbB();
+                            }
                         });
                     }
                 },
