@@ -159,20 +159,19 @@ stopSchema.methods.filterDepartures = function (day, time, callback) {
     time = time ? moment(time, "HH:mm") : undefined;
 
     this.departures = this.departures.filter(function (departure) {
-        var doesDayMatch = departure.day == day;
+        var doesDayMatch = true;
+        var isUpcoming = true;
 
-        var shouldKeep = false;
+        if (day) {
+            doesDayMatch = departure.day == day;
+        }
 
         if (time) {
             var due = moment(departure.time, "HH:mm");
-            var isUpcoming = due >= time;
-
-            shouldKeep = doesDayMatch && isUpcoming;
-        } else {
-            shouldKeep = doesDayMatch;
+            isUpcoming = due >= time;
         }
 
-        return shouldKeep;
+        return doesDayMatch && isUpcoming;
     });
 
     return callback();
