@@ -87,7 +87,6 @@
             android:id="@+id/nearby_stops_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="@dimen/spacing_small"
             android:clipToPadding="false"
             android:scrollbars="vertical"
             />
