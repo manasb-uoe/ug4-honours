@@ -29,6 +29,8 @@
     <string name="label_last_updated">\u0020\u0020\u0020\u0020\u0020Last updated</string>
     <string name="label_current_location">Current location</string>
     <string name="label_member_since">Member since</string>
+    <string name="label_departures">Departures</string>
+    <string name="label_map">Map</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
