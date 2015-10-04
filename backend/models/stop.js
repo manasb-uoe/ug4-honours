@@ -131,7 +131,14 @@ stopSchema.methods.updateDepartures = function (callback) {
         self.update({departures: timetableJson.departures}, function (err) {
             if (err) return callback(err);
 
-            return callback();
+            // need to query again in order to return the updated departures
+            // we could simply have returned timetableJson.departures, but there could be some pre processing
+            // of departures before saving, so we must return the actual departures subdocument
+            mongoose.model("Stop").findOne({stopId: self.stopId}, function (err, stop) {
+                if (err) return callback(err);
+
+                return callback(null, stop.departures);
+            });
         });
     });
 };

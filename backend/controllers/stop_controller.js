@@ -49,8 +49,10 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
                         async.series([
                             function (callbackA) {
                                 if (stop.departures.length == 0) {
-                                    stop.updateDepartures(function (err) {
+                                    stop.updateDepartures(function (err, departures) {
                                         if (err) return callbackA(err);
+
+                                        stop.departures = departures;
 
                                         return callbackA();
                                     });
