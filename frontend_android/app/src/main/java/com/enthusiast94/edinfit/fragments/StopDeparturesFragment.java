@@ -3,14 +3,13 @@ package com.enthusiast94.edinfit.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,11 +18,14 @@ import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.utils.Helpers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 /**
  * Created by manas on 04-10-2015.
@@ -36,7 +38,10 @@ public class StopDeparturesFragment extends Fragment {
     private RecyclerView departuresRecyclerView;
     private DeparturesAdapter departuresAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private int selectedDay = 0;
+
+    // default values for day and time
+    private String selectedDay = Helpers.getCurrentDay();
+    private String selectedTime = Helpers.getCurrentTime24h();
 
     public static StopDeparturesFragment newInstance(String stopId) {
         StopDeparturesFragment instance = new StopDeparturesFragment();
@@ -156,7 +161,7 @@ public class StopDeparturesFragment extends Fragment {
             }
 
             if (viewType == DAY_SELECTOR_TYPE) {
-                return new DaySelector(inflater.inflate(R.layout.row_day_selector, parent, false));
+                return new TimeSelectorViewHolder(inflater.inflate(R.layout.row_time_selector, parent, false));
             } else {
                 return new DepartureViewHolder(inflater.inflate(R.layout.row_departure, parent, false));
             }
@@ -167,7 +172,7 @@ public class StopDeparturesFragment extends Fragment {
             int viewType = getItemViewType(position);
 
             if (viewType == DAY_SELECTOR_TYPE) {
-                ((DaySelector) holder).bindItem(selectedDay);
+                ((TimeSelectorViewHolder) holder).bindItem();
             } else {
                 ((DepartureViewHolder) holder).bindItem((Departure) getItem(position));
             }
@@ -198,9 +203,18 @@ public class StopDeparturesFragment extends Fragment {
         private void notifyDeparturesChanged() {
             departures.clear();
 
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+
             for (Departure departure : stop.getDepartures()) {
-                if (departure.getDay() == selectedDay) {
-                    departures.add(departure);
+                try {
+                    Date selected = simpleDateFormat.parse(selectedTime);
+                    Date due = simpleDateFormat.parse(departure.getTime());
+
+                    if (departure.getDay() == Helpers.getDayCode(selectedDay) && due.after(selected)) {
+                        departures.add(departure);
+                    }
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -244,42 +258,29 @@ public class StopDeparturesFragment extends Fragment {
             }
         }
 
-        private class DaySelector extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private class TimeSelectorViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-            private Map<Button, Integer> buttonMap;
+            private TextView timeTextView;
+            private ImageButton selectTimeButton;
 
-            public DaySelector(View itemView) {
+            public TimeSelectorViewHolder(View itemView) {
                 super(itemView);
 
-                Button weekdayButton = (Button) itemView.findViewById(R.id.weekday_button);
-                Button saturdayButton = (Button) itemView.findViewById(R.id.saturday_button);
-                Button sundayButton = (Button) itemView.findViewById(R.id.sunday_button);
-
-                buttonMap = new HashMap<>();
-                buttonMap.put(weekdayButton, 0);
-                buttonMap.put(saturdayButton, 5);
-                buttonMap.put(sundayButton, 6);
+                // find views
+                timeTextView = (TextView) itemView.findViewById(R.id.time_textview);
+                selectTimeButton = (ImageButton) itemView.findViewById(R.id.select_time_button);
 
                 // bind event listeners
-                weekdayButton.setOnClickListener(this);
-                saturdayButton.setOnClickListener(this);
-                sundayButton.setOnClickListener(this);
+                selectTimeButton.setOnClickListener(this);
             }
 
-            public void bindItem(int selectedDat) {
-                for (Map.Entry<Button, Integer> entry : buttonMap.entrySet()) {
-                    if (entry.getValue() == selectedDay) {
-                        entry.getKey().setTextColor(ContextCompat.getColor(getActivity(), R.color.accent));
-                    } else {
-                        entry.getKey().setTextColor(ContextCompat.getColor(getActivity(), R.color.secondary_text_light_2));
-                    }
-                }
+            public void bindItem() {
+                timeTextView.setText(selectedDay + ", " + selectedTime);
             }
 
             @Override
             public void onClick(View v) {
-                selectedDay = buttonMap.get(v);
-                bindItem(selectedDay);
+                bindItem();
                 notifyDeparturesChanged();
             }
         }

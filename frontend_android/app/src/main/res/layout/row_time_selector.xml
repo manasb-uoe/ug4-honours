@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary_2"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_toLeftOf="@+id/select_time_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignBottom="@+id/select_time_button"
+        android:layout_alignTop="@+id/select_time_button"
+        android:gravity="center_vertical"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_showing_departures_for"
+            />
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/spacing_small"
+            android:textColor="@color/primary_text_light"
+            />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/select_time_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_device_access_time"
+        android:background="?attr/selectableItemBackground"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        />
+
+</RelativeLayout>

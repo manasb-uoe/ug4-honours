@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.location.Location;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Patterns;
@@ -12,7 +13,9 @@ import com.enthusiast94.edinfit.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by manas on 26-09-2015.
@@ -69,6 +72,29 @@ public class Helpers {
 
     public static String getCurrentTime24h() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+        return sdf.format(new Date());
+    }
+
+    public static int getDayCode(String day) {
+        day = day.toLowerCase();
+
+        switch (day) {
+            case "monday":
+            case "tuesday":
+            case "wednesday":
+            case "thursday":
+            case "friday":
+                return 0;
+            case "saturday":
+                return 5;
+            case "sunday":
+                return 6;
+            default: throw new IllegalArgumentException("Invalid day.");
+        }
+    }
+
+    public static String getCurrentDay() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.UK);
         return sdf.format(new Date());
     }
 }
