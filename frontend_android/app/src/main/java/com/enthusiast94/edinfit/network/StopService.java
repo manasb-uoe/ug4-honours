@@ -26,14 +26,14 @@ public class StopService extends BaseService {
     public static final String TAG = StopService.class.getSimpleName();
 
     public static void getNearbyStops(Double latitude, Double longitude, int maxDistance,
-                                      Double nearDistance, boolean onlyIncludeUpcomingDepartures,
+                                      Double nearDistance, String time,
                                       int limit, final Callback<List<Stop>> callback) {
 
         RequestParams requestParams = new RequestParams();
         requestParams.put("latitude", latitude);
         requestParams.put("longitude", longitude);
         requestParams.put("limit", limit);
-        requestParams.put("only_include_upcoming_departures", onlyIncludeUpcomingDepartures);
+        requestParams.put("time", time);
         requestParams.put("max_distance", maxDistance);
         requestParams.put("near_distance", nearDistance);
 

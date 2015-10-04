@@ -10,6 +10,10 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.enthusiast94.edinfit.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by manas on 26-09-2015.
  */
@@ -61,5 +65,10 @@ public class Helpers {
 
     public static void clearPrefs(Context context) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().apply();
+    }
+
+    public static String getCurrentTime24h() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+        return sdf.format(new Date());
     }
 }

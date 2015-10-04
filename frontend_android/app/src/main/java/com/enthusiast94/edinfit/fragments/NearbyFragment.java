@@ -22,6 +22,7 @@ import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -133,10 +134,9 @@ public class NearbyFragment extends Fragment {
         Location lastKnownUserLocation = App.getLastKnownUserLocation();
 
         if (lastKnownUserLocation != null) {
-            StopService.getNearbyStops(lastKnownUserLocation.getLatitude(),
-                    lastKnownUserLocation.getLongitude(), MAX_DISTANCE, NEAR_DISTANCE,
-                    ONLY_INCLUDE_UPCOMING_DEPARTURES, NEARBY_STOPS_LIMIT,
-                    new Callback<List<Stop>>() {
+            StopService.getNearbyStops(55.94252110000001,
+                    -3.2010698, MAX_DISTANCE, NEAR_DISTANCE, Helpers.getCurrentTime24h(),
+                    NEARBY_STOPS_LIMIT, new Callback<List<Stop>>() {
 
                         @Override
                         public void onSuccess(List<Stop> data) {
