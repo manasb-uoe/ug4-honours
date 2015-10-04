@@ -84,4 +84,25 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
         });
 });
 
+
+/**
+ * Get stop corresponding to provided stop_id
+ */
+
+router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
+    var stopId = req.params.stop_id;
+    var time = req.query.time;
+
+    Stop.findOne({stopId: stopId}, function (err, stop) {
+        if (!stop) return res.sendError(404, "Now stop with id '" + stopId +"'");
+
+        if (err) return res.sendError(500, err.message);
+
+        // filter out departures that do not belong to provided day
+        stop.filterDepartures(null, time, function () {
+            return res.sendOk(stop);
+        });
+    });
+});
+
 module.exports = router;
