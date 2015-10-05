@@ -1,5 +1,7 @@
 package com.enthusiast94.edinfit.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -280,8 +283,61 @@ public class StopDeparturesFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                bindItem();
-                notifyDeparturesChanged();
+                //noinspection StatementWithEmptyBody
+                if (v.getId() == R.id.select_time_button) {
+                   showTimePickerDialog();
+                }
+            }
+
+            private void showTimePickerDialog() {
+                View dialogView = inflater.inflate(R.layout.dialog_time_picker, null);
+
+                // find views
+                final NumberPicker dayPicker = (NumberPicker) dialogView.findViewById(R.id.day_picker);
+                final NumberPicker hourPicker = (NumberPicker) dialogView.findViewById(R.id.hour_picker);
+                final NumberPicker minutePicker = (NumberPicker) dialogView.findViewById(R.id.minute_picker);
+
+                // set value ranges and current values for pickers
+                final String[] daysOfTheWeek = getResources().getStringArray(R.array.days_of_the_week);
+                dayPicker.setMinValue(0);
+                dayPicker.setMaxValue(daysOfTheWeek.length - 1);
+                dayPicker.setDisplayedValues(daysOfTheWeek);
+                for (int i=0; i<daysOfTheWeek.length; i++) {
+                    if (daysOfTheWeek[i].equals(selectedDay)) {
+                        dayPicker.setValue(i);
+                    }
+                }
+
+                hourPicker.setMinValue(0);
+                hourPicker.setMaxValue(23);
+                hourPicker.setValue(Integer.parseInt(selectedTime.substring(0,
+                        selectedTime.indexOf(":"))));
+
+                minutePicker.setMinValue(0);
+                minutePicker.setMaxValue(59);
+                minutePicker.setValue(Integer.parseInt(selectedTime.substring(
+                        selectedTime.indexOf(":") + 1, selectedTime.length())));
+
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle("Select time")
+                        .setView(dialogView)
+                        .setPositiveButton("Set", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectedDay = daysOfTheWeek[dayPicker.getValue()];
+                                selectedTime = hourPicker.getValue() + ":" +
+                                        minutePicker.getValue();
+
+                                departuresAdapter.notifyDeparturesChanged();
+
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create();
+
+                dialog.show();
             }
         }
     }
