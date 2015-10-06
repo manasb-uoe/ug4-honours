@@ -33,9 +33,13 @@ serviceSchema.methods.toJSON = function() {
     // delete version key
     delete obj.__v;
 
-    // delete route id
+    // delete route and point id
     obj.routes.forEach(function (route) {
         delete route._id;
+
+        route.points.forEach(function (point) {
+            delete point._id;
+        });
     });
 
     return obj;
