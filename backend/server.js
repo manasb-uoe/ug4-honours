@@ -8,9 +8,10 @@ var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var config = require("./config");
 var responsesMiddleware = require("./middleware/responses");
-var userRoutes = require("./controllers/user_controller");
-var authRoutes = require("./controllers/auth_controller");
-var stopRoutes = require("./controllers/stop_controller");
+var userRouter = require("./controllers/user_controller");
+var authRouter = require("./controllers/auth_controller");
+var stopRouter = require("./controllers/stop_controller");
+var serviceRouter = require("./controllers/service_controller");
 var errorHandlerMiddleware = require("./middleware/404_error_handler");
 
 
@@ -43,9 +44,10 @@ function configure(apiExecutionMode) {
     app.use(responsesMiddleware);
 
     // Register API routes. All routes will be prefixed with /api.
-    app.use("/api", userRoutes);
-    app.use("/api", authRoutes);
-    app.use("/api", stopRoutes);
+    app.use("/api", userRouter);
+    app.use("/api", authRouter);
+    app.use("/api", stopRouter);
+    app.use("/api", serviceRouter);
 
     // add 404 error handling middleware in order to send custom message when no route matches client's request
     app.use(errorHandlerMiddleware);

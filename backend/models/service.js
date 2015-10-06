@@ -20,6 +20,26 @@ var serviceSchema = new mongoose.Schema({
     }]
 });
 
+/**
+ * Instance methods
+ */
+
+serviceSchema.methods.toJSON = function() {
+    var obj = this.toObject();
+
+    // delete _id since stopId is used as an id
+    delete obj._id;
+
+    // delete version key
+    delete obj.__v;
+
+    // delete route id
+    obj.routes.forEach(function (route) {
+        delete route._id;
+    });
+
+    return obj;
+};
 
 /**
  * Static methods
