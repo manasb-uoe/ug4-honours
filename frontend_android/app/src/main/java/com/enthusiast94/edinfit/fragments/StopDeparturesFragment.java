@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.OnStopLoadedEvent;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 04-10-2015.
@@ -126,6 +129,8 @@ public class StopDeparturesFragment extends Fragment {
                             setRefreshIndicatorVisiblity(false);
 
                             departuresAdapter.notifyDeparturesChanged();
+
+                            EventBus.getDefault().post(new OnStopLoadedEvent(stop));
                         }
                     }
 
