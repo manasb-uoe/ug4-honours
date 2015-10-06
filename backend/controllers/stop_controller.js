@@ -94,7 +94,7 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
     var time = req.query.time;
 
     Stop.findOne({stopId: stopId}, function (err, stop) {
-        if (!stop) return res.sendError(404, "Now stop with id '" + stopId +"'");
+        if (!stop) return res.sendError(404, "No stop with id '" + stopId +"'");
 
         if (err) return res.sendError(500, err.message);
 
