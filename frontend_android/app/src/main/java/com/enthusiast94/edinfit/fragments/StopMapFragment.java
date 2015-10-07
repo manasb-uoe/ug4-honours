@@ -47,8 +47,8 @@ public class StopMapFragment extends Fragment {
          */
 
         map = mapView.getMap();
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setMyLocationEnabled(true);
+//        map.getUiSettings().setMyLocationButtonEnabled(true);
+//        map.setMyLocationEnabled(true);
 
         return view;
     }
@@ -96,10 +96,10 @@ public class StopMapFragment extends Fragment {
         Stop stop = event.getStop();
 
         // add stop marker and zoom in
-        LatLng latLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
-        map.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(stop.getName())).showInfoWindow();
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+//        LatLng latLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
+//        map.addMarker(new MarkerOptions()
+//                .position(latLng)
+//                .title(stop.getName())).showInfoWindow();
+//        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
     }
 }

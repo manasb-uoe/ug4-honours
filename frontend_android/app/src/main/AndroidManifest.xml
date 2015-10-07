@@ -41,6 +41,10 @@
             android:name=".activities.StopActivity"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name=".activities.ServiceActivity"
+            android:label="@string/app_name" >
+        </activity>
 
         <!-- This embeds the version of Google Play services that the app was compiled with. -->
         <meta-data
