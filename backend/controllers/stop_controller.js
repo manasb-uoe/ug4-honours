@@ -100,7 +100,17 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
 
         // filter out departures that do not belong to provided day
         stop.filterDepartures(null, time, function () {
-            return res.sendOk(stop);
+            if (stop.departures.length == 0) {
+                stop.updateDepartures(function (err, departures) {
+                    if (err) return callbackA(err);
+
+                    stop.departures = departures;
+
+                    return res.sendOk(stop);
+                });
+            } else {
+                return res.sendOk(stop);
+            }
         });
     });
 });
