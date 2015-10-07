@@ -12,8 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.StartStopActivityEvent;
 import com.enthusiast94.edinfit.fragments.ServiceRouteMapFragment;
-import com.enthusiast94.edinfit.fragments.ServiceStopsFragment;
+import com.enthusiast94.edinfit.fragments.ServiceRouteStopsFragment;
+import com.enthusiast94.edinfit.models.Stop;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 06-10-2015.
@@ -68,6 +72,18 @@ public class ServiceActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -76,6 +92,15 @@ public class ServiceActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onEventMainThread(StartStopActivityEvent event) {
+        Stop stop = event.getStop();
+
+        Intent startActivityIntent = new Intent(this, StopActivity.class);
+        startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
+        startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+        startActivity(startActivityIntent);
     }
 
     private class ServicePagerAdapter extends FragmentPagerAdapter {
@@ -87,7 +112,7 @@ public class ServiceActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0: return ServiceStopsFragment.newInstance(serviceName);
+                case 0: return ServiceRouteStopsFragment.newInstance(serviceName);
                 case 1: return new ServiceRouteMapFragment();
                 default: return null;
             }
