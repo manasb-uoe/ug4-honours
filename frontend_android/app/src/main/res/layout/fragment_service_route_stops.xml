@@ -56,6 +56,12 @@
 
         </RelativeLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/divider"
+            />
+
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
