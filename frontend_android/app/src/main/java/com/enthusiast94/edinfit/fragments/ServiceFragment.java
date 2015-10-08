@@ -4,9 +4,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,11 +39,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.client.cache.Resource;
 
 /**
  * Created by manas on 06-10-2015.
@@ -253,13 +261,30 @@ public class ServiceFragment extends Fragment {
 
         List<Stop> stops = route.getStops();
 
-        for (Stop stop : stops) {
+        int px = getResources().getDimensionPixelSize(R.dimen.stop_marker_size);
+        Bitmap iconBitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(iconBitmap);
+        Drawable shape = ResourcesCompat.getDrawable(getResources(), R.drawable.stop_marker, null);
+        shape.setBounds(0, 0, iconBitmap.getWidth(), iconBitmap.getHeight());
+        shape.draw(canvas);
+
+        for (int i=0; i<stops.size(); i++) {
+            Stop stop = stops.get(i);
+
             LatLng latLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
 
-            map.addMarker(new MarkerOptions()
+            Marker stopMarker = map.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .title(stop.getName()))
-                    .setFlat(true);
+                    .anchor(.5f, .5f)
+                    .title(stop.getName())
+                    .icon(BitmapDescriptorFactory.fromBitmap(iconBitmap)));
+
+            if (i == 0) {
+                stopMarker.setSnippet(getString(R.string.label_start));
+                stopMarker.showInfoWindow();
+            } else if (i == stops.size()-1) {
+                stopMarker.setSnippet(getString(R.string.label_end));
+            }
         }
 
         // add route polyline to map
@@ -268,8 +293,14 @@ public class ServiceFragment extends Fragment {
 
         PolylineOptions polylineOptions = new PolylineOptions();
 
+        int redColor = ContextCompat.getColor(getActivity(), R.color.red);
+        int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
+
         for (Point point : points) {
-            polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+            polylineOptions
+                    .add(new LatLng(point.getLatitude(), point.getLongitude()))
+                    .width(polylineWidth)
+            .color(redColor);
         }
 
         map.addPolyline(polylineOptions);
@@ -286,7 +317,7 @@ public class ServiceFragment extends Fragment {
             final List<String> destinations = new ArrayList<>();
 
             for (Route route : service.getRoutes()) {
-                 destinations.add(route.getDestination());
+                destinations.add(route.getDestination());
             }
 
             AlertDialog alertDialog = new AlertDialog.Builder(getActivity())

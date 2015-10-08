@@ -24,4 +24,6 @@
     <dimen name="nearby_stop_more_options_button_height">35dp</dimen>
     <dimen name="nearby_stop_more_options_button_width">35dp</dimen>
     <dimen name="divider_height">1dp</dimen>
+    <dimen name="stop_marker_size">12dp</dimen>
+    <dimen name="polyline_width">3dp</dimen>
 </resources>
