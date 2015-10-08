@@ -1,45 +1,59 @@
 package com.enthusiast94.edinfit.fragments;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.StartStopActivityEvent;
+import com.enthusiast94.edinfit.activities.StopActivity;
+import com.enthusiast94.edinfit.models.Point;
+import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.ServiceService;
-import com.google.gson.Gson;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * Created by manas on 06-10-2015.
  */
-public class ServiceRouteStopsFragment extends Fragment {
+public class ServiceFragment extends Fragment {
 
+    public static final String TAG = ServiceFragment.class.getSimpleName();
     public static final String EXTRA_SERVICE_NAME = "serviceName";
-    private String serviceName;
-    private Service service;
+    private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
     private RecyclerView routeStopsRecyclerView;
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView routeTextView;
+    private MapView mapView;
+    private GoogleMap map;
+    private String serviceName;
+    private Service service;
+    private String selectedRouteDestination;
 
-    public static ServiceRouteStopsFragment newInstance(String stopId) {
-        ServiceRouteStopsFragment instance = new ServiceRouteStopsFragment();
+    public static ServiceFragment newInstance(String stopId) {
+        ServiceFragment instance = new ServiceFragment();
         Bundle bundle = new Bundle();
         bundle.putString(EXTRA_SERVICE_NAME, stopId);
         instance.setArguments(bundle);
@@ -64,6 +78,25 @@ public class ServiceRouteStopsFragment extends Fragment {
 
         routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        mapView = (MapView) view.findViewById(R.id.map_view);
+        routeTextView = (TextView) view.findViewById(R.id.route_textview);
+
+        /**
+         * Create MapView, get GoogleMap from it and then configure the GoogleMap
+         */
+
+        Bundle mapViewSavedInstanceState = savedInstanceState != null ?
+                savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
+        mapView.onCreate(mapViewSavedInstanceState);
+
+        map = mapView.getMap();
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setMyLocationEnabled(true);
+        LatLng userLatLng = new LatLng(
+                App.getLastKnownUserLocation().getLatitude(),
+                App.getLastKnownUserLocation().getLongitude()
+        );
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
 
         /**
          * Retrieve service name from arguments so that the data corresponding to its service
@@ -90,7 +123,7 @@ public class ServiceRouteStopsFragment extends Fragment {
          */
 
         routeStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        routeStopsAdapter = new RouteStopsAdapter();
+        routeStopsAdapter = new RouteStopsAdapter(getActivity());
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
 
         /**
@@ -100,10 +133,48 @@ public class ServiceRouteStopsFragment extends Fragment {
         if (service == null) {
             loadService();
         } else {
-            routeStopsAdapter.notifyStopsChanged();
+            updateRoute(selectedRouteDestination);
         }
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mapView.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        //This MUST be done before saving any of your own or your base class's variables
+        Bundle mapViewSaveState = new Bundle(outState);
+        mapView.onSaveInstanceState(mapViewSaveState);
+        outState.putBundle(MAPVIEW_SAVE_STATE, mapViewSaveState);
+        //Add any other variables here.
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+
+        mapView.onLowMemory();
     }
 
     private void loadService() {
@@ -115,13 +186,15 @@ public class ServiceRouteStopsFragment extends Fragment {
             public void onSuccess(Service data) {
                 service = data;
 
-                Gson gson = new Gson();
-                Log.i("json", gson.toJson(service.getRoutes().get(0).getStops()));
+                // set first route as the default route (if it exists)
+                if (service.getRoutes().size() > 1) {
+                    selectedRouteDestination = service.getRoutes().get(0).getDestination();
+                }
 
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
 
-                    routeStopsAdapter.notifyStopsChanged();
+                    updateRoute(selectedRouteDestination);
                 }
             }
 
@@ -146,15 +219,65 @@ public class ServiceRouteStopsFragment extends Fragment {
         });
     }
 
-    private class RouteStopsAdapter extends RecyclerView.Adapter {
+    private void updateRoute(String destination) {
+        List<Route> routes = service.getRoutes();
 
+        for (Route route : routes) {
+            if (route.getDestination().equals(destination)) {
+                addRouteToMap(route);
+
+                routeStopsAdapter.notifyRouteChanged(route);
+
+                routeTextView.setText(String.format(getString(R.string.label_towards),
+                        selectedRouteDestination));
+
+                break;
+            }
+        }
+    }
+
+    private void addRouteToMap(Route route) {
+
+        // add stop markers to map
+
+        List<Stop> stops = route.getStops();
+
+        for (Stop stop : stops) {
+            LatLng latLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
+
+            map.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(stop.getName()))
+                    .setFlat(true);
+        }
+
+        // add route polyline to map
+
+        List<Point> points = route.getPoints();
+
+        PolylineOptions polylineOptions = new PolylineOptions();
+
+        for (Point point : points) {
+            polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+        }
+
+        map.addPolyline(polylineOptions);
+    }
+
+    private static class RouteStopsAdapter extends RecyclerView.Adapter {
+
+        private Context context;
         private LayoutInflater inflater;
         private List<Stop> stops = new ArrayList<>();
+
+        public RouteStopsAdapter(Context context) {
+            this.context = context;
+        }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (inflater == null) {
-                inflater = LayoutInflater.from(getActivity());
+                inflater = LayoutInflater.from(context);
             }
 
             return new RouteStopViewHolder(inflater.inflate(R.layout.row_route_stops, parent, false));
@@ -170,10 +293,8 @@ public class ServiceRouteStopsFragment extends Fragment {
             return stops.size();
         }
 
-        private void notifyStopsChanged() {
-            stops.clear();
-
-            stops.addAll(service.getRoutes().get(0).getStops());
+        public void notifyRouteChanged(Route route) {
+            stops = new ArrayList<>(route.getStops());
 
             notifyDataSetChanged();
         }
@@ -202,9 +323,10 @@ public class ServiceRouteStopsFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                if (stop != null) {
-                    EventBus.getDefault().post(new StartStopActivityEvent(stop));
-                }
+                Intent startActivityIntent = new Intent(context, StopActivity.class);
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+                context.startActivity(startActivityIntent);
             }
         }
     }

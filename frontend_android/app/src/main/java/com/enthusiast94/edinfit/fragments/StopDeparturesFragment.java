@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
-import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.events.OnStopLoadedEvent;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
@@ -265,7 +264,6 @@ public class StopDeparturesFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                // go to service activity, passing in the name of the clicked service
                 Intent startActivityIntent = new Intent(getActivity(), ServiceActivity.class);
                 startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
                 startActivity(startActivityIntent);

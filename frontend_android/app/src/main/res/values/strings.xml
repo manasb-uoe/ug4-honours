@@ -36,6 +36,7 @@
     <string name="label_sunday">Sunday</string>
     <string name="label_showing_departures_for">Showing departures for: </string>
     <string name="label_stops">Stops</string>
+    <string name="label_towards">Towards %1$s</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

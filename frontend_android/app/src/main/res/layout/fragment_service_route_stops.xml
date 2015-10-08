@@ -1,25 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="bottom"
+    sothree:umanoDragView="@+id/drag_view"
+    sothree:umanoPanelHeight="?actionBarSize"
+    sothree:umanoShadowHeight="4dp"
     >
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top"
         >
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/route_stops_recyclerview"
+        <RelativeLayout
+            android:id="@+id/drag_view"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingRight="@dimen/spacing_normal"
+            android:gravity="center_vertical"
+            >
+
+            <ImageView
+                android:id="@+id/route_imageview"
+                android:src="@drawable/ic_action_maps_directions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                />
+
+            <TextView
+                android:id="@+id/route_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_loading"
+                android:textSize="@dimen/font_large"
+                android:gravity="center_vertical"
+                android:layout_alignTop="@id/route_imageview"
+                android:layout_alignBottom="@id/route_imageview"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/route_imageview"
+                android:layout_toStartOf="@+id/route_imageview" />
+
+        </RelativeLayout>
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            />
+            >
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/route_stops_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                />
 
-</LinearLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>
