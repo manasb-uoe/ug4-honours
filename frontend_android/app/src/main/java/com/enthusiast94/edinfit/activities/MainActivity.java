@@ -24,7 +24,7 @@ import com.enthusiast94.edinfit.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.fragments.GoFragment;
 import com.enthusiast94.edinfit.fragments.NearbyFragment;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.services.UserService;
 
 import de.greenrobot.event.EventBus;
 

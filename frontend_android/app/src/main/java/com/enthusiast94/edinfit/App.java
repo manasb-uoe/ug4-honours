@@ -5,11 +5,10 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.enthusiast94.edinfit.network.DirectionsService;
+import com.enthusiast94.edinfit.services.DirectionsService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;

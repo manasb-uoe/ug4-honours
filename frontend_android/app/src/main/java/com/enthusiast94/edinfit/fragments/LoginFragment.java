@@ -14,8 +14,8 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.network.BaseService;
-import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.services.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import de.greenrobot.event.EventBus;

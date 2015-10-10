@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.network;
+package com.enthusiast94.edinfit.services;
 
 import android.content.Context;
 

@@ -20,8 +20,8 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
-import com.enthusiast94.edinfit.network.BaseService;
-import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.text.SimpleDateFormat;
