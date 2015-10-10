@@ -56,6 +56,7 @@
     <string name="error_request_time_out">The request timed out. Please try again.</string>
     <string name="error_could_not_fetch_location">Error! Could not fetch current user location.</string>
     <string name="error_could_not_geocode_location">Error! Could not geocode current user location.</string>
+    <string name="error_could_not_fetch_directions">Error! Could not fetch directions.</string>
 
     <!-- Api keys -->
     <string name="api_key_google_maps">AIzaSyDjAGROEzgVxDKhSkF123yxS2_gb0yh8n4</string>

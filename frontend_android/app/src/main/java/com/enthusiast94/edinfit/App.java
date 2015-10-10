@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.enthusiast94.edinfit.network.DirectionsService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -36,6 +37,9 @@ public class App extends Application implements GoogleApiClient.OnConnectionFail
         googleApiClient.connect();
 
         geocoder = new Geocoder(this);
+
+        // init services
+        DirectionsService.init(this);
     }
 
     public static Context getAppContext() {
