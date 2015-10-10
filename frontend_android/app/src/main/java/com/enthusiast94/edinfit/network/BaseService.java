@@ -8,8 +8,6 @@ import com.loopj.android.http.AsyncHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * Created by manas on 26-09-2015.
  */
@@ -51,5 +49,10 @@ public class BaseService {
                 callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
             }
         }
+    }
+
+    public interface Callback<T> {
+        void onSuccess(T data);
+        void onFailure(String message);
     }
 }

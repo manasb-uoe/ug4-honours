@@ -1,7 +1,5 @@
 package com.enthusiast94.edinfit.network;
 
-import android.util.Log;
-
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;

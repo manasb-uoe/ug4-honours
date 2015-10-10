@@ -24,7 +24,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
-import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -190,7 +190,7 @@ public class StopFragment extends Fragment {
     private void loadStop() {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getStop(stopId, new Callback<Stop>() {
+        StopService.getStop(stopId, new BaseService.Callback<Stop>() {
 
                     @Override
                     public void onSuccess(Stop data) {
@@ -232,7 +232,7 @@ public class StopFragment extends Fragment {
         // move map focus to user's last known location
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
-        DirectionsService.getInstance().getWalkingDirections(userLatLng, stopLatLng, new Callback<DirectionsService.DirectionsResult>() {
+        DirectionsService.getInstance().getWalkingDirections(userLatLng, stopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
 
             @Override
             public void onSuccess(DirectionsService.DirectionsResult directionsResult) {

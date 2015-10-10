@@ -14,7 +14,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
@@ -118,7 +118,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 if (emailError == null && passwordError == null) {
                     setLoading(true);
 
-                    UserService.authenticate(email, password, new Callback<User>() {
+                    UserService.authenticate(email, password, new BaseService.Callback<User>() {
 
                         @Override
                         public void onSuccess(User data) {

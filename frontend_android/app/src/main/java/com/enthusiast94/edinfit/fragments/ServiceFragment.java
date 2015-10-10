@@ -5,13 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,7 +30,7 @@ import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
-import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -196,7 +193,7 @@ public class ServiceFragment extends Fragment {
     private void loadService() {
         setRefreshIndicatorVisiblity(true);
 
-        ServiceService.getService(serviceName, new Callback<Service>() {
+        ServiceService.getService(serviceName, new BaseService.Callback<Service>() {
 
             @Override
             public void onSuccess(Service data) {
@@ -279,7 +276,7 @@ public class ServiceFragment extends Fragment {
             } else if (i == stops.size()-1) {
                 stopMarker.setSnippet(getString(R.string.label_end));
                 stopMarker.showInfoWindow();
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
             }
         }
 
