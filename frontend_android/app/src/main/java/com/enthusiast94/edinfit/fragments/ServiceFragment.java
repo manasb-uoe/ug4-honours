@@ -285,6 +285,7 @@ public class ServiceFragment extends Fragment {
             } else if (i == stops.size()-1) {
                 stopMarker.setSnippet(getString(R.string.label_end));
                 stopMarker.showInfoWindow();
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
             }
         }
 
