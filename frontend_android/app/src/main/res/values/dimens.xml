@@ -26,4 +26,6 @@
     <dimen name="divider_height">1dp</dimen>
     <dimen name="stop_marker_size">12dp</dimen>
     <dimen name="polyline_width">3dp</dimen>
+    <dimen name="route_indicators_container_width">15dp</dimen>
+    <dimen name="route_indicator_width">4dp</dimen>
 </resources>

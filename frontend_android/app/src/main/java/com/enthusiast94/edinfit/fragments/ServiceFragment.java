@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -384,6 +385,9 @@ public class ServiceFragment extends Fragment {
                 implements View.OnClickListener {
 
             private TextView stopNameTextView;
+            private View topIndicatorView;
+            private View bottomIndicatorView;
+            private ImageView downArrowImageView;
             private Stop stop;
 
             public RouteStopViewHolder(View itemView) {
@@ -391,6 +395,9 @@ public class ServiceFragment extends Fragment {
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
+                bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
+                downArrowImageView = (ImageView) itemView.findViewById(R.id.down_arrow_imageview);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
@@ -400,6 +407,21 @@ public class ServiceFragment extends Fragment {
                 this.stop = stop;
 
                 stopNameTextView.setText(stop.getName());
+
+                // show indicators for first/last stop in the route
+                if (getAdapterPosition() == 0) {
+                    topIndicatorView.setVisibility(View.INVISIBLE);
+                    bottomIndicatorView.setVisibility(View.VISIBLE);
+                    downArrowImageView.setVisibility(View.VISIBLE);
+                } else if (getAdapterPosition() == stops.size() - 1) {
+                    topIndicatorView.setVisibility(View.VISIBLE);
+                    bottomIndicatorView.setVisibility(View.INVISIBLE);
+                    downArrowImageView.setVisibility(View.INVISIBLE);
+                } else {
+                    topIndicatorView.setVisibility(View.VISIBLE);
+                    bottomIndicatorView.setVisibility(View.VISIBLE);
+                    downArrowImageView.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override
