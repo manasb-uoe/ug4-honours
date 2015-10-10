@@ -42,7 +42,7 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_start">Start</string>
     <string name="label_end">End</string>
-    <string name="label_directions">Directions</string>
+    <string name="label_walk_duration">Walk (%1$s)</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

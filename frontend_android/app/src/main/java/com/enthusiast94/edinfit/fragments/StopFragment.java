@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,19 +18,23 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.directions.route.Route;
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
+import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,6 +57,7 @@ public class StopFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private MapView mapView;
     private GoogleMap map;
+    private TextView walkDurationTextView;
 
     // default values for day and time
     private String selectedDay = Helpers.getCurrentDay();
@@ -84,6 +90,7 @@ public class StopFragment extends Fragment {
         departuresRecyclerView = (RecyclerView) view.findViewById(R.id.departures_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
+        walkDurationTextView = (TextView) view.findViewById(R.id.walk_duration_textview);
 
         /**
          * Retrieve stop id from arguments so that the data corresponding to its stop can be loaded
@@ -194,7 +201,7 @@ public class StopFragment extends Fragment {
 
                             departuresAdapter.notifyDeparturesChanged();
 
-                            addStopToMap(data);
+                            updateMapSlidingPanel(data);
                         }
                     }
 
@@ -209,14 +216,44 @@ public class StopFragment extends Fragment {
                 });
     }
 
-    private void addStopToMap(Stop stop) {
-        LatLng latLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
+    private void updateMapSlidingPanel(Stop stop) {
+        LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
+        LatLng userLatLng = new LatLng(
+                App.getLastKnownUserLocation().getLatitude(),
+                App.getLastKnownUserLocation().getLongitude()
+        );
 
+        // add stop marker with info window containing stop name
         map.addMarker(new MarkerOptions()
-                .position(latLng)
+                .position(stopLatLng)
+                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
                 .title(stop.getName())).showInfoWindow();
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+        // move map focus to user's last known location
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
+
+        DirectionsService.getInstance().getWalkingDirections(userLatLng, stopLatLng, new Callback<DirectionsService.DirectionsResult>() {
+
+            @Override
+            public void onSuccess(DirectionsService.DirectionsResult directionsResult) {
+                // add walking route from user to stop
+                PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
+                        .color(ContextCompat.getColor(getActivity(), R.color.red))
+                        .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                map.addPolyline(polylineOptions);
+
+                // update drag view title with travel duration
+                Route route = directionsResult.getRoute();
+                walkDurationTextView.setText(String.format(
+                        getString(R.string.label_walk_duration), route.getDurationText()));
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {

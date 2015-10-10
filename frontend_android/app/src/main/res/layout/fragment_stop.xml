@@ -52,10 +52,10 @@
                 />
 
             <TextView
-                android:id="@+id/directions_textview"
+                android:id="@+id/walk_duration_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_directions"
+                android:text="@string/label_loading"
                 android:textSize="@dimen/font_large"
                 android:gravity="center_vertical"
                 android:layout_alignTop="@id/route_imageview"
