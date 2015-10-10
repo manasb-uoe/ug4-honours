@@ -2,31 +2,22 @@ package com.enthusiast94.edinfit.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.fragments.StopDeparturesFragment;
-import com.enthusiast94.edinfit.fragments.StopMapFragment;
+import com.enthusiast94.edinfit.fragments.ServiceFragment;
+import com.enthusiast94.edinfit.fragments.StopFragment;
 
 /**
  * Created by manas on 04-10-2015.
  */
 public class StopActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
     public static final String EXTRA_STOP_ID = "stopId";
     public static final String EXTRA_STOP_NAME = "stopName";
-    private String stopId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +28,7 @@ public class StopActivity extends AppCompatActivity {
          * Find views
          */
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        tabLayout = (TabLayout) findViewById(R.id.tablayout);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         /**
          * Retrieve stop id from intent, so that the corresponding stop's data can be fetched
@@ -47,7 +36,7 @@ public class StopActivity extends AppCompatActivity {
          */
 
         Intent intent = getIntent();
-        stopId = intent.getStringExtra(EXTRA_STOP_ID);
+        String stopId = intent.getStringExtra(EXTRA_STOP_ID);
         String stopName = intent.getStringExtra(EXTRA_STOP_NAME);
 
         /**
@@ -63,11 +52,15 @@ public class StopActivity extends AppCompatActivity {
         }
 
         /**
-         * Setup viewpager to work with tabs.
+         * Add stop fragment
          */
 
-        viewPager.setAdapter(new StopPagerAdapter());
-        tabLayout.setupWithViewPager(viewPager);
+        if (getSupportFragmentManager().findFragmentByTag(ServiceFragment.TAG) == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container_framelayout, StopFragment.newInstance(stopId), ServiceFragment.TAG)
+                    .commit();
+        }
+
     }
 
     @Override
@@ -78,36 +71,6 @@ public class StopActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private class StopPagerAdapter extends FragmentPagerAdapter {
-
-        public StopPagerAdapter() {
-            super(getSupportFragmentManager());
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0: return StopDeparturesFragment.newInstance(stopId);
-                case 1: return new StopMapFragment();
-                default: return null;
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0: return getString(R.string.label_departures);
-                case 1: return getString(R.string.label_map);
-                default: return null;
-            }
         }
     }
 }
