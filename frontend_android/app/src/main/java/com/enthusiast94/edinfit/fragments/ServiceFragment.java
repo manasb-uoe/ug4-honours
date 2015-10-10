@@ -281,9 +281,9 @@ public class ServiceFragment extends Fragment {
 
             if (i == 0) {
                 stopMarker.setSnippet(getString(R.string.label_start));
-                stopMarker.showInfoWindow();
             } else if (i == stops.size()-1) {
                 stopMarker.setSnippet(getString(R.string.label_end));
+                stopMarker.showInfoWindow();
             }
         }
 
