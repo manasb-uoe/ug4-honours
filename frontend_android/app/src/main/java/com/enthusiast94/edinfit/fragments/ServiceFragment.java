@@ -35,6 +35,7 @@ import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.Callback;
 import com.enthusiast94.edinfit.network.ServiceService;
+import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -46,8 +47,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cz.msebera.android.httpclient.client.cache.Resource;
 
 /**
  * Created by manas on 06-10-2015.
@@ -262,12 +261,7 @@ public class ServiceFragment extends Fragment {
 
         List<Stop> stops = route.getStops();
 
-        int px = getResources().getDimensionPixelSize(R.dimen.stop_marker_size);
-        Bitmap iconBitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(iconBitmap);
-        Drawable shape = ResourcesCompat.getDrawable(getResources(), R.drawable.stop_marker, null);
-        shape.setBounds(0, 0, iconBitmap.getWidth(), iconBitmap.getHeight());
-        shape.draw(canvas);
+        Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
 
         for (int i=0; i<stops.size(); i++) {
             Stop stop = stops.get(i);
@@ -278,7 +272,7 @@ public class ServiceFragment extends Fragment {
                     .position(latLng)
                     .anchor(.5f, .5f)
                     .title(stop.getName())
-                    .icon(BitmapDescriptorFactory.fromBitmap(iconBitmap)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(stopMarkerIcon)));
 
             if (i == 0) {
                 stopMarker.setSnippet(getString(R.string.label_start));
