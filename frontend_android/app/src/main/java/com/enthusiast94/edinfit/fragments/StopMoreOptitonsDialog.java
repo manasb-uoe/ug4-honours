@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
@@ -19,6 +20,14 @@ public abstract class StopMoreOptitonsDialog extends DialogFragment {
 
     public StopMoreOptitonsDialog(Stop stop) {
         this.stop = stop;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // this is needed in order to prevent the dialog from being displayed
+        // again after config change (which causes NPE)
+        setRetainInstance(true);
     }
 
     @NonNull
