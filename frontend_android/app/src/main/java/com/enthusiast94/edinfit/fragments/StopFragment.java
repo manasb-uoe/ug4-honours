@@ -143,6 +143,7 @@ public class StopFragment extends Fragment {
             loadStop();
         } else {
             departuresAdapter.notifyDeparturesChanged();
+            updateMapSlidingPanel();
         }
 
         return view;
@@ -200,7 +201,7 @@ public class StopFragment extends Fragment {
 
                             departuresAdapter.notifyDeparturesChanged();
 
-                            updateMapSlidingPanel(data);
+                            updateMapSlidingPanel();
                         }
                     }
 
@@ -215,7 +216,7 @@ public class StopFragment extends Fragment {
                 });
     }
 
-    private void updateMapSlidingPanel(Stop stop) {
+    private void updateMapSlidingPanel() {
         LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
         LatLng userLatLng = LocationService.getInstance().getLastKnownUserLocation();
 
