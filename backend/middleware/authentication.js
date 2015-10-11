@@ -3,6 +3,7 @@
  */
 
 var authTokenService = require("../services/auth_token");
+var User = require("../models/user");
 
 module.exports = function (req, res, next) {
     if (!req.headers || !req.headers.authorization) return res.sendError(401, "Authorization header not found.");
@@ -21,9 +22,16 @@ module.exports = function (req, res, next) {
     authTokenService.verifyToken(token, function (err, decoded) {
         if (err) return res.sendError(401, "Invalid access token.");
 
-        // add decoded payload to req object so that it can be used by other middleware
-        req.decodedPayload = decoded;
+        // check if user with id within token actually exists
+        User.findById(decoded.id, function (err, user) {
+            if (!user) return res.sendError(401, "Invalid access token.");
 
-        return next();
+            if (err) return res.sendError(500, err.message);
+
+            // add decoded payload to req object so that it can be used by other middleware
+            req.decodedPayload = decoded;
+
+            return next();
+        });
     });
 };
