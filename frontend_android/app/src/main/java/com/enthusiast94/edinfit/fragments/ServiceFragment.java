@@ -31,6 +31,7 @@ import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -105,11 +106,9 @@ public class ServiceFragment extends Fragment {
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
-        LatLng userLatLng = new LatLng(
-                App.getLastKnownUserLocation().getLatitude(),
-                App.getLastKnownUserLocation().getLongitude()
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                LocationService.getInstance().getLastKnownUserLocation(), 12)
         );
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
 
         /**
          * Retrieve service name from arguments so that the data corresponding to its service

@@ -21,8 +21,10 @@ import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -131,11 +133,11 @@ public class NearbyFragment extends Fragment {
     private void loadNearbyStops() {
         setRefreshIndicatorVisiblity(true);
 
-        Location lastKnownUserLocation = App.getLastKnownUserLocation();
+        LatLng lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
 
         if (lastKnownUserLocation != null) {
-            StopService.getNearbyStops(lastKnownUserLocation.getLatitude(),
-                    lastKnownUserLocation.getLongitude(), MAX_DISTANCE, NEAR_DISTANCE,
+            StopService.getNearbyStops(lastKnownUserLocation.latitude,
+                    lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
                     Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, new BaseService.Callback<List<Stop>>() {
 
                         @Override
@@ -168,7 +170,8 @@ public class NearbyFragment extends Fragment {
     }
 
     private void updateCurrentLocationAndLastUpdated() {
-        lastKnownUserLocationName = App.getLastKnownUserLocationName();
+        lastKnownUserLocationName = LocationService.getInstance().getLastKnownUserLocationName();
+
         if (lastKnownUserLocationName != null) {
             currentLocationTextView.setText(lastKnownUserLocationName);
         } else {

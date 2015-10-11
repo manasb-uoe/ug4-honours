@@ -26,6 +26,7 @@ import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
+import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -109,11 +110,9 @@ public class StopFragment extends Fragment {
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
-        LatLng userLatLng = new LatLng(
-                App.getLastKnownUserLocation().getLatitude(),
-                App.getLastKnownUserLocation().getLongitude()
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                LocationService.getInstance().getLastKnownUserLocation(), 12)
         );
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
 
         /**
          * Setup swipe refresh layout
@@ -218,10 +217,7 @@ public class StopFragment extends Fragment {
 
     private void updateMapSlidingPanel(Stop stop) {
         LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
-        LatLng userLatLng = new LatLng(
-                App.getLastKnownUserLocation().getLatitude(),
-                App.getLastKnownUserLocation().getLongitude()
-        );
+        LatLng userLatLng = LocationService.getInstance().getLastKnownUserLocation();
 
         // add stop marker with info window containing stop name
         map.addMarker(new MarkerOptions()
