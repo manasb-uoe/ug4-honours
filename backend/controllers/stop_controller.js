@@ -5,6 +5,7 @@
 var express = require("express");
 var async = require("async");
 var Stop = require("../models/stop");
+var User = require("../models/user");
 var helpers = require("../utils/helpers");
 var authenticationMiddleware = require("../middleware/authentication");
 
@@ -114,5 +115,62 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
         });
     });
 });
+
+
+/**
+ * Save stop corresponding to provided stop_id
+ */
+
+router.post("/stops/:stop_id/save", authenticationMiddleware, function (req, res) {
+    saveOrUnsave(req, res, true);
+});
+
+
+/**
+ * Remove saved stop corresponding to provided stop_id
+ */
+
+router.delete("/stops/:stop_id/save", authenticationMiddleware, function (req, res) {
+    saveOrUnsave(req, res, false);
+});
+
+
+/**
+ * Helper functions
+ */
+
+function saveOrUnsave(req, res, shouldSave) {
+    var stopId = req.params.stop_id;
+
+    Stop.findOne({stopId: stopId}, function (err, stop) {
+        if (!stop) return res.sendError(404, "No stop with id '" + stopId +"'");
+
+        if (err) return res.sendError(500, err.message);
+
+        console.log(req.decodedPayload.id);
+        User.findById(req.decodedPayload.id, function (err, user) {
+            if (err) return res.sendError(500, err.message);
+
+            var index = user.savedStops.indexOf(stopId);
+
+            if (index == -1) {
+                if (shouldSave) {
+                    user.savedStops.push(stopId);
+                }
+            } else {
+                if (!shouldSave) {
+                    user.savedStops.splice(index, 1);
+                }
+            }
+
+            user.save(function (err) {
+                if (err) return res.sendError(500, err.message);
+
+                res.sendOk();
+            });
+        });
+
+    });
+}
 
 module.exports = router;

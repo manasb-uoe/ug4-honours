@@ -19,6 +19,10 @@ var userSchema = new mongoose.Schema({
     password: {
         type: String
     },
+    savedStops: {
+        type: [Number],
+        index: true
+    },
     createdAt: {
         type: Number
     }
