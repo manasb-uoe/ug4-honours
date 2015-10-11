@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,12 +20,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Point;
@@ -42,6 +44,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +60,14 @@ public class ServiceFragment extends Fragment {
     private RecyclerView routeStopsRecyclerView;
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private SlidingUpPanelLayout slidingUpPanelLayout;
     private TextView routeTextView;
     private MapView mapView;
     private GoogleMap map;
     private String serviceName;
     private Service service;
     private String selectedRouteDestination;
+    private List<Marker> stopMarkers;
 
     public static ServiceFragment newInstance(String stopId) {
         ServiceFragment instance = new ServiceFragment();
@@ -94,6 +99,7 @@ public class ServiceFragment extends Fragment {
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
         routeTextView = (TextView) view.findViewById(R.id.route_textview);
+        slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -107,7 +113,7 @@ public class ServiceFragment extends Fragment {
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                LocationService.getInstance().getLastKnownUserLocation(), 12)
+                        LocationService.getInstance().getLastKnownUserLocation(), 12)
         );
 
         /**
@@ -135,7 +141,25 @@ public class ServiceFragment extends Fragment {
          */
 
         routeStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        routeStopsAdapter = new RouteStopsAdapter(getActivity());
+        routeStopsAdapter = new RouteStopsAdapter(getActivity(), getFragmentManager()) {
+
+            @Override
+            public void onShowStopOnMopOptionSelected(Stop stop) {
+                // lookup marker corresponding to provided, then show its info window and move
+                // map focus to it
+                List<Double> stopLocation = stop.getLocation();
+                for (Marker marker : stopMarkers) {
+                    LatLng latLng = marker.getPosition();
+
+                    if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
+                        marker.showInfoWindow();
+                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                        break;
+                    }
+                }
+            }
+        };
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
 
         /**
@@ -252,6 +276,7 @@ public class ServiceFragment extends Fragment {
 
         // remove all existing markers and polylines
         map.clear();
+        stopMarkers = new ArrayList<>();
 
         // add stop markers to map
 
@@ -277,6 +302,8 @@ public class ServiceFragment extends Fragment {
                 stopMarker.showInfoWindow();
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
             }
+
+            stopMarkers.add(stopMarker);
         }
 
         // add route polyline to map
@@ -337,14 +364,16 @@ public class ServiceFragment extends Fragment {
         return false;
     }
 
-    private static class RouteStopsAdapter extends RecyclerView.Adapter {
+    private static abstract class RouteStopsAdapter extends RecyclerView.Adapter {
 
         private Context context;
+        private FragmentManager fragmentManager;
         private LayoutInflater inflater;
         private List<Stop> stops = new ArrayList<>();
 
-        public RouteStopsAdapter(Context context) {
+        public RouteStopsAdapter(Context context, FragmentManager fragmentManager) {
             this.context = context;
+            this.fragmentManager = fragmentManager;
         }
 
         @Override
@@ -379,6 +408,7 @@ public class ServiceFragment extends Fragment {
             private View topIndicatorView;
             private View bottomIndicatorView;
             private ImageView downArrowImageView;
+            private ImageButton moreOptionsButton;
             private Stop stop;
 
             public RouteStopViewHolder(View itemView) {
@@ -389,9 +419,11 @@ public class ServiceFragment extends Fragment {
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
                 downArrowImageView = (ImageView) itemView.findViewById(R.id.down_arrow_imageview);
+                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
+                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
@@ -417,11 +449,25 @@ public class ServiceFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Intent startActivityIntent = new Intent(context, StopActivity.class);
-                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
-                context.startActivity(startActivityIntent);
+                int id = v.getId();
+                if (id == itemView.getId()) {
+                    Intent startActivityIntent = new Intent(context, StopActivity.class);
+                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
+                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+                    context.startActivity(startActivityIntent);
+                } else if (id == moreOptionsButton.getId()) {
+                    DialogFragment dialogFragment = new StopMoreOptitonsDialog(stop) {
+
+                        @Override
+                        public void onShowStopOnMopOptionSelected() {
+                            RouteStopsAdapter.this.onShowStopOnMopOptionSelected(stop);
+                        }
+                    };
+                    dialogFragment.show(fragmentManager, null);
+                }
             }
         }
+
+        public abstract void onShowStopOnMopOptionSelected(Stop stop);
     }
 }
