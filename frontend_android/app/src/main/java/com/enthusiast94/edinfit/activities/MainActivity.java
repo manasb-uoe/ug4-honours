@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
              */
 
             viewPager.setAdapter(new MainPagerAdapter());
+            viewPager.setOffscreenPageLimit(2);
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
