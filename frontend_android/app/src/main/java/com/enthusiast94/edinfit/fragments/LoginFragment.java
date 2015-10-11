@@ -118,7 +118,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 if (emailError == null && passwordError == null) {
                     setLoading(true);
 
-                    UserService.authenticate(email, password, new BaseService.Callback<User>() {
+                    UserService.getInstance().authenticate(email, password, new BaseService.Callback<User>() {
 
                         @Override
                         public void onSuccess(User data) {

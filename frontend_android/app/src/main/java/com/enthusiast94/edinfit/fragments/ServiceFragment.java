@@ -192,7 +192,7 @@ public class ServiceFragment extends Fragment {
     private void loadService() {
         setRefreshIndicatorVisiblity(true);
 
-        ServiceService.getService(serviceName, new BaseService.Callback<Service>() {
+        ServiceService.getInstance().getService(serviceName, new BaseService.Callback<Service>() {
 
             @Override
             public void onSuccess(Service data) {

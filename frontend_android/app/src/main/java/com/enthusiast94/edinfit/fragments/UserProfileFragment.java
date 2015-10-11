@@ -48,7 +48,7 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
-        User user = UserService.getAuthenticatedUser();
+        User user = UserService.getInstance().getAuthenticatedUser();
 
         if (user != null) {
             nameTextView.setText(user.getName());

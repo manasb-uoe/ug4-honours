@@ -1,8 +1,8 @@
 package com.enthusiast94.edinfit.services;
 
+import android.content.Context;
 import android.util.Base64;
 
-import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -26,12 +26,37 @@ public class UserService extends BaseService {
 
     public static final String TAG = UserService.class.getSimpleName();
     private static final String USER_PREFS_KEY = "userPrefKey";
+    private static UserService instance;
+    private String parsingErrorMessage;
+    private Context context;
+
+    private UserService(Context context) {
+        this.context = context;
+
+        this.parsingErrorMessage = context.getString(R.string.error_parsing);
+    }
+
+    public static void init(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException(TAG + " has already been initialized.");
+        }
+
+        instance = new UserService(context);
+    }
+
+    public static UserService getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(TAG + " has not been initialized yet.");
+        }
+
+        return instance;
+    }
 
     /**
      * POST api/authenticate
      */
 
-    public static void authenticate(String email, final String password, final Callback<User> callback) {
+    public void authenticate(String email, final String password, final Callback<User> callback) {
         Map<String, String> userDetails = new HashMap<>();
         userDetails.put("email", email);
         userDetails.put("password", password);
@@ -43,7 +68,7 @@ public class UserService extends BaseService {
      * POST api/users
      */
 
-    public static void createUser(String name, String email, String password, Callback<User> callback) {
+    public void createUser(String name, String email, String password, Callback<User> callback) {
         Map<String, String> userDetails = new HashMap<>();
         userDetails.put("name", name);
         userDetails.put("email", email);
@@ -56,7 +81,7 @@ public class UserService extends BaseService {
      * Common method for creating/authenticating users.
      */
 
-    private static void createOrAuthenticateUser(String url, Map<String, String> userDetails,
+    private void createOrAuthenticateUser(String url, Map<String, String> userDetails,
                                                  final Callback<User> callback) {
         RequestParams requestParams = new RequestParams(userDetails);
 
@@ -77,12 +102,12 @@ public class UserService extends BaseService {
                     user.setAuthToken(token);
 
                     // persist user object in shared preferences as json string
-                    Helpers.writeToPrefs(App.getAppContext(), USER_PREFS_KEY, gson.toJson(user));
+                    Helpers.writeToPrefs(context, USER_PREFS_KEY, gson.toJson(user));
 
                     if (callback != null) callback.onSuccess(user);
                 } catch (JSONException e) {
                     if (callback != null)
-                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
+                        callback.onFailure(parsingErrorMessage);
                 }
             }
 
@@ -93,12 +118,12 @@ public class UserService extends BaseService {
         });
     }
 
-    public static void deauthenticate() {
-        Helpers.clearPrefs(App.getAppContext());
+    public void deauthenticate() {
+        Helpers.clearPrefs(context);
     }
 
-    public static User getAuthenticatedUser() {
-        String userJson = Helpers.readFromPrefs(App.getAppContext(), USER_PREFS_KEY);
+    public User getAuthenticatedUser() {
+        String userJson = Helpers.readFromPrefs(context, USER_PREFS_KEY);
 
         if (userJson != null) {
             Gson gson = new Gson();
@@ -108,7 +133,7 @@ public class UserService extends BaseService {
         return null;
     }
 
-    public static boolean isUserAuthenticated() {
-        return Helpers.readFromPrefs(App.getAppContext(), USER_PREFS_KEY) != null;
+    public boolean isUserAuthenticated() {
+        return Helpers.readFromPrefs(context, USER_PREFS_KEY) != null;
     }
 }

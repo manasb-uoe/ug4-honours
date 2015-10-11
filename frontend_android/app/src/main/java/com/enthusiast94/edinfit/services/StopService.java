@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.services;
 
-import com.enthusiast94.edinfit.App;
+import android.content.Context;
+
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
 import com.google.gson.Gson;
@@ -22,8 +23,30 @@ import cz.msebera.android.httpclient.Header;
 public class StopService extends BaseService {
 
     public static final String TAG = StopService.class.getSimpleName();
+    private static StopService instance;
+    private String parsingErrorMessage;
 
-    public static void getStop(String stopId,  final Callback<Stop> callback) {
+    private StopService(Context context) {
+        this.parsingErrorMessage = context.getString(R.string.error_parsing);
+    }
+
+    public static void init(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException(TAG + " has already been initialized.");
+        }
+
+        instance = new StopService(context);
+    }
+
+    public static StopService getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(TAG + " has not been initialized yet.");
+        }
+
+        return instance;
+    }
+
+    public void getStop(String stopId,  final Callback<Stop> callback) {
         RequestParams requestParams = new RequestParams();
 
         AsyncHttpClient client = getAsyncHttpClient(true);
@@ -39,7 +62,7 @@ public class StopService extends BaseService {
 
                 } catch (JSONException e) {
                     if (callback != null)
-                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
+                        callback.onFailure(parsingErrorMessage);
                 }
             }
 
@@ -50,7 +73,7 @@ public class StopService extends BaseService {
         });
     }
 
-    public static void getNearbyStops(Double latitude, Double longitude, int maxDistance,
+    public void getNearbyStops(Double latitude, Double longitude, int maxDistance,
                                       Double nearDistance, String time,
                                       int limit, final Callback<List<Stop>> callback) {
 
@@ -78,7 +101,7 @@ public class StopService extends BaseService {
 
                 } catch (JSONException e) {
                     if (callback != null)
-                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
+                        callback.onFailure(parsingErrorMessage);
                 }
             }
 

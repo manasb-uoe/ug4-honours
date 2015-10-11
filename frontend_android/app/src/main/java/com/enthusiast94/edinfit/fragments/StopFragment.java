@@ -189,7 +189,7 @@ public class StopFragment extends Fragment {
     private void loadStop() {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getStop(stopId, new BaseService.Callback<Stop>() {
+        StopService.getInstance().getStop(stopId, new BaseService.Callback<Stop>() {
 
                     @Override
                     public void onSuccess(Stop data) {

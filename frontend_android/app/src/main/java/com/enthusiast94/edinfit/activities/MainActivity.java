@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
          * Start login activity if user is not authenticated, else continue with this activity
          */
 
-        if (!UserService.isUserAuthenticated()) {
+        if (!UserService.getInstance().isUserAuthenticated()) {
             goToLogin();
         } else {
             setContentView(R.layout.activity_main);
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateNavViewHeader() {
-        User user = UserService.getAuthenticatedUser();
+        User user = UserService.getInstance().getAuthenticatedUser();
         if (user != null) {
             navNameTextVeiew.setText(user.getName());
             navEmailTextView.setText(user.getEmail());

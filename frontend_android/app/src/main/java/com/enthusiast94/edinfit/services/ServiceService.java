@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.services;
 
-import com.enthusiast94.edinfit.App;
+import android.content.Context;
+
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
 import com.google.gson.Gson;
@@ -19,8 +20,30 @@ import cz.msebera.android.httpclient.Header;
 public class ServiceService extends BaseService {
 
     public static final String TAG = ServiceService.class.getSimpleName();
+    private static ServiceService instance;
+    private String parsingErrorMessage;
 
-    public static void getService(String serviceName,  final Callback<Service> callback) {
+    private ServiceService(Context context) {
+        this.parsingErrorMessage = context.getString(R.string.error_parsing);
+    }
+
+    public static void init(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException(TAG + " has already been initialized.");
+        }
+
+        instance = new ServiceService(context);
+    }
+
+    public static ServiceService getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(TAG + " has not been initialized yet.");
+        }
+
+        return instance;
+    }
+
+    public void getService(String serviceName,  final Callback<Service> callback) {
         RequestParams requestParams = new RequestParams();
 
         AsyncHttpClient client = getAsyncHttpClient(true);
@@ -37,7 +60,7 @@ public class ServiceService extends BaseService {
 
                 } catch (JSONException e) {
                     if (callback != null)
-                        callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
+                        callback.onFailure(parsingErrorMessage);
                 }
             }
 

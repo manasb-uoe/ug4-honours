@@ -10,6 +10,9 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationService;
+import com.enthusiast94.edinfit.services.ServiceService;
+import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.services.UserService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -34,6 +37,9 @@ public class App extends Application {
         // init services
         LocationService.init(this);
         DirectionsService.init(this);
+        UserService.init(this);
+        StopService.init(this);
+        ServiceService.init(this);
     }
 
     public static Context getAppContext() {

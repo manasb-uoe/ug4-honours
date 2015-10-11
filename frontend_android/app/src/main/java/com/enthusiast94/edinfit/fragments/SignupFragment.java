@@ -127,7 +127,7 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
                 if (nameError == null && emailError == null && passwordError == null && doPasswordsMatch) {
                     setLoading(true);
 
-                    UserService.createUser(name, email, password, new BaseService.Callback<User>() {
+                    UserService.getInstance().createUser(name, email, password, new BaseService.Callback<User>() {
 
                         @Override
                         public void onSuccess(User data) {

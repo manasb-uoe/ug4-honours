@@ -22,8 +22,8 @@ public class BaseService {
 
         if (isAuthenticationRequired) {
             // add authorization header if user is authenticated
-            if (UserService.isUserAuthenticated()) {
-                User user = UserService.getAuthenticatedUser();
+            if (UserService.getInstance().isUserAuthenticated()) {
+                User user = UserService.getInstance().getAuthenticatedUser();
                 if (user != null) {
                     client.addHeader("Authorization", "Bearer " + user.getAuthToken());
                 }

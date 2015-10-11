@@ -69,7 +69,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 return true;
 
             case R.id.action_logout:
-                UserService.deauthenticate();
+                UserService.getInstance().deauthenticate();
                 finish();
                 EventBus.getDefault().post(new OnDeauthenticatedEvent());
                 return true;

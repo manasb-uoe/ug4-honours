@@ -136,7 +136,7 @@ public class NearbyFragment extends Fragment {
         LatLng lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
 
         if (lastKnownUserLocation != null) {
-            StopService.getNearbyStops(lastKnownUserLocation.latitude,
+            StopService.getInstance().getNearbyStops(lastKnownUserLocation.latitude,
                     lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
                     Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, new BaseService.Callback<List<Stop>>() {
 
