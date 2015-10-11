@@ -14,6 +14,7 @@ import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
 import com.enthusiast94.edinfit.R;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -112,5 +113,12 @@ public class Helpers {
         shape.draw(canvas);
 
         return iconBitmap;
+    }
+
+    public static LatLng getEdinburghLatLng(Context context) {
+        return new LatLng(
+                Float.valueOf(context.getString(R.string.edinburgh_lat)),
+                Float.valueOf(context.getString(R.string.edinburgh_long))
+        );
     }
 }

@@ -43,6 +43,7 @@
     <string name="label_start">Start</string>
     <string name="label_end">End</string>
     <string name="label_walk_duration">Walk (%1$s)</string>
+    <string name="label_nearest">Nearest</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -57,6 +58,10 @@
     <string name="error_could_not_fetch_location">Error! Could not fetch current user location.</string>
     <string name="error_could_not_geocode_location">Error! Could not geocode current user location.</string>
     <string name="error_could_not_fetch_directions">Error! Could not fetch directions.</string>
+
+    <!-- Edinburgh coordinates -->
+    <string name="edinburgh_lat">55.9531</string>
+    <string name="edinburgh_long">-3.1889</string>
 
     <!-- Api keys -->
     <string name="api_key_google_maps">AIzaSyDjAGROEzgVxDKhSkF123yxS2_gb0yh8n4</string>

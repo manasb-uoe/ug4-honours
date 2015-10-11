@@ -1,7 +1,7 @@
 package com.enthusiast94.edinfit.fragments;
 
 import android.content.Intent;
-import android.location.Location;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,11 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
@@ -24,7 +22,13 @@ import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,19 +42,21 @@ import java.util.Locale;
 public class NearbyFragment extends Fragment {
 
     public static final String TAG = NearbyFragment.class.getSimpleName();
+    private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
     private RecyclerView nearbyStopsRecyclerView;
     private NearbyStopsAdapter nearbyStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView currentLocationTextView;
     private TextView lastUpdatedAtTextView;
+    private MapView mapView;
+    private GoogleMap map;
     private String lastKnownUserLocationName;
+    private LatLng lastKnownUserLocation;
     private Date lastUpdatedAt;
-    private ImageButton refreshImageButton;
     private List<Stop> nearbyStops = new ArrayList<>();
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 25;
-    private static final boolean ONLY_INCLUDE_UPCOMING_DEPARTURES = true;
     private static final int MAX_DISTANCE = 3;
     private static final double NEAR_DISTANCE = 0.3;
 
@@ -73,7 +79,21 @@ public class NearbyFragment extends Fragment {
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
         lastUpdatedAtTextView = (TextView) view.findViewById(R.id.last_updated_textview);
-        refreshImageButton = (ImageButton) view.findViewById(R.id.refresh_button);
+        mapView = (MapView) view.findViewById(R.id.map_view);
+
+        /**
+         * Create MapView, get GoogleMap from it and then configure the GoogleMap
+         */
+
+        Bundle mapViewSavedInstanceState = savedInstanceState != null ?
+                savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
+        mapView.onCreate(mapViewSavedInstanceState);
+
+        map = mapView.getMap();
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setMyLocationEnabled(true);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()),
+                12));
 
         /**
          * Setup swipe refresh layout
@@ -97,18 +117,6 @@ public class NearbyFragment extends Fragment {
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
         /**
-         * Set refresh button to reload nearby stops on click
-         */
-
-        refreshImageButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                loadNearbyStops();
-            }
-        });
-
-        /**
          * Load nearby stops from network
          */
 
@@ -116,26 +124,57 @@ public class NearbyFragment extends Fragment {
             loadNearbyStops();
         } else {
             nearbyStopsAdapter.notifyNearbyStopsChanged();
-            updateCurrentLocationAndLastUpdated();
+            updateSlidingMapPanel();
         }
 
         return view;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onResume() {
+        super.onResume();
 
-        nearbyStopsRecyclerView = null;
-        nearbyStopsAdapter = null;
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mapView.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        //This MUST be done before saving any of your own or your base class's variables
+        Bundle mapViewSaveState = new Bundle(outState);
+        mapView.onSaveInstanceState(mapViewSaveState);
+        outState.putBundle(MAPVIEW_SAVE_STATE, mapViewSaveState);
+        //Add any other variables here.
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+
+        mapView.onLowMemory();
     }
 
     private void loadNearbyStops() {
         setRefreshIndicatorVisiblity(true);
 
-        LatLng lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
+        lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
+        lastKnownUserLocationName = LocationService.getInstance().getLastKnownUserLocationName();
 
-        if (lastKnownUserLocation != null) {
+        if (lastKnownUserLocation != null && lastKnownUserLocationName != null) {
             StopService.getInstance().getNearbyStops(lastKnownUserLocation.latitude,
                     lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
                     Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, new BaseService.Callback<List<Stop>>() {
@@ -150,7 +189,7 @@ public class NearbyFragment extends Fragment {
 
                                 nearbyStopsAdapter.notifyNearbyStopsChanged();
 
-                                updateCurrentLocationAndLastUpdated();
+                                updateSlidingMapPanel();
                             }
                         }
 
@@ -169,21 +208,36 @@ public class NearbyFragment extends Fragment {
         }
     }
 
-    private void updateCurrentLocationAndLastUpdated() {
-        lastKnownUserLocationName = LocationService.getInstance().getLastKnownUserLocationName();
+    private void updateSlidingMapPanel() {
+        // update current location and last update timestamp
 
-        if (lastKnownUserLocationName != null) {
-            currentLocationTextView.setText(lastKnownUserLocationName);
-        } else {
-            currentLocationTextView.setText(getString(R.string.label_not_found));
+        currentLocationTextView.setText(lastKnownUserLocationName);
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+        lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
+
+        // add nearby stop markers to map
+
+        for (int i=0; i<nearbyStops.size(); i++) {
+            Stop stop = nearbyStops.get(i);
+
+            Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(new LatLng(stop.getLocation().get(1), stop.getLocation().get(0)))
+                    .icon(BitmapDescriptorFactory.fromBitmap(stopMarkerIcon))
+                    .title(stop.getName());
+
+            // only show info window for nearest stop
+            if (i == 0) {
+                markerOptions.snippet(getString(R.string.label_nearest));
+                map.addMarker(markerOptions).showInfoWindow();
+            } else {
+                map.addMarker(markerOptions);
+            }
         }
 
-        if (lastUpdatedAt != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
-            lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
-        } else {
-            lastUpdatedAtTextView.setText(R.string.label_not_found);
-        }
+        // move map focus to user's last known location
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownUserLocation, 16));
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
