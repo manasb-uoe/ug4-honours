@@ -136,4 +136,31 @@ public class StopService extends BaseService {
             client.delete(url, responseHandler);
         }
     }
+
+    public void getSavedStops(final Callback<List<Stop>> callback) {
+        AsyncHttpClient client = getAsyncHttpClient(true);
+        client.get(API_BASE + "/stops/saved", new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    Gson gson = new Gson();
+                    Stop[] stopsArray = gson.fromJson(
+                            response.getJSONArray("data").toString(), Stop[].class
+                    );
+                    List<Stop> stopsList = Arrays.asList(stopsArray);
+
+                    callback.onSuccess(stopsList);
+
+                } catch (JSONException e) {
+                        callback.onFailure(parsingErrorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                onFailureCommon(statusCode, errorResponse, callback);
+            }
+        });
+    }
 }

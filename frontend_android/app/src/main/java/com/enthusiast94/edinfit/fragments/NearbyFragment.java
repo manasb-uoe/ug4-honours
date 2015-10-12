@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,7 +28,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.SimpleDateFormat;
@@ -48,12 +48,16 @@ public class NearbyFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView currentLocationTextView;
     private TextView lastUpdatedAtTextView;
+    private TabLayout tabLayout;
     private MapView mapView;
     private GoogleMap map;
     private String lastKnownUserLocationName;
     private LatLng lastKnownUserLocation;
     private Date lastUpdatedAt;
-    private List<Stop> nearbyStops = new ArrayList<>();
+    private List<Stop> stops = new ArrayList<>();
+
+    // indicates whether nearest or saved stops are being shown
+    private boolean isShowingNearestStops = true;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 25;
@@ -79,6 +83,7 @@ public class NearbyFragment extends Fragment {
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
         lastUpdatedAtTextView = (TextView) view.findViewById(R.id.last_updated_textview);
+        tabLayout = (TabLayout) view.findViewById(R.id.tablayout);
         mapView = (MapView) view.findViewById(R.id.map_view);
 
         /**
@@ -96,6 +101,36 @@ public class NearbyFragment extends Fragment {
                 12));
 
         /**
+         * Setup tabs to switch between nearest and saved stops
+         */
+
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.label_nearest)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.label_saved)));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                isShowingNearestStops = tab.getPosition() == 0;
+                loadStops();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        // select tab based on retained value of isShowingNearestStops
+        if (savedInstanceState != null) {
+            TabLayout.Tab tab = isShowingNearestStops ? tabLayout.getTabAt(0) :
+                    tabLayout.getTabAt(1);
+            if (tab != null) {
+                tab.select();
+            }
+        }
+
+        /**
          * Setup swipe refresh layout
          */
 
@@ -104,7 +139,7 @@ public class NearbyFragment extends Fragment {
 
             @Override
             public void onRefresh() {
-                loadNearbyStops();
+                loadStops();
             }
         });
 
@@ -120,10 +155,10 @@ public class NearbyFragment extends Fragment {
          * Load nearby stops from network
          */
 
-        if (nearbyStops.size() == 0) {
-            loadNearbyStops();
+        if (stops.size() == 0) {
+            loadStops();
         } else {
-            nearbyStopsAdapter.notifyNearbyStopsChanged();
+            nearbyStopsAdapter.notifyStopsChanged();
             updateSlidingMapPanel();
         }
 
@@ -168,40 +203,45 @@ public class NearbyFragment extends Fragment {
         mapView.onLowMemory();
     }
 
-    private void loadNearbyStops() {
+    private void loadStops() {
         setRefreshIndicatorVisiblity(true);
 
         lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
         lastKnownUserLocationName = LocationService.getInstance().getLastKnownUserLocationName();
 
         if (lastKnownUserLocation != null && lastKnownUserLocationName != null) {
-            StopService.getInstance().getNearbyStops(lastKnownUserLocation.latitude,
-                    lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
-                    Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, new BaseService.Callback<List<Stop>>() {
+            BaseService.Callback<List<Stop>> callback = new BaseService.Callback<List<Stop>>() {
+                @Override
+                public void onSuccess(List<Stop> data) {
+                    stops = data;
+                    lastUpdatedAt = new Date();
 
-                        @Override
-                        public void onSuccess(List<Stop> data) {
-                            nearbyStops = data;
-                            lastUpdatedAt = new Date();
+                    if (getActivity() != null) {
+                        setRefreshIndicatorVisiblity(false);
 
-                            if (getActivity() != null) {
-                                setRefreshIndicatorVisiblity(false);
+                        nearbyStopsAdapter.notifyStopsChanged();
 
-                                nearbyStopsAdapter.notifyNearbyStopsChanged();
+                        updateSlidingMapPanel();
+                    }
+                }
 
-                                updateSlidingMapPanel();
-                            }
-                        }
+                @Override
+                public void onFailure(String message) {
+                    if (getActivity() != null) {
+                        setRefreshIndicatorVisiblity(false);
 
-                        @Override
-                        public void onFailure(String message) {
-                            if (getActivity() != null) {
-                                setRefreshIndicatorVisiblity(false);
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
 
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+            if (isShowingNearestStops) {
+                StopService.getInstance().getNearbyStops(lastKnownUserLocation.latitude,
+                        lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
+                        Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, callback);
+            } else {
+                StopService.getInstance().getSavedStops(callback);
+            }
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_location),
                     Toast.LENGTH_LONG).show();
@@ -217,8 +257,10 @@ public class NearbyFragment extends Fragment {
 
         // add nearby stop markers to map
 
-        for (int i=0; i<nearbyStops.size(); i++) {
-            Stop stop = nearbyStops.get(i);
+        map.clear();
+
+        for (int i=0; i< stops.size(); i++) {
+            Stop stop = stops.get(i);
 
             Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
 
@@ -227,10 +269,12 @@ public class NearbyFragment extends Fragment {
                     .icon(BitmapDescriptorFactory.fromBitmap(stopMarkerIcon))
                     .title(stop.getName());
 
-            // only show info window for nearest stop
-            if (i == 0) {
-                markerOptions.snippet(getString(R.string.label_nearest));
-                map.addMarker(markerOptions).showInfoWindow();
+            if (isShowingNearestStops) {
+                // only show info window for nearest stop
+                if (i == 0) {
+                    markerOptions.snippet(getString(R.string.label_nearest));
+                    map.addMarker(markerOptions).showInfoWindow();
+                }
             } else {
                 map.addMarker(markerOptions);
             }
@@ -253,9 +297,9 @@ public class NearbyFragment extends Fragment {
     private class NearbyStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private LayoutInflater inflater;
-        private final int HEADING_VIEW_TYPE = 0;
-        private final int NEAREST_STOP_VIEW_TYPE = 1;
-        private final int FARTHER_STOP_VIEW_TYPE = 2;
+        private final int HEADING_VIEW_TYPE = 1;
+        private final int NEAREST_STOP_VIEW_TYPE = 2;
+        private final int FARTHER_STOP_VIEW_TYPE = 3;
         private int nearestStopCount;
 
         @Override
@@ -267,9 +311,13 @@ public class NearbyFragment extends Fragment {
             if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else if (viewType == NEAREST_STOP_VIEW_TYPE) {
-                return new NearestStopViewHolder(inflater.inflate(R.layout.row_nearest_stop, parent, false));
+                return new NearestStopViewHolder(
+                        inflater.inflate(R.layout.row_nearest_stop, parent, false)
+                );
             } else {
-                return new FartherStopViewHolder(inflater.inflate(R.layout.row_farther_stop, parent, false));
+                return new FartherStopViewHolder(
+                        inflater.inflate(R.layout.row_farther_stop, parent, false)
+                );
             }
         }
 
@@ -288,7 +336,15 @@ public class NearbyFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return nearbyStops.size();
+            if (stops.size() > 0) {
+                if (isShowingNearestStops) {
+                    return stops.size() + 2 /* 2 headings */;
+                } else {
+                    return stops.size();
+                }
+            }
+
+            return 0;
         }
 
         @Override
@@ -298,36 +354,46 @@ public class NearbyFragment extends Fragment {
             if (item instanceof String) {
                 return HEADING_VIEW_TYPE;
             } else {
-                if (((Stop) item).getDistanceAway() < NEAR_DISTANCE) {
-                    return NEAREST_STOP_VIEW_TYPE;
+                if (isShowingNearestStops) {
+                    if (((Stop) item).getDistanceAway() < NEAR_DISTANCE) {
+                        return NEAREST_STOP_VIEW_TYPE;
+                    } else {
+                        return FARTHER_STOP_VIEW_TYPE;
+                    }
                 } else {
-                    return FARTHER_STOP_VIEW_TYPE;
+                    return NEAREST_STOP_VIEW_TYPE;
                 }
             }
         }
 
         private Object getItem(int position) {
-            if (position == 0) {
-                return getString(R.string.label_nearest_bus_stops);
-            } else if (position == nearestStopCount + 1) {
-                return getString(R.string.label_farther_away);
-            } else {
-                if (position < nearestStopCount) {
-                    return nearbyStops.get(position - 1);
+            if (isShowingNearestStops) {
+                if (position == 0) {
+                    return getString(R.string.label_nearest_bus_stops);
+                } else if (position == nearestStopCount + 1) {
+                    return getString(R.string.label_farther_away);
                 } else {
-                    return nearbyStops.get(position-2);
+                    if (position < nearestStopCount) {
+                        return stops.get(position - 1);
+                    } else {
+                        return stops.get(position-2);
+                    }
                 }
+            } else {
+                return stops.get(position);
             }
         }
 
-        private void notifyNearbyStopsChanged() {
-            // recalculate nearest stops count so that headings appear in the correct positions
-            nearestStopCount = 0;
-            for (Stop stop : nearbyStops) {
-                if (stop.getDistanceAway() < NEAR_DISTANCE) {
-                    nearestStopCount++;
-                } else {
-                    break;
+        private void notifyStopsChanged() {
+            if (isShowingNearestStops) {
+                // recalculate nearest stops count so that headings appear in the correct positions
+                nearestStopCount = 0;
+                for (Stop stop : stops) {
+                    if (stop.getDistanceAway() < NEAR_DISTANCE) {
+                        nearestStopCount++;
+                    } else {
+                        break;
+                    }
                 }
             }
 
