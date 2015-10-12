@@ -2,6 +2,7 @@ package com.enthusiast94.edinfit.services;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
@@ -93,8 +94,8 @@ public class UserService extends BaseService {
                 try {
                     // Decode JWT token's payload in order to retrieve user data as json
                     String token = response.getJSONObject("data").getString("token");
-                    String decodedPayload =
-                            new String(Base64.decode(token.split("\\.")[1].getBytes(), Base64.DEFAULT));
+                    String decodedPayload = new String(Base64.decode(token.split("\\.")[1].getBytes(),
+                            Base64.DEFAULT));
 
                     // parse the decoded payload and construct new user object
                     Gson gson = new Gson();
@@ -112,7 +113,8 @@ public class UserService extends BaseService {
             }
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable,
+                                  JSONObject errorResponse) {
                 onFailureCommon(statusCode, errorResponse, callback);
             }
         });
@@ -131,6 +133,36 @@ public class UserService extends BaseService {
         }
 
         return null;
+    }
+
+    public void updatedCachedUser(final Callback<Void> callback) {
+        final User user = getAuthenticatedUser();
+
+        AsyncHttpClient cliemt = getAsyncHttpClient(true);
+        cliemt.get(API_BASE + "/users/" + user.getId(), new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    Gson gson = new Gson();
+                    User updatedUser = gson.fromJson(response.getJSONObject("data").toString(),
+                            User.class);
+                    updatedUser.setAuthToken(user.getAuthToken());
+
+                    Helpers.writeToPrefs(context, USER_PREFS_KEY, gson.toJson(updatedUser));
+
+                    callback.onSuccess(null);
+                } catch (JSONException e) {
+                    callback.onFailure(parsingErrorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable,
+                                  JSONObject errorResponse) {
+                onFailureCommon(statusCode, errorResponse, callback);
+            }
+        });
     }
 
     public boolean isUserAuthenticated() {
