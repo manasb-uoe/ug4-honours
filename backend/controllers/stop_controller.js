@@ -87,6 +87,52 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
 
 
 /**
+ * Get list of saved stops for currently authenticated user
+ */
+
+router.get("/stops/saved", authenticationMiddleware, function (req, res) {
+    User.findById(req.decodedPayload.id, function (err, user) {
+        if (err) return res.sendError(500, err.message);
+
+        console.log(user);
+
+        Stop
+            .where("stopId")
+            .in(user.savedStops)
+            .exec(function (err, stops) {
+                if (err) return res.sendError(500, err.message);
+
+                async.each(
+                    stops,
+                    function (stop, callback) {
+                        // add departures if they don't already exist
+                        // also filter out departures that are not for today
+                        stop.filterDepartures(null, helpers.getDayCode(), function () {
+                            if (stop.departures.length == 0) {
+                                stop.updateDepartures(function (err, departures) {
+                                    if (err) return callback(err);
+
+                                    stop.departures = departures;
+
+                                    return callback();
+                                });
+                            } else {
+                                return callback();
+                            }
+                        });
+                    },
+                    function (err) {
+                        if (err) return res.sendError(500, err.message);
+
+                        return res.sendOk(stops);
+                    }
+                )
+            });
+    });
+});
+
+
+/**
  * Get stop corresponding to provided stop_id
  */
 
@@ -99,7 +145,8 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
 
         if (err) return res.sendError(500, err.message);
 
-        // filter out departures that do not belong to provided day
+        // add departures if they don't already exist
+        // also filter out departures that do not belong to provided day
         stop.filterDepartures(null, time, function () {
             if (stop.departures.length == 0) {
                 stop.updateDepartures(function (err, departures) {
