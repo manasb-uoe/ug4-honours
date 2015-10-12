@@ -45,10 +45,13 @@
     <string name="label_walk_duration">Walk (%1$s)</string>
     <string name="label_nearest">Nearest</string>
     <string name="label_save">Save</string>
+    <string name="label_unsave">Unsave</string>
     <string name="label_show_on_map">Show on map</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
+    <string name="success_stop_saved">\'%1$s\' added to saved stops.</string>
+    <string name="success_stop_unsaved">\'%1$s\' removed from saved stops.</string>
 
     <!-- Error messages -->
     <string name="error_required_field">This field is required</string>

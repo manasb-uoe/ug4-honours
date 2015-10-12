@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -36,6 +35,7 @@ import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -456,14 +456,38 @@ public class ServiceFragment extends Fragment {
                     startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
                     context.startActivity(startActivityIntent);
                 } else if (id == moreOptionsButton.getId()) {
-                    DialogFragment dialogFragment = new StopMoreOptitonsDialog(stop) {
+                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
+                            context, stop, new MoreStopOptionsDialog.ResponseListener() {
 
                         @Override
                         public void onShowStopOnMopOptionSelected() {
                             RouteStopsAdapter.this.onShowStopOnMopOptionSelected(stop);
                         }
-                    };
-                    dialogFragment.show(fragmentManager, null);
+
+                        @Override
+                        public void onStopSaved(String error) {
+                            if (error == null) {
+                                Toast.makeText(context, String.format(
+                                        context.getString(R.string.success_stop_saved),
+                                        stop.getName()), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onStopUnsaved(String error) {
+                            if (error == null) {
+                                Toast.makeText(context, String.format(
+                                        context.getString(R.string.success_stop_unsaved),
+                                        stop.getName()), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+                    moreStopOptionsDialog.show();
                 }
             }
         }
