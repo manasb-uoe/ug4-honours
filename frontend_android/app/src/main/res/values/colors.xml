@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#EEEEEE</color>
+    <color name="primary">#F44336</color>
     <color name="primary_2">#E8E8E8</color>
-    <color name="primary_dark">#B2B2B2</color>
+    <color name="primary_dark">#D32F2F</color>
     <color name="primary_light">#E3ECF5</color>
-    <color name="accent">#03A9F4</color>
+    <color name="accent">@color/primary</color>
     <color name="primary_text_light">@android:color/primary_text_light</color>
     <color name="secondary_text_light">@android:color/secondary_text_light</color>
     <color name="secondary_text_light_2">#777</color>
@@ -14,4 +14,6 @@
     <color name="background_dark">@color/background_material_dark</color>
     <color name="divider">#E8E8E8</color>
     <color name="red">#F44336</color>
+    <color name="tab_indicator">#FFFFFF</color>
+    <color name="drop_shadow_end_color">#40000000</color>
 </resources>

@@ -18,11 +18,4 @@
         android:textColor="@color/primary_dark"
         />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/primary_dark"
-        android:layout_marginTop="@dimen/spacing_small"
-        />
-
 </LinearLayout>
