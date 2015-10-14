@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -330,30 +329,32 @@ public class ServiceFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_select_route) {
-            final List<String> destinations = new ArrayList<>();
+            if (service != null) {
+                final List<String> destinations = new ArrayList<>();
 
-            for (Route route : service.getRoutes()) {
-                destinations.add(route.getDestination());
+                for (Route route : service.getRoutes()) {
+                    destinations.add(route.getDestination());
+                }
+
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                        .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
+                                destinations.indexOf(selectedRouteDestination), null)
+                        .setTitle(R.string.label_select_route)
+                        .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ListView listView = ((AlertDialog) dialog).getListView();
+                                selectedRouteDestination =
+                                        destinations.get(listView.getCheckedItemPosition());
+                                updateRoute(selectedRouteDestination);
+                            }
+                        })
+                        .setNegativeButton(R.string.label_cancel, null)
+                        .create();
+
+                alertDialog.show();
             }
-
-            AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                    .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
-                            destinations.indexOf(selectedRouteDestination), null)
-                    .setTitle(R.string.label_select_route)
-                    .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ListView listView = ((AlertDialog) dialog).getListView();
-                            selectedRouteDestination =
-                                    destinations.get(listView.getCheckedItemPosition());
-                            updateRoute(selectedRouteDestination);
-                        }
-                    })
-                    .setNegativeButton(R.string.label_cancel, null)
-                    .create();
-
-            alertDialog.show();
 
             return true;
         }
