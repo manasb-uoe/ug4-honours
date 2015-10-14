@@ -20,9 +20,9 @@ import com.enthusiast94.edinfit.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.LocationService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -39,7 +39,7 @@ import java.util.Locale;
 /**
  * Created by manas on 01-10-2015.
  */
-public class NearbyFragment extends Fragment {
+public class NearbyFragment extends Fragment implements LocationProviderService.LocationCallback {
 
     public static final String TAG = NearbyFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
@@ -51,8 +51,6 @@ public class NearbyFragment extends Fragment {
     private TabLayout tabLayout;
     private MapView mapView;
     private GoogleMap map;
-    private String lastKnownUserLocationName;
-    private LatLng lastKnownUserLocation;
     private Date lastUpdatedAt;
     private List<Stop> stops = new ArrayList<>();
 
@@ -111,7 +109,7 @@ public class NearbyFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 isShowingNearestStops = tab.getPosition() == 0;
-                loadStops();
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(NearbyFragment.this);
             }
 
             @Override
@@ -139,7 +137,7 @@ public class NearbyFragment extends Fragment {
 
             @Override
             public void onRefresh() {
-                loadStops();
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(NearbyFragment.this);
             }
         });
 
@@ -152,15 +150,10 @@ public class NearbyFragment extends Fragment {
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
         /**
-         * Load nearby stops from network
+         * Finally, request user location in order to get things started
          */
 
-        if (stops.size() == 0) {
-            loadStops();
-        } else {
-            nearbyStopsAdapter.notifyStopsChanged();
-            updateSlidingMapPanel();
-        }
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(this);
 
         return view;
     }
@@ -203,55 +196,48 @@ public class NearbyFragment extends Fragment {
         mapView.onLowMemory();
     }
 
-    private void loadStops() {
+    private void loadStops(final LatLng userLocationLatLng, final String userLocationName) {
         setRefreshIndicatorVisiblity(true);
 
-        lastKnownUserLocation = LocationService.getInstance().getLastKnownUserLocation();
-        lastKnownUserLocationName = LocationService.getInstance().getLastKnownUserLocationName();
+        BaseService.Callback<List<Stop>> callback = new BaseService.Callback<List<Stop>>() {
+            @Override
+            public void onSuccess(List<Stop> data) {
+                stops = data;
+                lastUpdatedAt = new Date();
 
-        if (lastKnownUserLocation != null && lastKnownUserLocationName != null) {
-            BaseService.Callback<List<Stop>> callback = new BaseService.Callback<List<Stop>>() {
-                @Override
-                public void onSuccess(List<Stop> data) {
-                    stops = data;
-                    lastUpdatedAt = new Date();
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
 
-                    if (getActivity() != null) {
-                        setRefreshIndicatorVisiblity(false);
+                    nearbyStopsAdapter.notifyStopsChanged();
 
-                        nearbyStopsAdapter.notifyStopsChanged();
-
-                        updateSlidingMapPanel();
-                    }
+                    updateSlidingMapPanel(userLocationLatLng, userLocationName);
                 }
-
-                @Override
-                public void onFailure(String message) {
-                    if (getActivity() != null) {
-                        setRefreshIndicatorVisiblity(false);
-
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            };
-
-            if (isShowingNearestStops) {
-                StopService.getInstance().getNearbyStops(lastKnownUserLocation.latitude,
-                        lastKnownUserLocation.longitude, MAX_DISTANCE, NEAR_DISTANCE,
-                        Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, callback);
-            } else {
-                StopService.getInstance().getSavedStops(callback);
             }
+
+            @Override
+            public void onFailure(String message) {
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
+
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+
+        if (isShowingNearestStops) {
+            StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
+                    userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE,
+                    Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, callback);
         } else {
-            Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_location),
-                    Toast.LENGTH_LONG).show();
+            StopService.getInstance().getSavedStops(callback);
         }
+
     }
 
-    private void updateSlidingMapPanel() {
+    private void updateSlidingMapPanel(LatLng userLocationLatLng, String userLocationName) {
         // update current location and last update timestamp
 
-        currentLocationTextView.setText(lastKnownUserLocationName);
+        currentLocationTextView.setText(userLocationName);
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
         lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
 
@@ -274,6 +260,8 @@ public class NearbyFragment extends Fragment {
                 if (i == 0) {
                     markerOptions.snippet(getString(R.string.label_nearest));
                     map.addMarker(markerOptions).showInfoWindow();
+                } else {
+                    map.addMarker(markerOptions);
                 }
             } else {
                 map.addMarker(markerOptions);
@@ -281,7 +269,7 @@ public class NearbyFragment extends Fragment {
         }
 
         // move map focus to user's last known location
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownUserLocation, 16));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 16));
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -292,6 +280,21 @@ public class NearbyFragment extends Fragment {
                 swipeRefreshLayout.setRefreshing(visiblity);
             }
         });
+    }
+
+    @Override
+    public void onLocationSuccess(LatLng latLng, String placeName) {
+        if (getActivity() != null) {
+            loadStops(latLng, placeName);
+        }
+    }
+
+    @Override
+    public void onLocationFailure(String error) {
+        if (getActivity() != null) {
+            setRefreshIndicatorVisiblity(false);
+            Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
+        }
     }
 
     private class NearbyStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

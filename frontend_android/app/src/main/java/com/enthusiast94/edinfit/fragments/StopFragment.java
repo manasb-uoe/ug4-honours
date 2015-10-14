@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.fragments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,14 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.directions.route.Route;
-import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
-import com.enthusiast94.edinfit.services.LocationService;
+import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,7 +47,7 @@ import java.util.Locale;
 /**
  * Created by manas on 04-10-2015.
  */
-public class StopFragment extends Fragment {
+public class StopFragment extends Fragment implements LocationProviderService.LocationCallback {
 
     public static final String EXTRA_STOP_ID = "stopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
@@ -110,9 +110,7 @@ public class StopFragment extends Fragment {
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                LocationService.getInstance().getLastKnownUserLocation(), 12)
-        );
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         /**
          * Setup swipe refresh layout
@@ -123,7 +121,7 @@ public class StopFragment extends Fragment {
 
             @Override
             public void onRefresh() {
-                loadStop();
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(StopFragment.this);
             }
         });
 
@@ -136,15 +134,10 @@ public class StopFragment extends Fragment {
         departuresRecyclerView.setAdapter(departuresAdapter);
 
         /**
-         * Load stop if it hasn't already been loaded
+         * Finally, request user location in order to get things started
          */
 
-        if (stop == null) {
-            loadStop();
-        } else {
-            departuresAdapter.notifyDeparturesChanged();
-            updateMapSlidingPanel();
-        }
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(this);
 
         return view;
     }
@@ -187,7 +180,7 @@ public class StopFragment extends Fragment {
         mapView.onLowMemory();
     }
 
-    private void loadStop() {
+    private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
         StopService.getInstance().getStop(stopId, new BaseService.Callback<Stop>() {
@@ -201,7 +194,7 @@ public class StopFragment extends Fragment {
 
                             departuresAdapter.notifyDeparturesChanged();
 
-                            updateMapSlidingPanel();
+                            updateMapSlidingPanel(userLocationLatLng);
                         }
                     }
 
@@ -216,9 +209,8 @@ public class StopFragment extends Fragment {
                 });
     }
 
-    private void updateMapSlidingPanel() {
+    private void updateMapSlidingPanel(LatLng userLocationLatLng) {
         LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
-        LatLng userLatLng = LocationService.getInstance().getLastKnownUserLocation();
 
         // add stop marker with info window containing stop name
         map.addMarker(new MarkerOptions()
@@ -229,26 +221,31 @@ public class StopFragment extends Fragment {
         // move map focus to user's last known location
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
-        DirectionsService.getInstance().getWalkingDirections(userLatLng, stopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
+        DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
+                new BaseService.Callback<DirectionsService.DirectionsResult>() {
 
             @Override
             public void onSuccess(DirectionsService.DirectionsResult directionsResult) {
-                // add walking route from user to stop
-                PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
-                        .color(ContextCompat.getColor(getActivity(), R.color.red))
-                        .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
-                map.addPolyline(polylineOptions);
+                if (getActivity() != null) {
+                    // add walking route from user to stop
+                    PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
+                            .color(ContextCompat.getColor(getActivity(), R.color.red))
+                            .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                    map.addPolyline(polylineOptions);
 
-                // update drag view title with travel duration
-                Route route = directionsResult.getRoute();
-                walkDurationTextView.setText(String.format(
-                        getString(R.string.label_walk_duration), route.getDurationText()));
+                    // update drag view title with travel duration
+                    Route route = directionsResult.getRoute();
+                    walkDurationTextView.setText(String.format(
+                            getString(R.string.label_walk_duration), route.getDurationText()));
+                }
             }
 
             @Override
             public void onFailure(String message) {
-                Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
-                        Toast.LENGTH_LONG).show();
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -261,6 +258,21 @@ public class StopFragment extends Fragment {
                 swipeRefreshLayout.setRefreshing(visiblity);
             }
         });
+    }
+
+    @Override
+    public void onLocationSuccess(LatLng latLng, String placeName) {
+        if (getActivity() != null) {
+            loadStop(latLng);
+        }
+    }
+
+    @Override
+    public void onLocationFailure(String error) {
+        if (getActivity() != null) {
+            setRefreshIndicatorVisiblity(false);
+            Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
+        }
     }
 
     private class DeparturesAdapter extends RecyclerView.Adapter {
