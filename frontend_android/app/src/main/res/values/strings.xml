@@ -9,6 +9,7 @@
     <string name="action_signup">Sign up</string>
     <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
     <string name="action_logout">Log out</string>
+    <string name="action_select_time">Select time</string>
 
     <!-- Labels-->
     <string name="label_name">Name</string>

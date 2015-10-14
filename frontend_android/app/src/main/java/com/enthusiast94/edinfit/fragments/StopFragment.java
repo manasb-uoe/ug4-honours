@@ -12,6 +12,9 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -83,6 +86,8 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stop, container, false);
+
+        setHasOptionsMenu(true);
 
         /**
          * Find views
@@ -180,33 +185,100 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
         mapView.onLowMemory();
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_stop_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_select_time:
+                showTimePickerDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
         StopService.getInstance().getStop(stopId, new BaseService.Callback<Stop>() {
 
+            @Override
+            public void onSuccess(Stop data) {
+                stop = data;
+
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
+
+                    departuresAdapter.notifyDeparturesChanged();
+
+                    updateMapSlidingPanel(userLocationLatLng);
+                }
+            }
+
+            @Override
+            public void onFailure(String message) {
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
+
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void showTimePickerDialog() {
+        View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_time_picker, null);
+
+        // find views
+        final NumberPicker dayPicker = (NumberPicker) dialogView.findViewById(R.id.day_picker);
+        final NumberPicker hourPicker = (NumberPicker) dialogView.findViewById(R.id.hour_picker);
+        final NumberPicker minutePicker = (NumberPicker) dialogView.findViewById(R.id.minute_picker);
+
+        // set value ranges and current values for pickers
+        final String[] daysOfTheWeek = getResources().getStringArray(R.array.days_of_the_week);
+        dayPicker.setMinValue(0);
+        dayPicker.setMaxValue(daysOfTheWeek.length - 1);
+        dayPicker.setDisplayedValues(daysOfTheWeek);
+        for (int i=0; i<daysOfTheWeek.length; i++) {
+            if (daysOfTheWeek[i].equals(selectedDay)) {
+                dayPicker.setValue(i);
+            }
+        }
+
+        hourPicker.setMinValue(0);
+        hourPicker.setMaxValue(23);
+        hourPicker.setValue(Integer.parseInt(selectedTime.substring(0,
+                selectedTime.indexOf(":"))));
+
+        minutePicker.setMinValue(0);
+        minutePicker.setMaxValue(59);
+        minutePicker.setValue(Integer.parseInt(selectedTime.substring(
+                selectedTime.indexOf(":") + 1, selectedTime.length())));
+
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Select time")
+                .setView(dialogView)
+                .setPositiveButton("Set", new DialogInterface.OnClickListener() {
+
                     @Override
-                    public void onSuccess(Stop data) {
-                        stop = data;
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedDay = daysOfTheWeek[dayPicker.getValue()];
+                        selectedTime = hourPicker.getValue() + ":" +
+                                minutePicker.getValue();
 
-                        if (getActivity() != null) {
-                            setRefreshIndicatorVisiblity(false);
+                        departuresAdapter.notifyDeparturesChanged();
 
-                            departuresAdapter.notifyDeparturesChanged();
-
-                            updateMapSlidingPanel(userLocationLatLng);
-                        }
+                        dialog.dismiss();
                     }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
 
-                    @Override
-                    public void onFailure(String message) {
-                        if (getActivity() != null) {
-                            setRefreshIndicatorVisiblity(false);
-
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        dialog.show();
     }
 
     private void updateMapSlidingPanel(LatLng userLocationLatLng) {
@@ -224,30 +296,30 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
         DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
                 new BaseService.Callback<DirectionsService.DirectionsResult>() {
 
-            @Override
-            public void onSuccess(DirectionsService.DirectionsResult directionsResult) {
-                if (getActivity() != null) {
-                    // add walking route from user to stop
-                    PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
-                            .color(ContextCompat.getColor(getActivity(), R.color.red))
-                            .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
-                    map.addPolyline(polylineOptions);
+                    @Override
+                    public void onSuccess(DirectionsService.DirectionsResult directionsResult) {
+                        if (getActivity() != null) {
+                            // add walking route from user to stop
+                            PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
+                                    .color(ContextCompat.getColor(getActivity(), R.color.red))
+                                    .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                            map.addPolyline(polylineOptions);
 
-                    // update drag view title with travel duration
-                    Route route = directionsResult.getRoute();
-                    walkDurationTextView.setText(String.format(
-                            getString(R.string.label_walk_duration), route.getDurationText()));
-                }
-            }
+                            // update drag view title with travel duration
+                            Route route = directionsResult.getRoute();
+                            walkDurationTextView.setText(String.format(
+                                    getString(R.string.label_walk_duration), route.getDurationText()));
+                        }
+                    }
 
-            @Override
-            public void onFailure(String message) {
-                if (getActivity() != null) {
-                    Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(String message) {
+                        if (getActivity() != null) {
+                            Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -388,7 +460,7 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
             }
         }
 
-        private class TimeSelectorViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private class TimeSelectorViewHolder extends RecyclerView.ViewHolder {
 
             private TextView timeTextView;
             private ImageButton selectTimeButton;
@@ -398,73 +470,10 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
 
                 // find views
                 timeTextView = (TextView) itemView.findViewById(R.id.time_textview);
-                selectTimeButton = (ImageButton) itemView.findViewById(R.id.select_time_button);
-
-                // bind event listeners
-                selectTimeButton.setOnClickListener(this);
             }
 
             public void bindItem() {
                 timeTextView.setText(selectedDay + ", " + selectedTime);
-            }
-
-            @Override
-            public void onClick(View v) {
-                //noinspection StatementWithEmptyBody
-                if (v.getId() == R.id.select_time_button) {
-                   showTimePickerDialog();
-                }
-            }
-
-            private void showTimePickerDialog() {
-                View dialogView = inflater.inflate(R.layout.dialog_time_picker, null);
-
-                // find views
-                final NumberPicker dayPicker = (NumberPicker) dialogView.findViewById(R.id.day_picker);
-                final NumberPicker hourPicker = (NumberPicker) dialogView.findViewById(R.id.hour_picker);
-                final NumberPicker minutePicker = (NumberPicker) dialogView.findViewById(R.id.minute_picker);
-
-                // set value ranges and current values for pickers
-                final String[] daysOfTheWeek = getResources().getStringArray(R.array.days_of_the_week);
-                dayPicker.setMinValue(0);
-                dayPicker.setMaxValue(daysOfTheWeek.length - 1);
-                dayPicker.setDisplayedValues(daysOfTheWeek);
-                for (int i=0; i<daysOfTheWeek.length; i++) {
-                    if (daysOfTheWeek[i].equals(selectedDay)) {
-                        dayPicker.setValue(i);
-                    }
-                }
-
-                hourPicker.setMinValue(0);
-                hourPicker.setMaxValue(23);
-                hourPicker.setValue(Integer.parseInt(selectedTime.substring(0,
-                        selectedTime.indexOf(":"))));
-
-                minutePicker.setMinValue(0);
-                minutePicker.setMaxValue(59);
-                minutePicker.setValue(Integer.parseInt(selectedTime.substring(
-                        selectedTime.indexOf(":") + 1, selectedTime.length())));
-
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                        .setTitle("Select time")
-                        .setView(dialogView)
-                        .setPositiveButton("Set", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                selectedDay = daysOfTheWeek[dayPicker.getValue()];
-                                selectedTime = hourPicker.getValue() + ":" +
-                                        minutePicker.getValue();
-
-                                departuresAdapter.notifyDeparturesChanged();
-
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create();
-
-                dialog.show();
             }
         }
     }
