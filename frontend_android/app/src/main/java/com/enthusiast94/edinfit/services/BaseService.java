@@ -19,6 +19,7 @@ public class BaseService {
     protected static AsyncHttpClient getAsyncHttpClient(boolean isAuthenticationRequired) {
         AsyncHttpClient client = new AsyncHttpClient();
         client.setUserAgent(USER_AGENT);
+        client.setLoggingEnabled(false);
 
         if (isAuthenticationRequired) {
             // add authorization header if user is authenticated
