@@ -138,7 +138,7 @@ public class ServiceFragment extends Fragment {
          */
 
         routeStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        routeStopsAdapter = new RouteStopsAdapter(getActivity(), getFragmentManager()) {
+        routeStopsAdapter = new RouteStopsAdapter(getActivity()) {
 
             @Override
             public void onShowStopOnMopOptionSelected(Stop stop) {
@@ -364,13 +364,11 @@ public class ServiceFragment extends Fragment {
     private static abstract class RouteStopsAdapter extends RecyclerView.Adapter {
 
         private Context context;
-        private FragmentManager fragmentManager;
         private LayoutInflater inflater;
         private List<Stop> stops = new ArrayList<>();
 
-        public RouteStopsAdapter(Context context, FragmentManager fragmentManager) {
+        public RouteStopsAdapter(Context context) {
             this.context = context;
-            this.fragmentManager = fragmentManager;
         }
 
         @Override
