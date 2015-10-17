@@ -7,4 +7,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_action_device_access_time"
         />
+    <item
+        android:id="@+id/action_save_or_unsave"
+        android:title="@string/label_save"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_toggle_star_outline"
+        />
 </menu>

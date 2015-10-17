@@ -27,10 +27,12 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.services.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -191,10 +193,54 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        // set save/unsave button icon depending on whether the current stop is saved or not
+        MenuItem saveOrUnsaveItem = menu.findItem(R.id.action_save_or_unsave);
+
+        if (UserService.getInstance().getAuthenticatedUser().getSavedStops().contains(stopId)) {
+            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star);
+        } else {
+            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star_outline);
+        }
+
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select_time:
                 showTimePickerDialog();
+                return true;
+            case R.id.action_save_or_unsave:
+                final boolean shouldSave = !UserService.getInstance().getAuthenticatedUser().
+                        getSavedStops().contains(stopId);
+
+                StopService.getInstance().saveOrUnsaveStop(stopId, shouldSave,
+                       new BaseService.Callback<Void>() {
+
+                    @Override
+                    public void onSuccess(Void data) {
+                        if (shouldSave) {
+                            Toast.makeText(getActivity(), String.format(
+                                    getActivity().getString(R.string.success_stop_saved),
+                                    stop.getName()), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), String.format(
+                                    getActivity().getString(R.string.success_stop_unsaved),
+                                    stop.getName()), Toast.LENGTH_SHORT).show();
+                        }
+
+                        // invalidate options menu so that it can be redrawn and therefore change
+                        // save/unsave button icon accordingly
+                        getActivity().invalidateOptionsMenu();
+                    }
+
+                    @Override
+                    public void onFailure(String message) {
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -463,7 +509,6 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
         private class TimeSelectorViewHolder extends RecyclerView.ViewHolder {
 
             private TextView timeTextView;
-            private ImageButton selectTimeButton;
 
             public TimeSelectorViewHolder(View itemView) {
                 super(itemView);
