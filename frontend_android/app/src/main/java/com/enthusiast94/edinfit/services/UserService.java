@@ -135,7 +135,7 @@ public class UserService extends BaseService {
         return null;
     }
 
-    public void updatedCachedUser(final Callback<Void> callback) {
+    public void updateCachedUser(final Callback<Void> callback) {
         final User user = getAuthenticatedUser();
 
         AsyncHttpClient cliemt = getAsyncHttpClient(true);

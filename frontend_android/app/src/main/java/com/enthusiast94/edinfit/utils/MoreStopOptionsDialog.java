@@ -71,26 +71,11 @@ public class MoreStopOptionsDialog {
 
                                     @Override
                                     public void onSuccess(Void data) {
-                                        UserService.getInstance().updatedCachedUser(new BaseService.Callback<Void>() {
-
-                                            @Override
-                                            public void onSuccess(Void data) {
-                                                if (shouldSave) {
-                                                    responseListener.onStopSaved(null);
-                                                } else {
-                                                    responseListener.onStopUnsaved(null);
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onFailure(String message) {
-                                                if (shouldSave) {
-                                                    responseListener.onStopSaved(message);
-                                                } else {
-                                                    responseListener.onStopSaved(message);
-                                                }
-                                            }
-                                        });
+                                        if (shouldSave) {
+                                            responseListener.onStopSaved(null);
+                                        } else {
+                                            responseListener.onStopUnsaved(null);
+                                        }
                                     }
 
                                     @Override

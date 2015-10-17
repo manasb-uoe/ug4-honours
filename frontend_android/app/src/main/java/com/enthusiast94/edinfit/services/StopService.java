@@ -120,7 +120,18 @@ public class StopService extends BaseService {
         JsonHttpResponseHandler responseHandler = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                callback.onSuccess(null);
+                UserService.getInstance().updateCachedUser(new Callback<Void>() {
+
+                    @Override
+                    public void onSuccess(Void data) {
+                        callback.onSuccess(null);
+                    }
+
+                    @Override
+                    public void onFailure(String message) {
+                        callback.onFailure(message);
+                    }
+                });
             }
 
             @Override
