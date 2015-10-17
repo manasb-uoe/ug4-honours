@@ -91,6 +91,8 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
  */
 
 router.get("/stops/saved", authenticationMiddleware, function (req, res) {
+    var time = req.query.time; 
+
     User.findById(req.decodedPayload.id, function (err, user) {
         if (err) return res.sendError(500, err.message);
 
@@ -107,7 +109,7 @@ router.get("/stops/saved", authenticationMiddleware, function (req, res) {
                     function (stop, callback) {
                         // add departures if they don't already exist
                         // also filter out departures that are not for today
-                        stop.filterDepartures(null, helpers.getDayCode(), function () {
+                        stop.filterDepartures(helpers.getDayCode(), time, function () {
                             if (stop.departures.length == 0) {
                                 stop.updateDepartures(function (err, departures) {
                                     if (err) return callback(err);

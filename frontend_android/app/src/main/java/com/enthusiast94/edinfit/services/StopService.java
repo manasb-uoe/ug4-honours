@@ -5,6 +5,7 @@ import android.telecom.Call;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -151,7 +152,11 @@ public class StopService extends BaseService {
 
     public void getSavedStops(final Callback<List<Stop>> callback) {
         AsyncHttpClient client = getAsyncHttpClient(true);
-        client.get(API_BASE + "/stops/saved", new JsonHttpResponseHandler() {
+
+        RequestParams requestParams = new RequestParams();
+        requestParams.add("time", Helpers.getCurrentTime24h());
+
+        client.get(API_BASE + "/stops/saved", requestParams, new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
