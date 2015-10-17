@@ -13,6 +13,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -148,7 +149,8 @@ public class StopService extends BaseService {
                     Stop[] stopsArray = gson.fromJson(
                             response.getJSONArray("data").toString(), Stop[].class
                     );
-                    List<Stop> stopsList = Arrays.asList(stopsArray);
+                    // return mutable list
+                    List<Stop> stopsList = new ArrayList<>(Arrays.asList(stopsArray));
 
                     callback.onSuccess(stopsList);
 

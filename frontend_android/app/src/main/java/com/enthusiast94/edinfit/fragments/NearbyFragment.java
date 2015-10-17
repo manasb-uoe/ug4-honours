@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,12 +24,15 @@ import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.services.LocationProviderService;
+import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,6 +47,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
     public static final String TAG = NearbyFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
+    private SlidingUpPanelLayout slidingUpPanelLayout;
     private RecyclerView nearbyStopsRecyclerView;
     private NearbyStopsAdapter nearbyStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -53,6 +58,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
     private GoogleMap map;
     private Date lastUpdatedAt;
     private List<Stop> stops = new ArrayList<>();
+    private List<Marker> stopMarkers = new ArrayList<>();
 
     // indicates whether nearest or saved stops are being shown
     private boolean isShowingNearestStops = true;
@@ -77,6 +83,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
          * Find views
          */
 
+        slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_panel_layout);
         nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
@@ -231,10 +238,13 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
         } else {
             StopService.getInstance().getSavedStops(callback);
         }
-
     }
 
     private void updateSlidingMapPanel(LatLng userLocationLatLng, String userLocationName) {
+        // remove all existing markers
+        stopMarkers = new ArrayList<>();
+        map.clear();
+
         // update current location and last update timestamp
 
         currentLocationTextView.setText(userLocationName);
@@ -242,8 +252,6 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
         lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
 
         // add nearby stop markers to map
-
-        map.clear();
 
         for (int i=0; i< stops.size(); i++) {
             Stop stop = stops.get(i);
@@ -255,17 +263,17 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
                     .icon(BitmapDescriptorFactory.fromBitmap(stopMarkerIcon))
                     .title(stop.getName());
 
+            Marker stopMarker = map.addMarker(markerOptions);
+
             if (isShowingNearestStops) {
                 // only show info window for nearest stop
                 if (i == 0) {
-                    markerOptions.snippet(getString(R.string.label_nearest));
-                    map.addMarker(markerOptions).showInfoWindow();
-                } else {
-                    map.addMarker(markerOptions);
+                    stopMarker.setSnippet(getString(R.string.label_nearest));
+                    stopMarker.showInfoWindow();
                 }
-            } else {
-                map.addMarker(markerOptions);
             }
+
+            stopMarkers.add(stopMarker);
         }
 
         // move map focus to user's last known location
@@ -411,6 +419,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
             private TextView serviceNameTextView;
             private TextView destinationTextView;
             private TextView timeTextView;
+            private ImageButton moreOptionsButton;
 
             public NearestStopViewHolder(View itemView) {
                 super(itemView);
@@ -423,9 +432,11 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
                         (TextView) itemView.findViewById(R.id.destination_textview);
                 timeTextView =
                         (TextView) itemView.findViewById(R.id.time_textview);
+                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
+                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
@@ -448,8 +459,31 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
             @Override
             public void onClick(View v) {
-                if (stop != null) {
+                int id = v.getId();
+
+                if (id == itemView.getId()) {
                     startStopActivity(stop);
+                } else if (id == moreOptionsButton.getId()) {
+                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
+                            getActivity(), stop, new MoreStopOptionsDialog.ResponseListener() {
+
+                        @Override
+                        public void onShowStopOnMopOptionSelected() {
+                            NearbyStopsAdapter.this.onShowStopOnMapOptionSelected(stop);
+                        }
+
+                        @Override
+                        public void onStopSaved(String error) {
+                            NearbyStopsAdapter.this.onStopSaved(error, stop);
+                        }
+
+                        @Override
+                        public void onStopUnsaved(String error) {
+                            NearbyStopsAdapter.this.onStopUnsaved(error, stop);
+                        }
+                    });
+
+                    moreStopOptionsDialog.show();
                 }
             }
         }
@@ -457,17 +491,20 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
         private class FartherStopViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener {
 
-            private TextView stopNameTextView;
             private Stop stop;
+            private TextView stopNameTextView;
+            private ImageButton moreOptionsButton;
 
             public FartherStopViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
+                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
@@ -478,8 +515,31 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
             @Override
             public void onClick(View v) {
-                if (stop != null) {
+                int id = v.getId();
+
+                if (id == itemView.getId()) {
                     startStopActivity(stop);
+                } else if (id == moreOptionsButton.getId()) {
+                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
+                            getActivity(), stop, new MoreStopOptionsDialog.ResponseListener() {
+
+                        @Override
+                        public void onShowStopOnMopOptionSelected() {
+                            NearbyStopsAdapter.this.onShowStopOnMapOptionSelected(stop);
+                        }
+
+                        @Override
+                        public void onStopSaved(String error) {
+                            NearbyStopsAdapter.this.onStopSaved(error, stop);
+                        }
+
+                        @Override
+                        public void onStopUnsaved(String error) {
+                            NearbyStopsAdapter.this.onStopUnsaved(error, stop);
+                        }
+                    });
+
+                    moreStopOptionsDialog.show();
                 }
             }
         }
@@ -504,6 +564,57 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
             startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
             startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
             startActivity(startActivityIntent);
+        }
+
+        private void onShowStopOnMapOptionSelected(Stop stop) {
+            // lookup marker corresponding to selected stop, then show its info
+            // window and move map focus to it
+            List<Double> stopLocation = stop.getLocation();
+            for (Marker marker : stopMarkers) {
+                LatLng latLng = marker.getPosition();
+
+                if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
+                    marker.showInfoWindow();
+                    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                    break;
+                }
+            }
+        }
+
+        private void onStopSaved(String error, Stop stop) {
+            if (getActivity() != null) {
+                if (error == null) {
+                    Toast.makeText(getActivity(), String.format(
+                            getActivity().getString(R.string.success_stop_saved),
+                            stop.getName()), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        private void onStopUnsaved(String error, Stop stop) {
+            if (getActivity() != null) {
+                if (error == null) {
+                    // remove unsaved stop from saved stops list
+                    if (!isShowingNearestStops) {
+                        for (int i=0; i<stops.size(); i++) {
+                            if (stops.get(i).equals(stop)) {
+                                stops.remove(stop);
+                                notifyItemRemoved(i);
+                                break;
+                            }
+                        }
+                    }
+
+                    Toast.makeText(getActivity(), String.format(
+                            getActivity().getString(R.string.success_stop_unsaved),
+                            stop.getName()), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
+                }
+            }
         }
     }
 }

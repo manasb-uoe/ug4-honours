@@ -30,8 +30,8 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/bus_imageview"
         android:layout_alignBottom="@+id/bus_imageview"
-        android:layout_toLeftOf="@+id/imageButton"
-        android:layout_toStartOf="@+id/imageButton"
+        android:layout_toLeftOf="@+id/more_options_button"
+        android:layout_toStartOf="@+id/more_options_button"
         />
 
     <ImageButton
@@ -43,7 +43,7 @@
         android:background="?attr/selectableItemBackground"
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/label_more_options"
-        android:id="@+id/imageButton"
+        android:id="@+id/more_options_button"
         />
 
 </RelativeLayout>
