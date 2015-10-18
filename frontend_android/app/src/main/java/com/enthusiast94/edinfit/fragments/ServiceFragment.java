@@ -6,12 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,11 +28,13 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.StopActivity;
+import com.enthusiast94.edinfit.models.LiveBus;
 import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.services.LiveBusService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
@@ -41,11 +45,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by manas on 06-10-2015.
@@ -55,6 +62,7 @@ public class ServiceFragment extends Fragment {
     public static final String TAG = ServiceFragment.class.getSimpleName();
     public static final String EXTRA_SERVICE_NAME = "serviceName";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
+    private Handler handler;
     private RecyclerView routeStopsRecyclerView;
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -66,6 +74,9 @@ public class ServiceFragment extends Fragment {
     private Service service;
     private String selectedRouteDestination;
     private List<Marker> stopMarkers;
+    private Polyline routePolyline;
+    private List<LiveBus> liveBuses;
+    private Map<String, Marker> liveBusMarkersMap;
 
     public static ServiceFragment newInstance(String stopId) {
         ServiceFragment instance = new ServiceFragment();
@@ -88,6 +99,13 @@ public class ServiceFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_service_route_stops, container, false);
 
         setHasOptionsMenu(true);
+
+        /**
+         * Bind handler to UI thread. It will be used to update live bus locations on map at
+         * frequent intervals.
+         */
+
+        handler = new Handler();
 
         /**
          * Find views
@@ -166,6 +184,7 @@ public class ServiceFragment extends Fragment {
             loadService();
         } else {
             updateRoute(selectedRouteDestination);
+            addLiveBusesToMap();
         }
 
         return view;
@@ -227,6 +246,15 @@ public class ServiceFragment extends Fragment {
                     setRefreshIndicatorVisiblity(false);
 
                     updateRoute(selectedRouteDestination);
+
+                    handler.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            loadLiveBuses();
+                            handler.postDelayed(this, 20000);
+                        }
+                    });
                 }
             }
 
@@ -269,10 +297,23 @@ public class ServiceFragment extends Fragment {
     }
 
     private void addRouteToMap(Route route) {
+        if (stopMarkers == null) {
+            stopMarkers = new ArrayList<>();
+        }
 
-        // remove all existing markers and polylines
-        map.clear();
-        stopMarkers = new ArrayList<>();
+        // remove all existing stop markers and polylines
+
+        if (stopMarkers.size() > 0) {
+            for (Marker stopMarker : stopMarkers) {
+                stopMarker.remove();
+            }
+
+            stopMarkers = new ArrayList<>();
+        }
+
+        if (routePolyline != null) {
+            routePolyline.remove();
+        }
 
         // add stop markers to map
 
@@ -296,7 +337,7 @@ public class ServiceFragment extends Fragment {
             } else if (i == stops.size()-1) {
                 stopMarker.setSnippet(getString(R.string.label_end));
                 stopMarker.showInfoWindow();
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
             }
 
             stopMarkers.add(stopMarker);
@@ -315,10 +356,62 @@ public class ServiceFragment extends Fragment {
             polylineOptions
                     .add(new LatLng(point.getLatitude(), point.getLongitude()))
                     .width(polylineWidth)
-            .color(redColor);
+                    .color(redColor);
         }
 
-        map.addPolyline(polylineOptions);
+        routePolyline = map.addPolyline(polylineOptions);
+    }
+
+    private void loadLiveBuses() {
+        LiveBusService.getInstance().getLiveBuses(serviceName, new BaseService.Callback<List<LiveBus>>() {
+
+            @Override
+            public void onSuccess(List<LiveBus> data) {
+                if (getActivity() != null) {
+                    liveBuses = data;
+                    addLiveBusesToMap();
+                    Toast.makeText(getActivity(), "Updated.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(String message) {
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void addLiveBusesToMap() {
+        if (liveBusMarkersMap == null) {
+            liveBusMarkersMap = new HashMap<>();
+        }
+
+        for (LiveBus liveBus : liveBuses) {
+            Marker liveBusMarkerOld = null;
+
+            if (liveBusMarkersMap.containsKey(liveBus.getVehicleId())) {
+                liveBusMarkerOld = liveBusMarkersMap.get(liveBus.getVehicleId());
+            }
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .title("#" + liveBus.getVehicleId() + " to " + liveBus.getDestination())
+                    .position(new LatLng(liveBus.getLatitude(), liveBus.getLongitude()))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.bus_marker));
+            Marker liveBusMarkerNew = map.addMarker(markerOptions);
+
+            if (liveBusMarkerOld != null) {
+                if (liveBusMarkerOld.isInfoWindowShown()) {
+                    liveBusMarkerNew.showInfoWindow();
+                }
+
+                liveBusMarkerOld.remove();
+            }
+
+            liveBusMarkersMap.remove(liveBus.getVehicleId());
+            liveBusMarkersMap.put(liveBus.getVehicleId(), liveBusMarkerNew);
+        }
     }
 
     @Override

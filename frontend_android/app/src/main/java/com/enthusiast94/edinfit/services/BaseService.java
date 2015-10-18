@@ -13,7 +13,7 @@ import org.json.JSONObject;
  */
 public class BaseService {
 
-    protected static final String API_BASE = "http://192.168.0.10:4000/api";
+    protected static final String API_BASE = "http://192.168.0.3:4000/api";
     private static final String USER_AGENT = "android:com.enthusiast94.edinfit";
 
     protected static AsyncHttpClient getAsyncHttpClient(boolean isAuthenticationRequired) {
