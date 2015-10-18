@@ -72,4 +72,5 @@
 
     <!-- Api keys -->
     <string name="api_key_google_maps">AIzaSyDjAGROEzgVxDKhSkF123yxS2_gb0yh8n4</string>
+    <string name="api_key_tfe">0c627af5849e23b0b030bc7352550884</string>
 </resources>

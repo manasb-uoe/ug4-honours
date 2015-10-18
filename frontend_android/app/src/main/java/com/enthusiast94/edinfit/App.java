@@ -3,7 +3,9 @@ package com.enthusiast94.edinfit;
 import android.app.Application;
 import android.content.Context;
 
+import com.enthusiast94.edinfit.models.LiveBus;
 import com.enthusiast94.edinfit.services.DirectionsService;
+import com.enthusiast94.edinfit.services.LiveBusService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.services.UserService;
@@ -29,6 +31,7 @@ public class App extends Application {
         UserService.init(this);
         StopService.init(this);
         ServiceService.init(this);
+        LiveBusService.init(this);
     }
 
     public static Context getAppContext() {
