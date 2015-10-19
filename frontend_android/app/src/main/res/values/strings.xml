@@ -55,6 +55,7 @@
     <string name="label_saved">Saved</string>
     <string name="label_modes">Modes</string>
     <string name="label_where_are_you_waiting">Where are you waiting?</string>
+    <string name="label_hint_long_click_stop_fpr_more_info">Hint: Long click on a stop to view more info.</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
