@@ -10,6 +10,10 @@
     <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
     <string name="action_logout">Log out</string>
     <string name="action_select_time">Select time</string>
+    <string name="action_wait_or_walk">Wait or Walk</string>
+    <string name="action_get_to_somewhere">Get to Somewhere</string>
+    <string name="action_select_stop">Select Stop</string>
+    <string name="action_next">Next</string>
 
     <!-- Labels-->
     <string name="label_name">Name</string>
@@ -49,6 +53,8 @@
     <string name="label_unsave">Unsave</string>
     <string name="label_show_on_map">Show on map</string>
     <string name="label_saved">Saved</string>
+    <string name="label_modes">Modes</string>
+    <string name="label_where_are_you_waiting">Where are you waiting?</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

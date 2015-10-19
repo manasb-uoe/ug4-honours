@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
@@ -120,5 +121,14 @@ public class Helpers {
                 Float.valueOf(context.getString(R.string.edinburgh_lat)),
                 Float.valueOf(context.getString(R.string.edinburgh_long))
         );
+    }
+
+    public static String humanizeDistance(Double distanceInKm) {
+        if (distanceInKm < 1) {
+            Log.d("UTIL", distanceInKm + "");
+            return String.format("%.0f", distanceInKm*1000) + " m";
+        } else {
+            return String.format("%.1f", distanceInKm) + " km";
+        }
     }
 }

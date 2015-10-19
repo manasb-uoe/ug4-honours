@@ -16,4 +16,5 @@
     <color name="red">#F44336</color>
     <color name="tab_indicator">#FFFFFF</color>
     <color name="drop_shadow_end_color">#40000000</color>
+    <color name="green_selection">#dff0d8</color>
 </resources>
