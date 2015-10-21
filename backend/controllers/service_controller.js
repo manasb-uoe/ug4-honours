@@ -54,4 +54,28 @@ router.get("/services/:service_name", authenticationMiddleware, function (req, r
     });
 });
 
+
+/**
+ * Get list of services corresponding to provided list of service names, exluding any route information. 
+ */
+
+router.get("/services/", function (req, res) {
+    var serviceNames = req.query.services;
+
+    Service
+        .where("name")
+        .in(serviceNames)
+        .exec(function (err, services) {
+            if (err) return res.sendError(500, err.message);
+
+            // remove route info 
+            services.forEach(function (service) {
+                service.routes = undefined;
+            });
+
+            return res.sendOk(services);
+        });
+});
+
+
 module.exports = router;
