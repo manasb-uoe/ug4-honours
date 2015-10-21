@@ -14,6 +14,7 @@
     <string name="action_get_to_somewhere">Get to Somewhere</string>
     <string name="action_select_stop">Select Stop</string>
     <string name="action_next">Next</string>
+    <string name="action_select_service">Select Service</string>
 
     <!-- Labels-->
     <string name="label_name">Name</string>
@@ -56,6 +57,8 @@
     <string name="label_modes">Modes</string>
     <string name="label_where_are_you_waiting">Where are you waiting?</string>
     <string name="label_hint_long_click_stop_fpr_more_info">Hint: Long click on a stop to view more info.</string>
+    <string name="label_which_service_are_you_going_to_use">Which service are you going to use?</string>
+    <string name="label_hint_long_click_service_for_more_info">Hint: Long click on a service to view more info.</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

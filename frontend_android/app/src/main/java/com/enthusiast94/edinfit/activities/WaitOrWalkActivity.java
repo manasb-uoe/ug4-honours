@@ -7,7 +7,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.OnStopSelectedEvent;
+import com.enthusiast94.edinfit.fragments.SelectServiceFragment;
 import com.enthusiast94.edinfit.fragments.SelectStopFragment;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 18-10-2015.
@@ -51,6 +55,18 @@ public class WaitOrWalkActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -68,5 +84,15 @@ public class WaitOrWalkActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void onEventMainThread(OnStopSelectedEvent event) {
+        // add service selection fragment
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                .add(R.id.fragment_container, SelectServiceFragment.getInstance(
+                        event.getSelectedStop().getServices()), SelectServiceFragment.TAG)
+                .addToBackStack(null)
+                .commit();
     }
 }

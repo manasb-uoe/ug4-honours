@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.StopActivity;
+import com.enthusiast94.edinfit.events.OnStopSelectedEvent;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
@@ -38,6 +39,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Created by manas on 18-10-2015.
  */
@@ -52,6 +55,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
     private GoogleMap map;
     private TextView selectedStopTextView;
     private int currentlySelectedStopIndex = -1;
+    private List<Stop> stops = new ArrayList<>();
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 5;
@@ -110,11 +114,11 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         });
 
         /**
-         * Setup departures recycler view
+         * Setup stops recycler view
          */
 
         stopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        stopsAdapter = new StopsAdapter(new ArrayList<Stop>());
+        stopsAdapter = new StopsAdapter();
         stopsRecyclerView.setAdapter(stopsAdapter);
 
 
@@ -132,6 +136,12 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         super.onResume();
 
         mapView.onResume();
+
+        // update app bar title
+        ActionBar appBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (appBar != null) {
+            appBar.setTitle(getString(R.string.action_select_stop));
+        }
     }
 
     @Override
@@ -184,12 +194,14 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
 
                     @Override
                     public void onSuccess(List<Stop> data) {
+                        stops = data;
+
                         if (getActivity() != null) {
                             setRefreshIndicatorVisiblity(false);
 
-                            stopsAdapter.notifyStopsChanged(data);
+                            stopsAdapter.notifyStopsChanged();
 
-                            updateSlidingMapPanel(data);
+                            updateSlidingMapPanel();
                         }
                     }
 
@@ -204,7 +216,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
                 });
     }
 
-    private void updateSlidingMapPanel(List<Stop> stops) {
+    private void updateSlidingMapPanel() {
         // remove all existing markers
         map.clear();
 
@@ -260,6 +272,8 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_next:
+                EventBus.getDefault()
+                        .post(new OnStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -269,15 +283,10 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
     private class StopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private LayoutInflater inflater;
-        private List<Stop> stops;
         private int previouslySelectedStopIndex;
         private static final int HINT_VIEW_TYPE = 0;
         private static final int HEADING_VIEW_TYPE = 1;
         private static final int STOP_VIEW_TYPE = 2;
-
-        public StopsAdapter(List<Stop> stops) {
-            this.stops = stops;
-        }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -339,9 +348,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
             }
         }
 
-        public void notifyStopsChanged(List<Stop> stops) {
-            this.stops = stops;
-
+        public void notifyStopsChanged() {
             currentlySelectedStopIndex = 0;
             previouslySelectedStopIndex = 0;
 
@@ -387,7 +394,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
                 notifyItemChanged(currentlySelectedStopIndex + 2);
                 notifyItemChanged(previouslySelectedStopIndex + 2);
 
-                updateSlidingMapPanel(stops);
+                updateSlidingMapPanel();
 
                 previouslySelectedStopIndex = currentlySelectedStopIndex;
             }
