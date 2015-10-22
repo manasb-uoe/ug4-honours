@@ -5,10 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,6 +58,30 @@ public class SelectServiceFragment extends Fragment {
 
         servicesRecyclerView = (RecyclerView) view.findViewById(R.id.services_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        View actionNext = toolbar.findViewById(R.id.action_next);
+
+        /**
+         * Setup toolbar
+         */
+
+        toolbar.setTitle(getString(R.string.action_select_service));
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+
+        actionNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), services.get(currentlySelectedServiceIndex).getName(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 
         /**
          * Get service names from arguments so that the corresponding services can be fetched
@@ -95,17 +118,6 @@ public class SelectServiceFragment extends Fragment {
         loadServices(serviceNames);
 
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // update app bar title
-        ActionBar appBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (appBar != null) {
-            appBar.setTitle(getString(R.string.action_select_service));
-        }
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -160,7 +172,7 @@ public class SelectServiceFragment extends Fragment {
             }
 
             if (viewType == HINT_VIEW_TYPE) {
-                return new HintViewHolder(inflater.inflate(R.layout.row_hint_stop_selection,
+                return new HintViewHolder(inflater.inflate(R.layout.row_hint,
                         parent, false));
             } else if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
@@ -172,11 +184,7 @@ public class SelectServiceFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            Object item = getItem(position);
-
-            if (item instanceof String) {
-                ((HeadingViewHolder) holder).bindItem((String) getItem(position));
-            } else if (item instanceof Service) {
+            if (getItem(position) instanceof Service) {
                 ((SelectionServiceViewHolder) holder).bindItem((Service) getItem(position));
             }
         }
@@ -204,10 +212,8 @@ public class SelectServiceFragment extends Fragment {
         private Object getItem(int position) {
             int viewType = getItemViewType(position);
 
-            if (viewType == HINT_VIEW_TYPE) {
+            if (viewType == HINT_VIEW_TYPE || viewType == HEADING_VIEW_TYPE) {
                 return null;
-            } else if (viewType == HEADING_VIEW_TYPE) {
-                return getString(R.string.label_which_service_are_you_going_to_use);
             } else {
                 return services.get(position - 2);
             }
@@ -281,18 +287,26 @@ public class SelectServiceFragment extends Fragment {
             public HeadingViewHolder(View itemView) {
                 super(itemView);
 
+                // find views
                 headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
-            }
 
-            public void bindItem(String heading) {
-                headingTextView.setText(heading);
+                // set heading
+                headingTextView.setText(getString(R.string.label_which_service_are_you_going_to_use));
             }
         }
 
         private class HintViewHolder extends RecyclerView.ViewHolder {
 
+            private TextView hintTextView;
+
             public HintViewHolder(View itemView) {
                 super(itemView);
+
+                // find views
+                hintTextView = (TextView) itemView.findViewById(R.id.hint_textview);
+
+                // set hint
+                hintTextView.setText(getString(R.string.label_hint_long_click_service_for_more_info));
             }
         }
     }

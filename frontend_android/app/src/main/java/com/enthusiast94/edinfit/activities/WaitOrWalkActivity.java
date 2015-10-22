@@ -18,30 +18,10 @@ import de.greenrobot.event.EventBus;
  */
 public class WaitOrWalkActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wait_or_walk);
-
-        /**
-         * Find views
-         */
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        /**
-         * Setup AppBar
-         */
-
-        setSupportActionBar(toolbar);
-
-        ActionBar appBar = getSupportActionBar();
-        if (appBar != null) {
-            appBar.setHomeButtonEnabled(true);
-            appBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         /**
          * Add stop selection fragment

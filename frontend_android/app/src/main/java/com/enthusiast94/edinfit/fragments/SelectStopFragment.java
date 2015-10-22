@@ -10,11 +10,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -68,15 +66,29 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         View view = inflater.inflate(R.layout.fragment_select_stop, container, false);
 
         /**
-         * Setup app bar
+         * Setup toolbar
          */
 
-        setHasOptionsMenu(true);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        toolbar.setTitle(getString(R.string.action_select_stop));
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 
-        ActionBar appBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (appBar != null) {
-            appBar.setTitle(getString(R.string.action_select_stop));
-        }
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+
+        View actionNext = toolbar.findViewById(R.id.action_next);
+        actionNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault()
+                        .post(new OnStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
+
+            }
+        });
 
         /**
          * Find views
@@ -263,23 +275,6 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         }
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_select_stop, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_next:
-                EventBus.getDefault()
-                        .post(new OnStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     private class StopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private LayoutInflater inflater;
@@ -295,7 +290,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
             }
 
             if (viewType == HINT_VIEW_TYPE) {
-                return new HintViewHolder(inflater.inflate(R.layout.row_hint_stop_selection,
+                return new HintViewHolder(inflater.inflate(R.layout.row_hint,
                         parent, false));
             } else if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
@@ -309,9 +304,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             Object item = getItem(position);
 
-            if (item instanceof String) {
-                ((HeadingViewHolder) holder).bindItem((String) getItem(position));
-            } else if (item instanceof Stop) {
+            if (item instanceof Stop) {
                 ((SelectionStopViewHolder) holder).bindItem((Stop) getItem(position));
             }
         }
@@ -339,10 +332,8 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
         private Object getItem(int position) {
             int viewType = getItemViewType(position);
 
-            if (viewType == HINT_VIEW_TYPE) {
+            if (viewType == HINT_VIEW_TYPE || viewType == HEADING_VIEW_TYPE) {
                 return null;
-            } else if (viewType == HEADING_VIEW_TYPE) {
-                return getString(R.string.label_where_are_you_waiting);
             } else {
                 return stops.get(position - 2);
             }
@@ -419,18 +410,26 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
             public HeadingViewHolder(View itemView) {
                 super(itemView);
 
+                // find views
                 headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
-            }
 
-            public void bindItem(String heading) {
-                headingTextView.setText(heading);
+                // set heading
+                headingTextView.setText(getString(R.string.label_where_are_you_waiting));
             }
         }
 
         private class HintViewHolder extends RecyclerView.ViewHolder {
 
+            private TextView hintTextView;
+
             public HintViewHolder(View itemView) {
                 super(itemView);
+
+                // find views
+                hintTextView = (TextView) itemView.findViewById(R.id.hint_textview);
+
+                // set hint
+                hintTextView.setText(getString(R.string.label_hint_long_click_stop_fpr_more_info));
             }
         }
     }
