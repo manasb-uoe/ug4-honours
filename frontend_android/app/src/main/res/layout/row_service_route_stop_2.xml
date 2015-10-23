@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
+        >
+
+        <ImageView
+            android:id="@+id/down_arrow_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@+id/route_indicators_container"
+            android:layout_alignBottom="@+id/route_indicators_container"
+            android:layout_marginRight="@dimen/spacing_small"
+            android:scaleType="centerCrop"
+            android:gravity="center_vertical"
+            android:src="@drawable/ic_action_arrow_down"
+            />
+
+        <LinearLayout
+            android:id="@+id/route_indicators_container"
+            android:layout_width="@dimen/route_indicators_container_width"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/down_arrow_imageview"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:layout_alignBottom="@id/stop_name_textview"
+            android:layout_alignTop="@id/stop_name_textview"
+            android:orientation="vertical"
+            android:weightSum="7"
+            >
+
+            <View
+                android:id="@+id/top_indicator_view"
+                android:layout_width="@dimen/route_indicator_width"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:background="@color/red"
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/red"
+                android:layout_gravity="center_vertical"
+                />
+
+            <View
+                android:id="@+id/bottom_indicator_view"
+                android:layout_width="@dimen/route_indicator_width"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:background="@color/red"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/stop_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/route_indicators_container"
+            android:layout_alignBottom="@+id/more_options_button"
+            android:layout_toLeftOf="@+id/more_options_button"
+            android:layout_toStartOf="@+id/more_options_button"
+            />
+
+        <ImageButton
+            android:id="@+id/more_options_button"
+            android:layout_width="@dimen/nearby_stop_more_options_button_width"
+            android:layout_height="@dimen/nearby_stop_more_options_button_height"
+            android:src="@drawable/ic_action_navigation_more_vert"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/label_more_options"
+            />
+
+    </RelativeLayout>
+
+</FrameLayout>

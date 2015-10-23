@@ -1,15 +1,15 @@
 package com.enthusiast94.edinfit.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.events.OnServiceSelectedEvent;
 import com.enthusiast94.edinfit.events.OnStopSelectedEvent;
+import com.enthusiast94.edinfit.fragments.SelectDestinationStopFragment;
 import com.enthusiast94.edinfit.fragments.SelectServiceFragment;
-import com.enthusiast94.edinfit.fragments.SelectStopFragment;
+import com.enthusiast94.edinfit.fragments.SelectOriginStopFragment;
 
 import de.greenrobot.event.EventBus;
 
@@ -27,9 +27,9 @@ public class WaitOrWalkActivity extends AppCompatActivity {
          * Add stop selection fragment
          */
 
-        if (getSupportFragmentManager().findFragmentByTag(SelectStopFragment.TAG) == null) {
+        if (getSupportFragmentManager().findFragmentByTag(SelectOriginStopFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new SelectStopFragment(), SelectStopFragment.TAG)
+                    .add(R.id.fragment_container, new SelectOriginStopFragment(), SelectOriginStopFragment.TAG)
                     .commit();
         }
     }
@@ -72,6 +72,16 @@ public class WaitOrWalkActivity extends AppCompatActivity {
                 .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
                 .add(R.id.fragment_container, SelectServiceFragment.getInstance(
                         event.getSelectedStop().getServices()), SelectServiceFragment.TAG)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void onEventMainThread(OnServiceSelectedEvent event) {
+        // add destination stop selection fragment
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                .add(R.id.fragment_container, SelectDestinationStopFragment.newInstance(
+                        null, event.getSelectedServiceName()), SelectDestinationStopFragment.TAG)
                 .addToBackStack(null)
                 .commit();
     }

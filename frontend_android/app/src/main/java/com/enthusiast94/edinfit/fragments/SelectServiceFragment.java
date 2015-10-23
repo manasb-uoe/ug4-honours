@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.activities.ServiceActivity;
+import com.enthusiast94.edinfit.events.OnServiceSelectedEvent;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.ServiceService;
@@ -24,12 +25,14 @@ import com.enthusiast94.edinfit.services.ServiceService;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Created by manas on 19-10-2015.
  */
 public class SelectServiceFragment extends Fragment {
 
-    public static final String TAG = SelectStopFragment.class.getSimpleName();
+    public static final String TAG = SelectOriginStopFragment.class.getSimpleName();
     private static final String BUNDLE_SERVICE_NAMES = "bundleServiceNames";
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView servicesRecyclerView;
@@ -78,8 +81,8 @@ public class SelectServiceFragment extends Fragment {
         actionNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), services.get(currentlySelectedServiceIndex).getName(),
-                        Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().post(new OnServiceSelectedEvent(
+                        services.get(currentlySelectedServiceIndex).getName()));
             }
         });
 

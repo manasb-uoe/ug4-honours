@@ -42,9 +42,9 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 18-10-2015.
  */
-public class SelectStopFragment extends Fragment implements LocationProviderService.LocationCallback {
+public class SelectOriginStopFragment extends Fragment implements LocationProviderService.LocationCallback {
 
-    public static final String TAG = SelectStopFragment.class.getSimpleName();
+    public static final String TAG = SelectOriginStopFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView stopsRecyclerView;
@@ -121,7 +121,7 @@ public class SelectStopFragment extends Fragment implements LocationProviderServ
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(SelectStopFragment.this);
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(SelectOriginStopFragment.this);
             }
         });
 

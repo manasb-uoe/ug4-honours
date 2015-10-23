@@ -15,6 +15,8 @@
     <string name="action_select_stop">Select Stop</string>
     <string name="action_next">Next</string>
     <string name="action_select_service">Select Service</string>
+    <string name="action_select_final_stop">Select Destination</string>
+    <string name="action_change_route">Change\nRoute</string>
 
     <!-- Labels-->
     <string name="label_name">Name</string>
@@ -59,6 +61,7 @@
     <string name="label_hint_long_click_stop_fpr_more_info">Hint: Long click on a stop to view more info.</string>
     <string name="label_which_service_are_you_going_to_use">Which service are you going to use?</string>
     <string name="label_hint_long_click_service_for_more_info">Hint: Long click on a service to view more info.</string>
+    <string name="label_where_will_you_get_off">Where will you get off?</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
