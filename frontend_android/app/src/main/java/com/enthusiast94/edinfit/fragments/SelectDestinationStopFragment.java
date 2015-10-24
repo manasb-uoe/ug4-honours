@@ -28,7 +28,6 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -42,7 +41,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by manas on 22-10-2015.
@@ -493,50 +491,33 @@ public class SelectDestinationStopFragment extends Fragment {
 
                     previouslySelectedStopIndex = currentlySelectedStopIndex;
                 } else if (id == showOnMapButton.getId()) {
-                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
-                            getActivity(), stop, new MoreStopOptionsDialog.ResponseListener() {
+                    AlertDialog showOnMapDialog = new AlertDialog.Builder(getActivity())
+                            .setItems(new String[]{getString(R.string.label_show_on_map)},
+                                    new DialogInterface.OnClickListener() {
 
-                        @Override
-                        public void onShowStopOnMopOptionSelected() {
-                            // lookup marker corresponding to selected stop, then show its info
-                            // window and move map focus to it
-                            List<Double> stopLocation = stop.getLocation();
-                            for (Marker marker : stopMarkers) {
-                                LatLng latLng = marker.getPosition();
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            // lookup marker corresponding to selected stop, then show its info
+                                            // window and move map focus to it
+                                            List<Double> stopLocation = stop.getLocation();
+                                            for (Marker marker : stopMarkers) {
+                                                LatLng latLng = marker.getPosition();
 
-                                if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
-                                    marker.showInfoWindow();
-                                    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                                    break;
+                                                if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
+                                                    marker.showInfoWindow();
+                                                    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                                                    break;
+                                                }
+                                            }
+                                            break;
+                                    }
                                 }
-                            }
-                        }
-
-                        @Override
-                        public void onStopSaved(String error) {
-                            if (error == null) {
-                                Toast.makeText(getActivity(), String.format(
-                                        getString(R.string.success_stop_saved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onStopUnsaved(String error) {
-                            if (error == null) {
-                                Toast.makeText(getActivity(), String.format(
-                                        getString(R.string.success_stop_unsaved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                    moreStopOptionsDialog.show();
+                            })
+                            .create();
+                    showOnMapDialog.show();
                 }
             }
         }
