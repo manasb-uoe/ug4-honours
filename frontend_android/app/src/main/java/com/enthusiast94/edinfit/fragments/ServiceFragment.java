@@ -78,10 +78,10 @@ public class ServiceFragment extends Fragment {
     private List<LiveBus> liveBuses;
     private Map<String, Marker> liveBusMarkersMap;
 
-    public static ServiceFragment newInstance(String stopId) {
+    public static ServiceFragment newInstance(String serviceName) {
         ServiceFragment instance = new ServiceFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_SERVICE_NAME, stopId);
+        bundle.putString(EXTRA_SERVICE_NAME, serviceName);
         instance.setArguments(bundle);
 
         return instance;
@@ -547,6 +547,7 @@ public class ServiceFragment extends Fragment {
                 } else if (id == moreOptionsButton.getId()) {
                     MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
                             context, stop, new MoreStopOptionsDialog.ResponseListener() {
+
 
                         @Override
                         public void onShowStopOnMopOptionSelected() {
