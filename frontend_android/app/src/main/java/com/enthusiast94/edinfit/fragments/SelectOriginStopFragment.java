@@ -70,7 +70,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
          */
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.action_select_stop));
+        toolbar.setTitle(getString(R.string.action_select_origin));
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 
@@ -148,12 +148,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         super.onResume();
 
         mapView.onResume();
-
-        // update app bar title
-        ActionBar appBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (appBar != null) {
-            appBar.setTitle(getString(R.string.action_select_stop));
-        }
     }
 
     @Override

@@ -12,7 +12,7 @@
     <string name="action_select_time">Select time</string>
     <string name="action_wait_or_walk">Wait or Walk</string>
     <string name="action_get_to_somewhere">Get to Somewhere</string>
-    <string name="action_select_stop">Select Stop</string>
+    <string name="action_select_origin">Select Origin</string>
     <string name="action_next">Next</string>
     <string name="action_select_service">Select Service</string>
     <string name="action_select_final_stop">Select Destination</string>
