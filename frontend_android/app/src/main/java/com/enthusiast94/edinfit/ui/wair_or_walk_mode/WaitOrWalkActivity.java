@@ -19,12 +19,12 @@ public class WaitOrWalkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wait_or_walk);
 
         /**
-         * Add stop selection fragment
+         * Add new activity fragment
          */
 
         if (getSupportFragmentManager().findFragmentByTag(SelectOriginStopFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new SelectOriginStopFragment(), SelectOriginStopFragment.TAG)
+                    .add(R.id.fragment_container, new NewActivityFragment(), NewActivityFragment.TAG)
                     .commit();
         }
     }
@@ -61,22 +61,30 @@ public class WaitOrWalkActivity extends AppCompatActivity {
         }
     }
 
-    public void onEventMainThread(OnStopSelectedEvent event) {
-        // add service selection fragment
+    public void onEventMainThread(ShowOriginStopSelectionFragmentEvent event) {
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
-                .add(R.id.fragment_container, SelectServiceFragment.getInstance(
-                        event.getSelectedStop().getServices()), SelectServiceFragment.TAG)
+                .add(R.id.fragment_container, new SelectOriginStopFragment(),
+                        SelectOriginStopFragment.TAG)
                 .addToBackStack(null)
                 .commit();
     }
 
-    public void onEventMainThread(OnServiceSelectedEvent event) {
-        // add destination stop selection fragment
+    public void onEventMainThread(ShowServiceSelectionFragmentEvent event) {
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                .add(R.id.fragment_container, SelectServiceFragment.getInstance(
+                        event.getServiceNames()), SelectServiceFragment.TAG)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void onEventMainThread(ShowDestinationStopSelectionEvent event) {
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
                 .add(R.id.fragment_container, SelectDestinationStopFragment.newInstance(
-                        null, event.getSelectedServiceName()), SelectDestinationStopFragment.TAG)
+                        event.getOriginStopId(), event.getServiceName()),
+                        SelectDestinationStopFragment.TAG)
                 .addToBackStack(null)
                 .commit();
     }

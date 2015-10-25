@@ -13,4 +13,11 @@
         <item name="android:textSize">@dimen/font_normal</item>
     </style>
 
+    <style name="TextViewHeading">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">@color/primary_dark</item>
+    </style>
+
 </resources>

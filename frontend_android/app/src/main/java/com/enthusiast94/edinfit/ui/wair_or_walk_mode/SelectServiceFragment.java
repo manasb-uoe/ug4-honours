@@ -61,7 +61,7 @@ public class SelectServiceFragment extends Fragment {
         servicesRecyclerView = (RecyclerView) view.findViewById(R.id.services_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        View actionNext = toolbar.findViewById(R.id.action_next);
+        View actionDone = toolbar.findViewById(R.id.action_done);
 
         /**
          * Setup toolbar
@@ -77,11 +77,12 @@ public class SelectServiceFragment extends Fragment {
             }
         });
 
-        actionNext.setOnClickListener(new View.OnClickListener() {
+        actionDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EventBus.getDefault().post(new OnServiceSelectedEvent(
-                        services.get(currentlySelectedServiceIndex).getName()));
+                        services.get(currentlySelectedServiceIndex)));
+                getActivity().onBackPressed();
             }
         });
 

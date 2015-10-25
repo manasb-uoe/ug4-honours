@@ -60,7 +60,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_select_stop, container, false);
+        View view = inflater.inflate(R.layout.fragment_select_origin_stop, container, false);
 
         /**
          * Setup toolbar
@@ -77,12 +77,13 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             }
         });
 
-        View actionNext = toolbar.findViewById(R.id.action_next);
-        actionNext.setOnClickListener(new View.OnClickListener() {
+        View actionDone = toolbar.findViewById(R.id.action_done);
+        actionDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 EventBus.getDefault()
-                        .post(new OnStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
+                        .post(new OnOriginStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
+                getActivity().onBackPressed();
 
             }
         });

@@ -42,6 +42,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Created by manas on 22-10-2015.
  */
@@ -64,6 +66,7 @@ public class SelectDestinationStopFragment extends Fragment {
     private Polyline routePolyline;
     private int currentlySelectedStopIndex = -1;
     private Service service;
+    private Route selectedRoute;
 
     public static SelectDestinationStopFragment newInstance(String originStopId, String serviceName) {
         SelectDestinationStopFragment instance = new SelectDestinationStopFragment();
@@ -85,7 +88,7 @@ public class SelectDestinationStopFragment extends Fragment {
          */
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        View actionNext = toolbar.findViewById(R.id.action_next);
+        final View actionDone = toolbar.findViewById(R.id.action_done);
         RecyclerView routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
@@ -149,41 +152,52 @@ public class SelectDestinationStopFragment extends Fragment {
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
 
         /**
-         * Setup 'change route' button
+         * Bind event listeners
          */
 
-        changeRouteButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener onClickListener = new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (service != null) {
-                    final List<String> destinations = new ArrayList<>();
+                int id = v.getId();
 
-                    for (Route route : service.getRoutes()) {
-                        destinations.add(route.getDestination());
+                if (id == actionDone.getId()) {
+                    EventBus.getDefault().post(new OnDestinationStopSelectedEvent(
+                            selectedRoute.getStops().get(currentlySelectedStopIndex), selectedRoute));
+                    getActivity().onBackPressed();
+                } else if (id == changeRouteButton.getId()) {
+                    if (service != null) {
+                        final List<String> destinations = new ArrayList<>();
+
+                        for (Route route : service.getRoutes()) {
+                            destinations.add(route.getDestination());
+                        }
+
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                                .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
+                                        destinations.indexOf(selectedRouteDestination), null)
+                                .setTitle(R.string.label_select_route)
+                                .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ListView listView = ((AlertDialog) dialog).getListView();
+                                        selectedRouteDestination =
+                                                destinations.get(listView.getCheckedItemPosition());
+                                        updateRoute(selectedRouteDestination);
+                                    }
+                                })
+                                .setNegativeButton(R.string.label_cancel, null)
+                                .create();
+
+                        alertDialog.show();
                     }
-
-                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                            .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
-                                    destinations.indexOf(selectedRouteDestination), null)
-                            .setTitle(R.string.label_select_route)
-                            .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
-
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ListView listView = ((AlertDialog) dialog).getListView();
-                                    selectedRouteDestination =
-                                            destinations.get(listView.getCheckedItemPosition());
-                                    updateRoute(selectedRouteDestination);
-                                }
-                            })
-                            .setNegativeButton(R.string.label_cancel, null)
-                            .create();
-
-                    alertDialog.show();
                 }
             }
-        });
+        };
+
+        actionDone.setOnClickListener(onClickListener);
+        changeRouteButton.setOnClickListener(onClickListener);
 
         /**
          * Load service from network
@@ -279,9 +293,11 @@ public class SelectDestinationStopFragment extends Fragment {
 
         for (Route route : routes) {
             if (route.getDestination().equals(destination)) {
-                addRouteToMap(route);
+                selectedRoute = route;
 
-                routeStopsAdapter.notifyRouteChanged(route);
+                addRouteToMap();
+
+                routeStopsAdapter.notifyRouteChanged();
 
                 routeTextView.setText(String.format(getString(R.string.label_towards),
                         selectedRouteDestination));
@@ -291,7 +307,7 @@ public class SelectDestinationStopFragment extends Fragment {
         }
     }
 
-    private void addRouteToMap(Route route) {
+    private void addRouteToMap() {
         if (stopMarkers == null) {
             stopMarkers = new ArrayList<>();
         }
@@ -312,7 +328,7 @@ public class SelectDestinationStopFragment extends Fragment {
 
         // add stop markers to map
 
-        List<Stop> stops = route.getStops();
+        List<Stop> stops = selectedRoute.getStops();
 
         Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
 
@@ -340,7 +356,7 @@ public class SelectDestinationStopFragment extends Fragment {
 
         // add route polyline to map
 
-        List<Point> points = route.getPoints();
+        List<Point> points = selectedRoute.getPoints();
 
         PolylineOptions polylineOptions = new PolylineOptions();
 
@@ -416,8 +432,8 @@ public class SelectDestinationStopFragment extends Fragment {
             }
         }
 
-        public void notifyRouteChanged(Route route) {
-            stops = new ArrayList<>(route.getStops());
+        public void notifyRouteChanged() {
+            stops = new ArrayList<>(selectedRoute.getStops());
 
             currentlySelectedStopIndex = 0;
             previouslySelectedStopIndex = 0;
