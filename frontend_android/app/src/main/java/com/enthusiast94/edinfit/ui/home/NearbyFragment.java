@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.home;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.activities.StopActivity;
+import com.enthusiast94.edinfit.ui.stop_info.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;

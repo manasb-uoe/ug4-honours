@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.events;
+package com.enthusiast94.edinfit.ui.login_and_signup;
 
 import com.enthusiast94.edinfit.models.User;
 

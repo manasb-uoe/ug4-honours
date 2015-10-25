@@ -1,23 +1,17 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -27,17 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.activities.StopActivity;
-import com.enthusiast94.edinfit.models.LiveBus;
 import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.LiveBusService;
 import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -50,72 +40,72 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by manas on 06-10-2015.
+ * Created by manas on 22-10-2015.
  */
-public class ServiceFragment extends Fragment {
+public class SelectDestinationStopFragment extends Fragment {
 
-    public static final String TAG = ServiceFragment.class.getSimpleName();
+    public static final String TAG = SelectDestinationStopFragment.class.getSimpleName();
     public static final String EXTRA_SERVICE_NAME = "serviceName";
+    public static final String EXTRA_ORIGIN_STOP_ID = "originStopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
-    private Handler handler;
-    private RecyclerView routeStopsRecyclerView;
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private SlidingUpPanelLayout slidingUpPanelLayout;
     private TextView routeTextView;
+    private TextView changeRouteButton;
     private MapView mapView;
     private GoogleMap map;
     private String serviceName;
-    private Service service;
     private String selectedRouteDestination;
     private List<Marker> stopMarkers;
     private Polyline routePolyline;
-    private List<LiveBus> liveBuses;
-    private Map<String, Marker> liveBusMarkersMap;
+    private int currentlySelectedStopIndex = -1;
+    private Service service;
 
-    public static ServiceFragment newInstance(String serviceName) {
-        ServiceFragment instance = new ServiceFragment();
+    public static SelectDestinationStopFragment newInstance(String originStopId, String serviceName) {
+        SelectDestinationStopFragment instance = new SelectDestinationStopFragment();
         Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_ORIGIN_STOP_ID, originStopId);
         bundle.putString(EXTRA_SERVICE_NAME, serviceName);
         instance.setArguments(bundle);
 
         return instance;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_service_route_stops, container, false);
-
-        setHasOptionsMenu(true);
-
-        /**
-         * Bind handler to UI thread. It will be used to update live bus locations on map at
-         * frequent intervals.
-         */
-
-        handler = new Handler();
+        View view = inflater.inflate(R.layout.fragment_select_destination_stop, container, false);
 
         /**
          * Find views
          */
 
-        routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        View actionNext = toolbar.findViewById(R.id.action_next);
+        RecyclerView routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
         routeTextView = (TextView) view.findViewById(R.id.route_textview);
         slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
+        changeRouteButton = (TextView) view.findViewById(R.id.change_route_button);
+
+        /**
+         * Setup toolbar
+         */
+
+        toolbar.setTitle(getString(R.string.action_select_final_stop));
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -155,37 +145,51 @@ public class ServiceFragment extends Fragment {
          */
 
         routeStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        routeStopsAdapter = new RouteStopsAdapter(getActivity()) {
-
-            @Override
-            public void onShowStopOnMopOptionSelected(Stop stop) {
-                // lookup marker corresponding to provided, then show its info window and move
-                // map focus to it
-                List<Double> stopLocation = stop.getLocation();
-                for (Marker marker : stopMarkers) {
-                    LatLng latLng = marker.getPosition();
-
-                    if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
-                        marker.showInfoWindow();
-                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                        break;
-                    }
-                }
-            }
-        };
+        routeStopsAdapter = new RouteStopsAdapter();
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
 
         /**
-         * Load service if it hasn't already been loaded
+         * Setup 'change route' button
          */
 
-        if (service == null) {
-            loadService();
-        } else {
-            updateRoute(selectedRouteDestination);
-            addLiveBusesToMap();
-        }
+        changeRouteButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (service != null) {
+                    final List<String> destinations = new ArrayList<>();
+
+                    for (Route route : service.getRoutes()) {
+                        destinations.add(route.getDestination());
+                    }
+
+                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                            .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
+                                    destinations.indexOf(selectedRouteDestination), null)
+                            .setTitle(R.string.label_select_route)
+                            .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ListView listView = ((AlertDialog) dialog).getListView();
+                                    selectedRouteDestination =
+                                            destinations.get(listView.getCheckedItemPosition());
+                                    updateRoute(selectedRouteDestination);
+                                }
+                            })
+                            .setNegativeButton(R.string.label_cancel, null)
+                            .create();
+
+                    alertDialog.show();
+                }
+            }
+        });
+
+        /**
+         * Load service from network
+         */
+
+        loadService();
 
         return view;
     }
@@ -246,15 +250,6 @@ public class ServiceFragment extends Fragment {
                     setRefreshIndicatorVisiblity(false);
 
                     updateRoute(selectedRouteDestination);
-
-                    handler.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            loadLiveBuses();
-                            handler.postDelayed(this, 20000);
-                        }
-                    });
                 }
             }
 
@@ -362,130 +357,70 @@ public class ServiceFragment extends Fragment {
         routePolyline = map.addPolyline(polylineOptions);
     }
 
-    private void loadLiveBuses() {
-        LiveBusService.getInstance().getLiveBuses(serviceName, new BaseService.Callback<List<LiveBus>>() {
+    private class RouteStopsAdapter extends RecyclerView.Adapter {
 
-            @Override
-            public void onSuccess(List<LiveBus> data) {
-                if (getActivity() != null) {
-                    liveBuses = data;
-                    addLiveBusesToMap();
-                    Toast.makeText(getActivity(), "Updated.", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(String message) {
-                if (getActivity() != null) {
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
-    private void addLiveBusesToMap() {
-        if (liveBusMarkersMap == null) {
-            liveBusMarkersMap = new HashMap<>();
-        }
-
-        for (LiveBus liveBus : liveBuses) {
-            Marker liveBusMarkerOld = null;
-
-            if (liveBusMarkersMap.containsKey(liveBus.getVehicleId())) {
-                liveBusMarkerOld = liveBusMarkersMap.get(liveBus.getVehicleId());
-            }
-
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .title("#" + liveBus.getVehicleId() + " to " + liveBus.getDestination())
-                    .position(new LatLng(liveBus.getLatitude(), liveBus.getLongitude()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.bus_marker));
-            Marker liveBusMarkerNew = map.addMarker(markerOptions);
-
-            if (liveBusMarkerOld != null) {
-                if (liveBusMarkerOld.isInfoWindowShown()) {
-                    liveBusMarkerNew.showInfoWindow();
-                }
-
-                liveBusMarkerOld.remove();
-            }
-
-            liveBusMarkersMap.remove(liveBus.getVehicleId());
-            liveBusMarkersMap.put(liveBus.getVehicleId(), liveBusMarkerNew);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_service_fragment, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_select_route) {
-            if (service != null) {
-                final List<String> destinations = new ArrayList<>();
-
-                for (Route route : service.getRoutes()) {
-                    destinations.add(route.getDestination());
-                }
-
-                AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                        .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
-                                destinations.indexOf(selectedRouteDestination), null)
-                        .setTitle(R.string.label_select_route)
-                        .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ListView listView = ((AlertDialog) dialog).getListView();
-                                selectedRouteDestination =
-                                        destinations.get(listView.getCheckedItemPosition());
-                                updateRoute(selectedRouteDestination);
-                            }
-                        })
-                        .setNegativeButton(R.string.label_cancel, null)
-                        .create();
-
-                alertDialog.show();
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private static abstract class RouteStopsAdapter extends RecyclerView.Adapter {
-
-        private Context context;
         private LayoutInflater inflater;
         private List<Stop> stops = new ArrayList<>();
-
-        public RouteStopsAdapter(Context context) {
-            this.context = context;
-        }
+        private static final int HEADING_VIEW_TYPE = 0;
+        private static final int STOP_VIEW_TYPE = 1;
+        private int previouslySelectedStopIndex = -1;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (inflater == null) {
-                inflater = LayoutInflater.from(context);
+                inflater = LayoutInflater.from(getActivity());
             }
 
-            return new RouteStopViewHolder(inflater.inflate(R.layout.row_route_stops, parent, false));
+            if (viewType == HEADING_VIEW_TYPE) {
+                return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
+            } else {
+                return new RouteStopViewHolder(inflater.inflate(R.layout.row_service_route_stop_2,
+                        parent, false));
+            }
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ((RouteStopViewHolder) holder).bindItem(stops.get(position));
+            Object item = getItem(position);
+
+            if (item instanceof Stop) {
+                ((RouteStopViewHolder) holder).bindItem((Stop) item);
+            }
         }
 
         @Override
         public int getItemCount() {
-            return stops.size();
+            if (stops.size() > 0) {
+                return stops.size() + 1 /* 1 heading */;
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return HEADING_VIEW_TYPE;
+            } else {
+                return STOP_VIEW_TYPE;
+            }
+        }
+
+        private Object getItem(int position) {
+            int viewType = getItemViewType(position);
+
+            if (viewType == HEADING_VIEW_TYPE) {
+                return null;
+            } else {
+                return stops.get(position - 1);
+            }
         }
 
         public void notifyRouteChanged(Route route) {
             stops = new ArrayList<>(route.getStops());
+
+            currentlySelectedStopIndex = 0;
+            previouslySelectedStopIndex = 0;
 
             notifyDataSetChanged();
         }
@@ -497,7 +432,7 @@ public class ServiceFragment extends Fragment {
             private View topIndicatorView;
             private View bottomIndicatorView;
             private ImageView downArrowImageView;
-            private ImageButton moreOptionsButton;
+            private ImageButton showOnMapButton;
             private Stop stop;
 
             public RouteStopViewHolder(View itemView) {
@@ -508,11 +443,11 @@ public class ServiceFragment extends Fragment {
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
                 downArrowImageView = (ImageView) itemView.findViewById(R.id.down_arrow_imageview);
-                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
+                showOnMapButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                moreOptionsButton.setOnClickListener(this);
+                showOnMapButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
@@ -521,11 +456,13 @@ public class ServiceFragment extends Fragment {
                 stopNameTextView.setText(stop.getName());
 
                 // show indicators for first/last stop in the route
-                if (getAdapterPosition() == 0) {
+                int adapterPosition = getAdapterPosition() - 1;
+
+                if (adapterPosition == 0) {
                     topIndicatorView.setVisibility(View.INVISIBLE);
                     bottomIndicatorView.setVisibility(View.VISIBLE);
                     downArrowImageView.setVisibility(View.VISIBLE);
-                } else if (getAdapterPosition() == stops.size() - 1) {
+                } else if (adapterPosition == stops.size() - 1) {
                     topIndicatorView.setVisibility(View.VISIBLE);
                     bottomIndicatorView.setVisibility(View.INVISIBLE);
                     downArrowImageView.setVisibility(View.INVISIBLE);
@@ -534,54 +471,70 @@ public class ServiceFragment extends Fragment {
                     bottomIndicatorView.setVisibility(View.VISIBLE);
                     downArrowImageView.setVisibility(View.INVISIBLE);
                 }
+
+                // highlight selected item
+                if (adapterPosition == currentlySelectedStopIndex) {
+                    itemView.setBackgroundResource(R.color.green_selection);
+                } else {
+                    itemView.setBackgroundResource(android.R.color.transparent);
+                }
             }
 
             @Override
             public void onClick(View v) {
                 int id = v.getId();
                 if (id == itemView.getId()) {
-                    Intent startActivityIntent = new Intent(context, StopActivity.class);
-                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
-                    context.startActivity(startActivityIntent);
-                } else if (id == moreOptionsButton.getId()) {
-                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
-                            context, stop, new MoreStopOptionsDialog.ResponseListener() {
+                    currentlySelectedStopIndex = getAdapterPosition() - 1;
 
+                    notifyItemChanged(currentlySelectedStopIndex + 1);
+                    notifyItemChanged(previouslySelectedStopIndex + 1);
 
-                        @Override
-                        public void onShowStopOnMopOptionSelected() {
-                            RouteStopsAdapter.this.onShowStopOnMopOptionSelected(stop);
-                        }
+                    previouslySelectedStopIndex = currentlySelectedStopIndex;
+                } else if (id == showOnMapButton.getId()) {
+                    AlertDialog showOnMapDialog = new AlertDialog.Builder(getActivity())
+                            .setItems(new String[]{getString(R.string.label_show_on_map)},
+                                    new DialogInterface.OnClickListener() {
 
-                        @Override
-                        public void onStopSaved(String error) {
-                            if (error == null) {
-                                Toast.makeText(context, String.format(
-                                        context.getString(R.string.success_stop_saved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            // lookup marker corresponding to selected stop, then show its info
+                                            // window and move map focus to it
+                                            List<Double> stopLocation = stop.getLocation();
+                                            for (Marker marker : stopMarkers) {
+                                                LatLng latLng = marker.getPosition();
 
-                        @Override
-                        public void onStopUnsaved(String error) {
-                            if (error == null) {
-                                Toast.makeText(context, String.format(
-                                        context.getString(R.string.success_stop_unsaved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                    moreStopOptionsDialog.show();
+                                                if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
+                                                    marker.showInfoWindow();
+                                                    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                                                    break;
+                                                }
+                                            }
+                                            break;
+                                    }
+                                }
+                            })
+                            .create();
+                    showOnMapDialog.show();
                 }
             }
         }
 
-        public abstract void onShowStopOnMopOptionSelected(Stop stop);
+        private class HeadingViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView headingTextView;
+
+            public HeadingViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
+
+                // set heading
+                headingTextView.setText(getString(R.string.label_where_will_you_get_off));
+            }
+        }
     }
 }

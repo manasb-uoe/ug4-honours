@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.activities;
+package com.enthusiast94.edinfit.ui.home;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -19,12 +19,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.OnDeauthenticatedEvent;
-import com.enthusiast94.edinfit.fragments.ActivityFragment;
-import com.enthusiast94.edinfit.fragments.GoFragment;
-import com.enthusiast94.edinfit.fragments.NearbyFragment;
+import com.enthusiast94.edinfit.ui.user_profile.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.services.UserService;
+import com.enthusiast94.edinfit.ui.login_and_signup.LoginActivity;
+import com.enthusiast94.edinfit.ui.user_profile.UserProfileActivity;
 
 import de.greenrobot.event.EventBus;
 

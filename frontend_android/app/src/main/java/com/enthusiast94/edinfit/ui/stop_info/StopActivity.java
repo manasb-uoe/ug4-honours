@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.activities;
+package com.enthusiast94.edinfit.ui.stop_info;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,8 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.fragments.ServiceFragment;
-import com.enthusiast94.edinfit.fragments.StopFragment;
+import com.enthusiast94.edinfit.ui.service_info.ServiceFragment;
 
 /**
  * Created by manas on 04-10-2015.

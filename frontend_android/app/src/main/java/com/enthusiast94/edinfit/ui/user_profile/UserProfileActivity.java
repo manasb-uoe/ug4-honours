@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.activities;
+package com.enthusiast94.edinfit.ui.user_profile;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -8,8 +8,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.OnDeauthenticatedEvent;
-import com.enthusiast94.edinfit.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.services.UserService;
 
 import de.greenrobot.event.EventBus;

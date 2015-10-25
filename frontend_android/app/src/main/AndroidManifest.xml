@@ -21,11 +21,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".ui.login_and_signup.LoginActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".ui.home.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,19 +34,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.UserProfileActivity"
+            android:name=".ui.user_profile.UserProfileActivity"
             android:label="@string/title_activity_user_profile" >
         </activity>
         <activity
-            android:name=".activities.StopActivity"
+            android:name=".ui.stop_info.StopActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".activities.ServiceActivity"
+            android:name=".ui.service_info.ServiceActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".activities.WaitOrWalkActivity"
+            android:name=".ui.wair_or_walk_mode.WaitOrWalkActivity"
             android:label="@string/app_name" >
         </activity>
 

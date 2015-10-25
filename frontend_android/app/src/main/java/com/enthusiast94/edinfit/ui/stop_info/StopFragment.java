@@ -1,9 +1,8 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.stop_info;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,17 +16,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.directions.route.Route;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.activities.ServiceActivity;
+import com.enthusiast94.edinfit.ui.service_info.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
-import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;

@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.home;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

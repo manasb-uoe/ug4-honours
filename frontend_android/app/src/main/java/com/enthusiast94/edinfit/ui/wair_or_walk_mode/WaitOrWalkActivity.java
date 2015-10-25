@@ -1,15 +1,10 @@
-package com.enthusiast94.edinfit.activities;
+package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.OnServiceSelectedEvent;
-import com.enthusiast94.edinfit.events.OnStopSelectedEvent;
-import com.enthusiast94.edinfit.fragments.SelectDestinationStopFragment;
-import com.enthusiast94.edinfit.fragments.SelectServiceFragment;
-import com.enthusiast94.edinfit.fragments.SelectOriginStopFragment;
 
 import de.greenrobot.event.EventBus;
 

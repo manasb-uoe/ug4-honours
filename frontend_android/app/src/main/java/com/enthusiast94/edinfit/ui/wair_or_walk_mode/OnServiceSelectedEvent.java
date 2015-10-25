@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.events;
+package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
 /**
  * Created by manas on 22-10-2015.

@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.activities;
+package com.enthusiast94.edinfit.ui.login_and_signup;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,10 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
-import com.enthusiast94.edinfit.events.ShowSignupFragmentEvent;
-import com.enthusiast94.edinfit.fragments.LoginFragment;
-import com.enthusiast94.edinfit.fragments.SignupFragment;
+import com.enthusiast94.edinfit.ui.home.MainActivity;
 
 import de.greenrobot.event.EventBus;
 

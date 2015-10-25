@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.login_and_signup;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.UserService;
@@ -22,38 +21,45 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 26-09-2015.
  */
-public class SignupFragment extends Fragment implements View.OnClickListener {
+public class LoginFragment extends Fragment implements View.OnClickListener {
 
-    private EditText nameEditText;
+    private static final String TAG = LoginFragment.class.getSimpleName();
     private EditText emailEditText;
     private EditText passwordEditText;
-    private EditText confirmPasswordEditText;
+    private Button loginButton;
     private Button signupButton;
     private boolean isLoading;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_signup, container, false);
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
 
         /**
-         * Find Views
+         * Find views
          */
 
-        nameEditText = (EditText) view.findViewById(R.id.name_edittext);
         emailEditText = (EditText) view.findViewById(R.id.email_edittext);
         passwordEditText = (EditText) view.findViewById(R.id.password_edittext);
-        confirmPasswordEditText = (EditText) view.findViewById(R.id.confirm_password_edittext);
+        loginButton = (Button) view.findViewById(R.id.login_button);
         signupButton = (Button) view.findViewById(R.id.signup_button);
 
         /**
          * Bind event listeners
          */
 
+        loginButton.setOnClickListener(this);
         signupButton.setOnClickListener(this);
 
+
         /**
-         * Start or stop loading based on the value of isLoading, which is retained on config
+         * Start or stop loading based on the value of isLoading, which was retained on config
          * change.
          */
 
@@ -66,44 +72,37 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
     public void onDestroyView() {
         super.onDestroyView();
 
-        nameEditText = null;
         emailEditText = null;
         passwordEditText = null;
-        confirmPasswordEditText = null;
+        loginButton = null;
         signupButton = null;
     }
 
     private void setLoading(boolean isLoading) {
-        SignupFragment.this.isLoading = isLoading;
+        LoginFragment.this.isLoading = isLoading;
 
         if (isLoading) {
-            signupButton.setEnabled(false);
-            signupButton.setText(getString(R.string.label_loading));
+            loginButton.setText(getString(R.string.label_loading));
+            loginButton.setEnabled(false);
         } else {
-            signupButton.setEnabled(true);
-            signupButton.setText(getString(R.string.action_signup));
+            loginButton.setText(getString(R.string.action_login));
+            loginButton.setEnabled(true);
         }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.signup_button:
-                Helpers.hideSoftKeyboard(getActivity(), signupButton.getWindowToken());
+            case R.id.login_button:
+                Helpers.hideSoftKeyboard(getActivity(), loginButton.getWindowToken());
 
-                String name = nameEditText.getText().toString().trim();
                 String email = emailEditText.getText().toString().trim();
                 String password = passwordEditText.getText().toString().trim();
-                String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-                String nameError = Helpers.validateName(name, getResources());
-                String emailError = Helpers.validateEmail(email, getResources());
-                String passwordError = Helpers.validatePassword(password, getResources());
-                String confirmPasswordError = Helpers.validatePassword(password, getResources());
+                String requiredFieldErrorMessage = getString(R.string.error_required_field);
 
-                if (nameError != null) {
-                    nameEditText.setError(nameError);
-                }
+                String emailError = email.length() == 0 ? requiredFieldErrorMessage : null;
+                String passwordError = password.length() == 0 ? requiredFieldErrorMessage : null;
 
                 if (emailError != null) {
                     emailEditText.setError(emailError);
@@ -113,21 +112,11 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
                     passwordEditText.setError(passwordError);
                 }
 
-                if (confirmPasswordError != null) {
-                    confirmPasswordEditText.setError(confirmPasswordError);
-                }
-
-                boolean doPasswordsMatch = password.equals(confirmPassword);
-
-                if (!doPasswordsMatch) {
-                    confirmPasswordEditText.setError(getString(R.string.error_passwords_do_not_match));
-                }
-
-                // if all input validations pass, initiate sign up
-                if (nameError == null && emailError == null && passwordError == null && doPasswordsMatch) {
+                // if both email and password are provided, initiate login
+                if (emailError == null && passwordError == null) {
                     setLoading(true);
 
-                    UserService.getInstance().createUser(name, email, password, new BaseService.Callback<User>() {
+                    UserService.getInstance().authenticate(email, password, new BaseService.Callback<User>() {
 
                         @Override
                         public void onSuccess(User data) {
@@ -144,6 +133,10 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
                         }
                     });
                 }
+                break;
+
+            case R.id.signup_button:
+                EventBus.getDefault().post(new ShowSignupFragmentEvent());
                 break;
         }
     }

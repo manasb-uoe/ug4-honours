@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,8 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.activities.ServiceActivity;
-import com.enthusiast94.edinfit.events.OnServiceSelectedEvent;
+import com.enthusiast94.edinfit.ui.service_info.ServiceActivity;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.ServiceService;

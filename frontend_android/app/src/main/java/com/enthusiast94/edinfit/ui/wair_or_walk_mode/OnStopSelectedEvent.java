@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.events;
+package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
 import com.enthusiast94.edinfit.models.Stop;
 

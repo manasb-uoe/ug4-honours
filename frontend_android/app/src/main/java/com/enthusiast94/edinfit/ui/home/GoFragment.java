@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.fragments;
+package com.enthusiast94.edinfit.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,8 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.activities.WaitOrWalkActivity;
-import com.google.android.gms.games.multiplayer.realtime.WaitingRoomListener;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.WaitOrWalkActivity;
 
 /**
  * Created by manas on 01-10-2015.
