@@ -29,7 +29,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_gravity="right"
-                android:layout_marginRight="@dimen/spacing_normal"
+                android:layout_marginRight="@dimen/spacing_small"
                 android:clickable="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 >
@@ -66,6 +66,7 @@
             >
 
             <ImageView
+                android:id="@+id/step1_imageview"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:src="@drawable/ic_image_looks_one"
@@ -119,9 +120,10 @@
             >
 
             <ImageView
+                android:id="@+id/step2_imageview"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:src="@drawable/ic_image_looks_two"
+                android:src="@drawable/ic_image_looks_two_grey"
                 android:layout_marginRight="@dimen/spacing_normal"
                 />
 
@@ -172,9 +174,10 @@
             >
 
             <ImageView
+                android:id="@+id/step3_imageview"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:src="@drawable/ic_image_looks_3"
+                android:src="@drawable/ic_image_looks_3_grey"
                 android:layout_marginRight="@dimen/spacing_normal"
                 />
 

@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
@@ -31,6 +32,14 @@ public class NewActivityFragment extends Fragment {
     private TextView originStopNameTextView;
     private TextView serviceNameTextView;
     private TextView destinationStopNameTextView;
+    private ImageView step2ImageVIew;
+    private ImageView step3ImageView;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Nullable
     @Override
@@ -49,6 +58,8 @@ public class NewActivityFragment extends Fragment {
         originStopNameTextView = (TextView) view.findViewById(R.id.origin_stop_name_textview);
         serviceNameTextView = (TextView) view.findViewById(R.id.service_name_textview);
         destinationStopNameTextView = (TextView) view.findViewById(R.id.destination_stop_name_textview);
+        step2ImageVIew = (ImageView) view.findViewById(R.id.step2_imageview);
+        step3ImageView = (ImageView) view.findViewById(R.id.step3_imageview);
 
         /**
          * Setup toolbar title and back button icon
@@ -98,6 +109,14 @@ public class NewActivityFragment extends Fragment {
         selectServiceButton.setOnClickListener(onClickListener);
         selectDestinationStopButton.setOnClickListener(onClickListener);
 
+        /**
+         * Retain UI back to pre configuration change state
+         */
+
+        if (savedInstanceState != null) {
+            updateUi();
+        }
+
         return view;
     }
 
@@ -113,24 +132,41 @@ public class NewActivityFragment extends Fragment {
         EventBus.getDefault().unregister(this);
     }
 
+
+    private void updateUi() {
+        if (selectedOriginStop != null) {
+            originStopNameTextView.setText(selectedOriginStop.getName());
+            step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two);
+        }
+
+        if (selectedService != null) {
+            serviceNameTextView.setText(String.format(getString(R.string.label_service_name_and_description),
+                    selectedService.getName(), selectedService.getDescription()));
+            step3ImageView.setImageResource(R.drawable.ic_image_looks_3);
+        }
+
+        if (selectedDestinationStop != null && selectedRoute != null) {
+            destinationStopNameTextView.setText(String.format(getString(R.string.label_destination_stop_and_route),
+                    selectedDestinationStop.getName(), selectedRoute.getDestination()));
+        }
+    }
+
     public void onEventMainThread(OnOriginStopSelectedEvent event) {
         selectedOriginStop = event.getOriginStop();
 
-        originStopNameTextView.setText(selectedOriginStop.getName());
+        updateUi();
     }
 
     public void onEventMainThread(OnServiceSelectedEvent event) {
         selectedService = event.getService();
 
-        serviceNameTextView.setText(String.format(getString(R.string.label_service_name_and_description),
-                selectedService.getName(), selectedService.getDescription()));
+        updateUi();
     }
 
     public void onEventMainThread(OnDestinationStopSelectedEvent event) {
         selectedDestinationStop = event.getDestinationStop();
         selectedRoute = event.getRoute();
 
-        destinationStopNameTextView.setText(String.format(getString(R.string.label_destination_stop_and_route),
-                selectedDestinationStop.getName(), selectedRoute.getDestination()));
+        updateUi();
     }
 }
