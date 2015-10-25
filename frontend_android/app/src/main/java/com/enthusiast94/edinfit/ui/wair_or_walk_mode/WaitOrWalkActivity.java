@@ -22,7 +22,7 @@ public class WaitOrWalkActivity extends AppCompatActivity {
          * Add new activity fragment
          */
 
-        if (getSupportFragmentManager().findFragmentByTag(SelectOriginStopFragment.TAG) == null) {
+        if (getSupportFragmentManager().findFragmentByTag(NewActivityFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, new NewActivityFragment(), NewActivityFragment.TAG)
                     .commit();
