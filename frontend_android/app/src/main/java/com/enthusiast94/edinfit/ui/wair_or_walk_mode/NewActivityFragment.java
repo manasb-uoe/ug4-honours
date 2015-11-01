@@ -136,13 +136,23 @@ public class NewActivityFragment extends Fragment {
     private void updateUi() {
         if (selectedOriginStop != null) {
             originStopNameTextView.setText(selectedOriginStop.getName());
+
             step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two);
+        } else {
+            step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two_grey);
         }
 
         if (selectedService != null) {
             serviceNameTextView.setText(String.format(getString(R.string.label_service_name_and_description),
                     selectedService.getName(), selectedService.getDescription()));
+
+            destinationStopNameTextView.setText(getString(R.string.label_click_here_to_select));
             step3ImageView.setImageResource(R.drawable.ic_image_looks_3);
+        } else {
+            serviceNameTextView.setText(getString(R.string.label_click_here_to_select));
+
+            destinationStopNameTextView.setText(getString(R.string.label_click_here_to_select));
+            step3ImageView.setImageResource(R.drawable.ic_image_looks_3_grey);
         }
 
         if (selectedDestinationStop != null && selectedRoute != null) {
@@ -153,12 +163,17 @@ public class NewActivityFragment extends Fragment {
 
     public void onEventMainThread(OnOriginStopSelectedEvent event) {
         selectedOriginStop = event.getOriginStop();
+        selectedService = null;
+        selectedDestinationStop = null;
+        selectedRoute = null;
 
         updateUi();
     }
 
     public void onEventMainThread(OnServiceSelectedEvent event) {
         selectedService = event.getService();
+        selectedDestinationStop = null;
+        selectedRoute = null;
 
         updateUi();
     }
