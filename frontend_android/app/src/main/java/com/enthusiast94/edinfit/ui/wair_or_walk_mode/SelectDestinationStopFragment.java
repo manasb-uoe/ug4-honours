@@ -50,9 +50,11 @@ import de.greenrobot.event.EventBus;
 public class SelectDestinationStopFragment extends Fragment {
 
     public static final String TAG = SelectDestinationStopFragment.class.getSimpleName();
+
     public static final String EXTRA_SERVICE_NAME = "serviceName";
     public static final String EXTRA_ORIGIN_STOP_ID = "originStopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
+
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private SlidingUpPanelLayout slidingUpPanelLayout;
@@ -60,11 +62,14 @@ public class SelectDestinationStopFragment extends Fragment {
     private TextView changeRouteButton;
     private MapView mapView;
     private GoogleMap map;
+
     private String serviceName;
+    private String originStopId;
+    private List<String> destinationsWithOriginStop; // destination names for all routes that contain origin stop
     private String selectedRouteDestination;
     private List<Marker> stopMarkers;
     private Polyline routePolyline;
-    private int currentlySelectedStopIndex = -1;
+    private int currentlySelectedStopIndex;
     private Service service;
     private Route selectedRoute;
 
@@ -125,10 +130,13 @@ public class SelectDestinationStopFragment extends Fragment {
 
         /**
          * Retrieve service name from arguments so that the data corresponding to its service
-         * can be loaded
+         * can be loaded. Also retrieve origin stop id so that only those stops can be made
+         * available for selection that come AFTER the origin stop.
          */
 
-        serviceName = getArguments().getString(EXTRA_SERVICE_NAME);
+        Bundle bundle = getArguments();
+        serviceName = bundle.getString(EXTRA_SERVICE_NAME);
+        originStopId = bundle.getString(EXTRA_ORIGIN_STOP_ID);
 
         /**
          * Setup swipe refresh layout
@@ -167,15 +175,9 @@ public class SelectDestinationStopFragment extends Fragment {
                     getActivity().onBackPressed();
                 } else if (id == changeRouteButton.getId()) {
                     if (service != null) {
-                        final List<String> destinations = new ArrayList<>();
-
-                        for (Route route : service.getRoutes()) {
-                            destinations.add(route.getDestination());
-                        }
-
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                                .setSingleChoiceItems(destinations.toArray(new String[destinations.size()]),
-                                        destinations.indexOf(selectedRouteDestination), null)
+                                .setSingleChoiceItems(destinationsWithOriginStop.toArray(new String[destinationsWithOriginStop.size()]),
+                                        destinationsWithOriginStop.indexOf(selectedRouteDestination), null)
                                 .setTitle(R.string.label_select_route)
                                 .setPositiveButton(R.string.label_set, new DialogInterface.OnClickListener() {
 
@@ -183,7 +185,7 @@ public class SelectDestinationStopFragment extends Fragment {
                                     public void onClick(DialogInterface dialog, int which) {
                                         ListView listView = ((AlertDialog) dialog).getListView();
                                         selectedRouteDestination =
-                                                destinations.get(listView.getCheckedItemPosition());
+                                                destinationsWithOriginStop.get(listView.getCheckedItemPosition());
                                         updateRoute(selectedRouteDestination);
                                     }
                                 })
@@ -255,9 +257,20 @@ public class SelectDestinationStopFragment extends Fragment {
             public void onSuccess(Service data) {
                 service = data;
 
-                // set first route as the default route (if it exists)
-                if (service.getRoutes().size() > 1) {
-                    selectedRouteDestination = service.getRoutes().get(0).getDestination();
+                // filter out routes that do not contain origin stop
+                destinationsWithOriginStop = new ArrayList<>();
+                for (Route route : service.getRoutes()) {
+                    for (Stop stop : route.getStops()) {
+                        if (stop.getId().equals(originStopId)) {
+                            destinationsWithOriginStop.add(route.getDestination());
+                            break;
+                        }
+                    }
+                }
+
+                // set first route as the default route
+                if (destinationsWithOriginStop.size() > 0) {
+                    selectedRouteDestination = destinationsWithOriginStop.get(0);
                 }
 
                 if (getActivity() != null) {
@@ -379,7 +392,8 @@ public class SelectDestinationStopFragment extends Fragment {
         private List<Stop> stops = new ArrayList<>();
         private static final int HEADING_VIEW_TYPE = 0;
         private static final int STOP_VIEW_TYPE = 1;
-        private int previouslySelectedStopIndex = -1;
+        private int previouslySelectedStopIndex;
+        private int originStopIndex;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -435,8 +449,23 @@ public class SelectDestinationStopFragment extends Fragment {
         public void notifyRouteChanged() {
             stops = new ArrayList<>(selectedRoute.getStops());
 
-            currentlySelectedStopIndex = 0;
-            previouslySelectedStopIndex = 0;
+            currentlySelectedStopIndex = -1;
+            previouslySelectedStopIndex = -1;
+
+            // find index of origin stop so that all stops that come before it can be made not
+            // available for selection
+            for (int i=0; i<stops.size(); i++) {
+                if (stops.get(i).getId().equals(originStopId)) {
+                    originStopIndex = i;
+                    break;
+                }
+            }
+
+            // set currently selected stop as the stop right after origin stop
+            if (originStopIndex != stops.size() - 1) {
+                currentlySelectedStopIndex = originStopIndex + 1;
+                previouslySelectedStopIndex = originStopIndex + 1;
+            }
 
             notifyDataSetChanged();
         }
@@ -446,6 +475,7 @@ public class SelectDestinationStopFragment extends Fragment {
 
             private TextView stopNameTextView;
             private View topIndicatorView;
+            private View middleIndicatorView;
             private View bottomIndicatorView;
             private ImageView downArrowImageView;
             private ImageButton showOnMapButton;
@@ -457,6 +487,7 @@ public class SelectDestinationStopFragment extends Fragment {
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
+                middleIndicatorView = itemView.findViewById(R.id.middle_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
                 downArrowImageView = (ImageView) itemView.findViewById(R.id.down_arrow_imageview);
                 showOnMapButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
@@ -488,6 +519,28 @@ public class SelectDestinationStopFragment extends Fragment {
                     downArrowImageView.setVisibility(View.INVISIBLE);
                 }
 
+                // fade out stops all stops until origin stop since they are not available
+                // for selection
+                if (adapterPosition <= originStopIndex) {
+                    stopNameTextView.setTextColor(
+                            ContextCompat.getColor(getActivity(), R.color.secondary_text_light_2)
+                    );
+
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary_opaque_40);
+                    topIndicatorView.setBackgroundColor(indicatorColor);
+                    middleIndicatorView.setBackgroundColor(indicatorColor);
+                    bottomIndicatorView.setBackgroundColor(indicatorColor);
+                } else {
+                    stopNameTextView.setTextColor(
+                            ContextCompat.getColor(getActivity(), R.color.primary_text_light)
+                    );
+
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary);
+                    topIndicatorView.setBackgroundColor(indicatorColor);
+                    middleIndicatorView.setBackgroundColor(indicatorColor);
+                    bottomIndicatorView.setBackgroundColor(indicatorColor);
+                }
+
                 // highlight selected item
                 if (adapterPosition == currentlySelectedStopIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);
@@ -500,12 +553,15 @@ public class SelectDestinationStopFragment extends Fragment {
             public void onClick(View v) {
                 int id = v.getId();
                 if (id == itemView.getId()) {
-                    currentlySelectedStopIndex = getAdapterPosition() - 1;
+                    // only allow selection if selected stop comes after origin stop
+                    if (getAdapterPosition() - 1 > originStopIndex) {
+                        currentlySelectedStopIndex = getAdapterPosition() - 1;
 
-                    notifyItemChanged(currentlySelectedStopIndex + 1);
-                    notifyItemChanged(previouslySelectedStopIndex + 1);
+                        notifyItemChanged(currentlySelectedStopIndex + 1);
+                        notifyItemChanged(previouslySelectedStopIndex + 1);
 
-                    previouslySelectedStopIndex = currentlySelectedStopIndex;
+                        previouslySelectedStopIndex = currentlySelectedStopIndex;
+                    }
                 } else if (id == showOnMapButton.getId()) {
                     AlertDialog showOnMapDialog = new AlertDialog.Builder(getActivity())
                             .setItems(new String[]{getString(R.string.label_show_on_map)},
