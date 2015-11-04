@@ -22,6 +22,7 @@ import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -29,6 +30,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 01-11-2015.
@@ -188,6 +191,8 @@ public class ResultFragment extends Fragment {
 
                                                             resultsAdapter.notifyDataSetChanged();
 
+                                                            EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
+
                                                             progressDialog.dismiss();
 
                                                             Log.d(TAG, "result: WALK");
@@ -208,6 +213,8 @@ public class ResultFragment extends Fragment {
                                                                                 );
 
                                                                                 resultsAdapter.notifyDataSetChanged();
+
+                                                                                EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
 
                                                                                 progressDialog.dismiss();
 
@@ -372,11 +379,11 @@ public class ResultFragment extends Fragment {
         }
     }
 
-    private enum WaitOrWalkResultType {
+    public enum WaitOrWalkResultType {
         WAIT, WALK
     }
 
-    private static class WaitOrWalkResult {
+    public static class WaitOrWalkResult {
 
         private WaitOrWalkResultType type;
         private Stop stop;
