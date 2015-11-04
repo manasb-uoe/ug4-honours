@@ -2,7 +2,9 @@ package com.enthusiast94.edinfit.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,11 +18,11 @@ public class Stop implements Parcelable {
     private List<String> destinations;
     private List<String> services;
     private List<Departure> departures;
-    private Double distanceAway;
+    @Nullable private Double distanceAway;
 
     public Stop(String id, String name, List<Double> location, String serviceType,
                 List<String> destinations, List<String> services, List<Departure> departures,
-                Double distanceAway) {
+                @Nullable Double distanceAway) {
         this.stopId = id;
         this.name = name;
         this.location = location;
@@ -70,12 +72,14 @@ public class Stop implements Parcelable {
     public Stop(Parcel in) {
         stopId = in.readString();
         name = in.readString();
+        location = new ArrayList<>();
         in.readList(location, Double.class.getClassLoader());
         serviceType = in.readString();
         destinations = in.createStringArrayList();
         services = in.createStringArrayList();
         departures = in.createTypedArrayList(Departure.CREATOR);
         distanceAway = in.readDouble();
+        distanceAway = distanceAway == 0 ? null : distanceAway;
     }
 
     public static final Creator<Stop> CREATOR = new Creator<Stop>() {
@@ -104,6 +108,6 @@ public class Stop implements Parcelable {
         dest.writeStringList(destinations);
         dest.writeStringList(services);
         dest.writeTypedList(departures);
-        dest.writeDouble(distanceAway);
+        dest.writeDouble(distanceAway == null ? 0 : distanceAway);
     }
 }
