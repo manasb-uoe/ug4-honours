@@ -140,6 +140,7 @@ router.get("/stops/saved", authenticationMiddleware, function (req, res) {
 
 router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
     var stopId = req.params.stop_id;
+    var day = req.query.day;
     var time = req.query.time;
 
     Stop.findOne({stopId: stopId}, function (err, stop) {
@@ -149,7 +150,7 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
 
         // add departures if they don't already exist
         // also filter out departures that do not belong to provided day
-        stop.filterDepartures(null, time, function () {
+        stop.filterDepartures(day, time, function () {
             if (stop.departures.length == 0) {
                 stop.updateDepartures(function (err, departures) {
                     if (err) return callbackA(err);
