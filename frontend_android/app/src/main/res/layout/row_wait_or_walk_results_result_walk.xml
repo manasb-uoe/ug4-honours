@@ -11,14 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextAppearance.AppCompat.Display3"
-        android:text="Walk"
+        android:text="@string/label_walk"
         android:gravity="center_horizontal"
         />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="to"
+        android:text="@string/label_to"
         android:gravity="center_horizontal"
         />
 
@@ -36,7 +36,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="by"
+        android:text="@string/label_by"
         android:layout_marginTop="@dimen/spacing_tiny"
         android:gravity="center_horizontal"
         />

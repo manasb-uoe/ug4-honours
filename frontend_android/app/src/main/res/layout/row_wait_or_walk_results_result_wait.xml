@@ -11,14 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextAppearance.AppCompat.Display3"
-        android:text="Wait"
+        android:text="@string/label_wait"
         android:gravity="center_horizontal"
         />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="at"
+        android:text="@string/label_at"
         android:gravity="center_horizontal"
         />
 
@@ -36,7 +36,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="until"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:text="@string/label_until"
         android:gravity="center_horizontal"
         />
 
