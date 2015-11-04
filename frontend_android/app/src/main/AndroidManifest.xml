@@ -49,6 +49,10 @@
             android:name=".ui.wair_or_walk_mode.WaitOrWalkActivity"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name=".ui.wair_or_walk_mode.ResultActivity"
+            android:label="@string/app_name" >
+        </activity>
 
         <!-- This embeds the version of Google Play services that the app was compiled with. -->
         <meta-data

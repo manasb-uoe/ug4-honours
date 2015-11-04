@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.wair_or_walk_mode;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -87,7 +88,15 @@ public class NewActivityFragment extends Fragment {
                 int id = v.getId();
 
                 if (id == actionStart.getId()) {
-                    // TODO
+                    if (selectedOriginStop != null && selectedService != null &&
+                            selectedDestinationStop != null && selectedRoute != null) {
+                        Intent startActivityIntent = new Intent(getActivity(), ResultActivity.class);
+                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop);
+                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_SERVICE, selectedService);
+                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop);
+                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_ROUTE, selectedRoute);
+                        startActivity(startActivityIntent);
+                    }
                 } else if (id == selectOriginStopButton.getId()) {
                     EventBus.getDefault().post(new ShowOriginStopSelectionFragmentEvent());
                 } else if (id == selectServiceButton.getId()) {

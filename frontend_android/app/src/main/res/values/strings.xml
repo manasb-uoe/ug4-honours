@@ -2,6 +2,7 @@
     <string name="app_name">EdinFit</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_user_profile">User Profile</string>
+    <string name="title_activity_wait_or_walk_result">Wait or Walk?</string>
 
     <!-- Actions -->
     <string name="action_settings">Settings</string>
@@ -66,6 +67,8 @@
     <string name="label_click_here_to_select">Click here to select</string>
     <string name="label_service_name_and_description">%1$s (%2$s)</string>
     <string name="label_destination_stop_and_route">%1$s (towards %2$s)</string>
+    <string name="label_making_complex_calculations">Making complex calculations…</string>
+    <string name="label_result">Result</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -82,6 +85,7 @@
     <string name="error_could_not_fetch_location">Error! Could not fetch current user location.</string>
     <string name="error_could_not_geocode_location">Error! Could not geocode current user location.</string>
     <string name="error_could_not_fetch_directions">Error! Could not fetch directions.</string>
+    <string name="error_unexpected">Un an unexpected error occurred! Please try again.</string>
 
     <!-- Edinburgh coordinates -->
     <string name="edinburgh_lat">55.9531</string>
