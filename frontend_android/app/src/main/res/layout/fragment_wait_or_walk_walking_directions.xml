@@ -62,17 +62,28 @@
             android:background="@color/divider"
             />
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
 
-        <!--<android.support.v7.widget.RecyclerView-->
-        <!--android:id="@+id/directions_recyclerview"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:clipToPadding="false"-->
-        <!--android:scrollbars="vertical"-->
-        <!--/>-->
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/directions_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                />
+
+            <TextView
+                android:id="@+id/nothing_found_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_huge"
+                android:text="@string/label_nothing_found"
+                android:gravity="center_horizontal"
+                />
+
+        </FrameLayout>
 
     </LinearLayout>
 

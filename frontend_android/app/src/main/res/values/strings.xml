@@ -77,6 +77,8 @@
     <string name="label_to">to</string>
     <string name="label_by">by</string>
     <string name="label_until">until</string>
+    <string name="label_distance_km">%1$s km</string>
+    <string name="label_nothing_found">Nothing found here…</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

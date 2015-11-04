@@ -6,11 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.directions.route.Segment;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
@@ -25,6 +28,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -35,10 +41,12 @@ public class WalkingDirectionsFragment extends Fragment {
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
 
     private RecyclerView directionsRecyclerView;
-    //    private DirectionsAdapter departuresAdapter;
+    private DirectionsAdapter directionsAdapter;
     private MapView mapView;
+    private TextView noDirectionsFoundTextView;
 
     private GoogleMap map;
+    private List<Segment> directionSegments;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,8 +63,9 @@ public class WalkingDirectionsFragment extends Fragment {
          * Find views
          */
 
-//        directionsRecyclerView = (RecyclerView) view.findViewById(R.id.directions_recyclerview);
+        directionsRecyclerView = (RecyclerView) view.findViewById(R.id.directions_recyclerview);
         mapView = (MapView) view.findViewById(R.id.map_view);
+        noDirectionsFoundTextView = (TextView) view.findViewById(R.id.nothing_found_textview);
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -75,8 +84,9 @@ public class WalkingDirectionsFragment extends Fragment {
          * Setup directions recycler view
          */
 
-//        directionsRecyclerView.setAdapter(null);
-//        directionsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        directionsAdapter = new DirectionsAdapter();
+        directionsRecyclerView.setAdapter(directionsAdapter);
+        directionsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return view;
     }
@@ -156,10 +166,18 @@ public class WalkingDirectionsFragment extends Fragment {
 
                             marker.setSnippet(directionsResult.getRoute().getDistanceText());
                             marker.showInfoWindow();
+
+                            // update directions list
+                            directionSegments = directionsResult.getRoute().getSegments();
+                            directionsAdapter.notifyDirectionsChanged();
                         }
                     } else {
                         marker.setSnippet(getString(R.string.label_wait_here));
                         marker.showInfoWindow();
+
+                        // update directions list to be empty
+                        directionSegments = new ArrayList<Segment>();
+                        directionsAdapter.notifyDirectionsChanged();
                     }
                 }
             }
@@ -172,5 +190,66 @@ public class WalkingDirectionsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.DirectionSegmentViewHolder> {
+
+        private LayoutInflater inflater;
+
+        @Override
+        public DirectionsAdapter.DirectionSegmentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (inflater == null) {
+                inflater = LayoutInflater.from(getActivity());
+            }
+
+            return new DirectionSegmentViewHolder(inflater.inflate(
+                    R.layout.row_wait_or_walk_walking_directions, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(DirectionsAdapter.DirectionSegmentViewHolder holder, int position) {
+            holder.bindItem(directionSegments.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            if (directionSegments != null) {
+                return directionSegments.size();
+            } else {
+                return 0;
+            }
+        }
+
+        public void notifyDirectionsChanged() {
+            if (directionSegments.size() > 0) {
+                directionsRecyclerView.setVisibility(View.VISIBLE);
+                noDirectionsFoundTextView.setVisibility(View.GONE);
+            } else {
+                directionsRecyclerView.setVisibility(View.GONE);
+                noDirectionsFoundTextView.setVisibility(View.VISIBLE);
+            }
+
+            notifyDataSetChanged();
+        }
+
+        public class DirectionSegmentViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView instructionTextView;
+            private TextView distanceTextView;
+
+            public DirectionSegmentViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                instructionTextView = (TextView) itemView.findViewById(R.id.instruction_textview);
+                distanceTextView = (TextView) itemView.findViewById(R.id.distance_textview);
+            }
+
+            public void bindItem(Segment directionSegment) {
+                instructionTextView.setText(directionSegment.getInstruction());
+                distanceTextView.setText(String.format(getString(R.string.label_distance_km),
+                        directionSegment.getDistance()));
+            }
+        }
     }
 }
