@@ -4,9 +4,13 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
@@ -33,6 +37,9 @@ public class ResultFragment extends Fragment {
 
     public static final String TAG = ResultFragment.class.getSimpleName();
 
+    private RecyclerView resultsRecyclerView;
+    private ResultsAdapter resultsAdapter;
+
     private static final String EXTRA_SELECTED_ORIGIN_STOP = "selectedOriginStop";
     private static final String EXTRA_SELECTED_SERVICE = "selectedService";
     private static final String EXTRA_SELECTED_DESTINATION_STOP = "selectedDestinationStop";
@@ -42,6 +49,7 @@ public class ResultFragment extends Fragment {
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
+    private WaitOrWalkResult mainResult;
 
     public static ResultFragment newInstance(Stop selectedOriginStop, Service selectedService,
                                              Stop selectedDestinationStop, Route selectedRoute) {
@@ -78,6 +86,20 @@ public class ResultFragment extends Fragment {
         selectedRoute = bundle.getParcelable(EXTRA_SELECTED_ROUTE);
 
         /**
+         * Find views
+         */
+
+        resultsRecyclerView = (RecyclerView) view.findViewById(R.id.results_recyclerview);
+
+        /**
+         * Setup results recycler view
+         */
+
+        resultsAdapter = new ResultsAdapter();
+        resultsRecyclerView.setAdapter(resultsAdapter);
+        resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        /**
          * Make computations to decide whether to wait or walk
          */
 
@@ -97,7 +119,7 @@ public class ResultFragment extends Fragment {
         }
 
         if (nextStopIndex != -1) {
-            Stop nextStopWithoutDepartures = selectedRoute.getStops().get(nextStopIndex);
+            final Stop nextStopWithoutDepartures = selectedRoute.getStops().get(nextStopIndex);
 
             // fetch next stop with upcoming departures for current day
             StopService.getInstance().getStop(nextStopWithoutDepartures.getId(),
@@ -107,9 +129,14 @@ public class ResultFragment extends Fragment {
                         @Override
                         public void onSuccess(final Stop nextStopWithDepartures) {
                             if (getActivity() != null) {
-                                // find the amount of time remaining until upcoming departure
-                                long remainingTimeMillis = -1;
-                                for (Departure departure : nextStopWithDepartures.getDepartures()) {
+                                // find the amount of time remaining until upcoming departure of
+                                // selected service
+                                Departure upcomingDeparture = null;
+                                long remainingTimeMillis = 0;
+
+                                for (int i=0; i<nextStopWithDepartures.getDepartures().size(); i++) {
+                                    Departure departure = nextStopWithDepartures.getDepartures().get(i);
+
                                     if (departure.getServiceName().equals(selectedService.getName())) {
                                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
 
@@ -117,10 +144,11 @@ public class ResultFragment extends Fragment {
                                             Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
                                             Date due = simpleDateFormat.parse(departure.getTime());
 
-                                            if (due.after(now)) {
-                                                remainingTimeMillis = due.getTime() - now.getTime();
-                                                break;
-                                            }
+                                            upcomingDeparture = departure;
+                                            remainingTimeMillis = due.getTime() - now.getTime();
+
+                                            Log.d(TAG, "upcoming departure at: " + departure.getTime());
+                                            break;
                                         } catch (ParseException e) {
                                             throw new RuntimeException(e);
                                         }
@@ -128,7 +156,10 @@ public class ResultFragment extends Fragment {
                                 }
 
                                 // check if there's enough time left to walk to the next stop or not
-                                if (remainingTimeMillis != -1) {
+                                if (upcomingDeparture != null) {
+                                    final long finalRemainingTimeMillis = remainingTimeMillis;
+                                    final Departure finalUpcomingDeparture = upcomingDeparture;
+
                                     LocationProviderService.getInstance().requestLastKnownLocationInfo(new LocationProviderService.LocationCallback() {
                                         @Override
                                         public void onLocationSuccess(LatLng latLng, String placeName) {
@@ -137,28 +168,84 @@ public class ResultFragment extends Fragment {
 
                                                 @Override
                                                 public void onSuccess(DirectionsService.DirectionsResult result) {
-//                                                                    Toast.makeText(getActivity(),
-//                                                                            TimeUnit.MINUTES.convert(remainingTimeMillis, TimeUnit.MILLISECONDS) + " minutes remaining",
-//                                                                            Toast.LENGTH_LONG).show();
-                                                    Toast.makeText(getActivity(), result.getRoute().getDistanceText() + " " + result.getRoute().getDurationText(), Toast.LENGTH_LONG)
-                                                            .show();
-                                                    progressDialog.dismiss();
+                                                    if (getActivity() != null) {
+                                                        com.directions.route.Route resultRoute = result.getRoute();
+
+                                                        long walkingTimeMillis = Helpers.parseDirectionsApiDurationToMillis(resultRoute.getDurationText());
+
+
+                                                        Log.d(TAG, "remaining time: " + finalRemainingTimeMillis);
+                                                        Log.d(TAG, "api duration: " + resultRoute.getDurationText());
+                                                        Log.d(TAG, "parsed api duration: " + walkingTimeMillis);
+
+                                                        if (finalRemainingTimeMillis > walkingTimeMillis) {
+                                                            mainResult = new WaitOrWalkResult(
+                                                                    WaitOrWalkResultType.WALK,
+                                                                    nextStopWithoutDepartures,
+                                                                    finalUpcomingDeparture,
+                                                                    result
+                                                            );
+
+                                                            resultsAdapter.notifyDataSetChanged();
+
+                                                            progressDialog.dismiss();
+
+                                                            Log.d(TAG, "result: WALK");
+                                                        } else {
+                                                            // fetch origin stop with upcoming departures for current day
+                                                            StopService.getInstance().getStop(selectedOriginStop.getId(),
+                                                                    Helpers.getDayCode(Helpers.getCurrentDay()), Helpers.getCurrentTime24h(),
+                                                                    new BaseService.Callback<Stop>() {
+
+                                                                        @Override
+                                                                        public void onSuccess(Stop selectedOriginStopWithDepartures) {
+                                                                            if (getActivity() != null) {
+                                                                                mainResult = new WaitOrWalkResult(
+                                                                                        WaitOrWalkResultType.WAIT,
+                                                                                        selectedOriginStop,
+                                                                                        selectedOriginStopWithDepartures.getDepartures().get(0),
+                                                                                        null
+                                                                                );
+
+                                                                                resultsAdapter.notifyDataSetChanged();
+
+                                                                                progressDialog.dismiss();
+
+                                                                                Log.d(TAG, "result: WAIT");
+                                                                            }
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFailure(String message) {
+                                                                            if (getActivity() != null) {
+                                                                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
+                                                                                        .show();
+                                                                                progressDialog.dismiss();
+                                                                            }
+                                                                        }
+                                                                    });
+                                                        }
+                                                    }
                                                 }
 
                                                 @Override
                                                 public void onFailure(String message) {
-                                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
-                                                            .show();
-                                                    progressDialog.dismiss();
+                                                    if (getActivity() != null) {
+                                                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
+                                                                .show();
+                                                        progressDialog.dismiss();
+                                                    }
                                                 }
                                             });
                                         }
 
                                         @Override
                                         public void onLocationFailure(String error) {
-                                            Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT)
-                                                    .show();
-                                            progressDialog.dismiss();
+                                            if (getActivity() != null) {
+                                                Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT)
+                                                        .show();
+                                                progressDialog.dismiss();
+                                            }
                                         }
                                     });
 
@@ -188,5 +275,137 @@ public class ResultFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        private static final int WALK_RESULT_ViEW_TYPE = 0;
+        private static final int WAIT_RESULT_VIEW_TYPE = 1;
+        private LayoutInflater inflater;
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (inflater == null) {
+                inflater = LayoutInflater.from(getActivity());
+            }
+
+            if (viewType == WALK_RESULT_ViEW_TYPE) {
+                return new WaitResultViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_results_result_walk, parent, false));
+            } else if (viewType == WAIT_RESULT_VIEW_TYPE) {
+                return new WalkResultViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_results_result_wait, parent, false));
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            if (position == 0) {
+                if (holder instanceof WalkResultViewHolder) {
+                    ((WalkResultViewHolder) holder).bindItem(mainResult);
+                } else if (holder instanceof WaitResultViewHolder) {
+                    ((WaitResultViewHolder) holder).bindItem(mainResult);
+                }
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            if (mainResult != null) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                if (mainResult.getType() == WaitOrWalkResultType.WALK) {
+                    return WALK_RESULT_ViEW_TYPE;
+                } else {
+                    return WAIT_RESULT_VIEW_TYPE;
+                }
+            }
+
+            return -1;
+        }
+
+        private class WalkResultViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextview;
+            private TextView departureTextView;
+
+            public WalkResultViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                stopNameTextview = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
+            }
+
+            public void bindItem(WaitOrWalkResult result) {
+                stopNameTextview.setText(result.getStop().getName());
+                departureTextView.setText(result.getUpcomingDeparture().getTime());
+            }
+        }
+
+        private class WaitResultViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextview;
+            private TextView departureTextView;
+
+            public WaitResultViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                stopNameTextview = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
+            }
+
+            public void bindItem(WaitOrWalkResult result) {
+                stopNameTextview.setText(result.getStop().getName());
+                departureTextView.setText(result.getUpcomingDeparture().getTime());
+            }
+        }
+    }
+
+    private enum WaitOrWalkResultType {
+        WAIT, WALK
+    }
+
+    private static class WaitOrWalkResult {
+
+        private WaitOrWalkResultType type;
+        private Stop stop;
+        private Departure upcomingDeparture;
+        @Nullable private DirectionsService.DirectionsResult walkingDirections;
+
+        public WaitOrWalkResult(WaitOrWalkResultType type, Stop stop, Departure upcomingDeparture,
+                                @Nullable DirectionsService.DirectionsResult walkingDirections) {
+            this.type = type;
+            this.stop = stop;
+            this.upcomingDeparture = upcomingDeparture;
+            this.walkingDirections = walkingDirections;
+        }
+
+        public Departure getUpcomingDeparture() {
+            return upcomingDeparture;
+        }
+
+        @Nullable
+        public DirectionsService.DirectionsResult getWalkingDirections() {
+            return walkingDirections;
+        }
+
+        public Stop getStop() {
+            return stop;
+        }
+
+        public WaitOrWalkResultType getType() {
+            return type;
+        }
     }
 }

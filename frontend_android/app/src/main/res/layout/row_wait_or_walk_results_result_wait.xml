@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.AppCompat.Display3"
+        android:text="Wait"
+        android:gravity="center_horizontal"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="at"
+        android:gravity="center_horizontal"
+        />
+
+    <TextView
+        android:id="@+id/stop_name_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="North Bridge"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="@dimen/font_large"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:gravity="center_horizontal"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="until"
+        android:gravity="center_horizontal"
+        />
+
+    <TextView
+        android:id="@+id/departure_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="12:50"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="@dimen/font_large"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:gravity="center_horizontal"
+        />
+
+</LinearLayout>

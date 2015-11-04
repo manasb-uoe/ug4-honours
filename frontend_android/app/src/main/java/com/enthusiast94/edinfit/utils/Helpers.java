@@ -131,4 +131,10 @@ public class Helpers {
             return String.format("%.1f", distanceInKm) + " km";
         }
     }
+
+    // currently only parses durations of format "x mins"
+    public static long parseDirectionsApiDurationToMillis(String durationText) {
+        String[] split = durationText.split("\\s");
+        return (Integer.valueOf(split[0]) * 60 * 1000);
+    }
 }
