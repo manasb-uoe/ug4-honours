@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "nodemon index.js",
+    "start:db": "mongod --dbpath data --smallfiles",
     "test": "mocha tests",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- tests -R spec"
   },
