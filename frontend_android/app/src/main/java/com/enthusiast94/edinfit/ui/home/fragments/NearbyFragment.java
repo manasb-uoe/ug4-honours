@@ -205,6 +205,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
     private void loadStops(final LatLng userLocationLatLng, final String userLocationName) {
         setRefreshIndicatorVisiblity(true);
+        nearbyStopsRecyclerView.setVisibility(View.INVISIBLE);
 
         BaseService.Callback<List<Stop>> callback = new BaseService.Callback<List<Stop>>() {
             @Override
@@ -214,6 +215,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
+                    nearbyStopsRecyclerView.setVisibility(View.VISIBLE);
 
                     nearbyStopsAdapter.notifyStopsChanged();
 
