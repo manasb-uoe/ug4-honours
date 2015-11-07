@@ -23,25 +23,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabMode="fixed"
-            sothree:tabIndicatorColor="@color/primary"
+            android:background="@color/primary"
+            sothree:tabIndicatorColor="@android:color/white"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
             />
 
-        <android.support.v4.widget.SwipeRefreshLayout
-
-            android:id="@+id/swipe_refresh_layout"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/nearby_stops_recyclerview"
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:scrollbars="vertical"
+                >
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/nearby_stops_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:scrollbars="vertical"
+                    />
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/drop_shadow_height"
+                android:background="@drawable/drop_shadow"
                 />
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+        </FrameLayout>
+
     </LinearLayout>
 
     <LinearLayout
