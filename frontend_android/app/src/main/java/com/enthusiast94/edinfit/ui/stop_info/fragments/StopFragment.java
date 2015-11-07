@@ -125,7 +125,7 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(StopFragment.this);
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(false, StopFragment.this);
             }
         });
 
@@ -141,7 +141,7 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
          * Finally, request user location in order to get things started
          */
 
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(this);
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(false, this);
 
         return view;
     }

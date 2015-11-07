@@ -120,7 +120,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(SelectOriginStopFragment.this);
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(false, SelectOriginStopFragment.this);
             }
         });
 
@@ -137,7 +137,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
          * Finally, request user location in order to get things started
          */
 
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(this);
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(false, this);
 
         return view;
     }

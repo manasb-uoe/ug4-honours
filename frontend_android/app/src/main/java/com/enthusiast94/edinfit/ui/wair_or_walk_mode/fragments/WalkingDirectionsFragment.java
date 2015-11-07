@@ -132,7 +132,8 @@ public class WalkingDirectionsFragment extends Fragment {
     }
 
     public void onEventMainThread(final OnWaitOrWalkResultComputedEvent event) {
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(new LocationProviderService.LocationCallback() {
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(false,
+                new LocationProviderService.LocationCallback() {
 
             @Override
             public void onLocationSuccess(LatLng latLng, String placeName) {

@@ -163,7 +163,7 @@ public class ResultFragment extends Fragment {
                                     final long finalRemainingTimeMillis = remainingTimeMillis;
                                     final Departure finalUpcomingDeparture = upcomingDeparture;
 
-                                    LocationProviderService.getInstance().requestLastKnownLocationInfo(new LocationProviderService.LocationCallback() {
+                                    LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LocationCallback() {
                                         @Override
                                         public void onLocationSuccess(LatLng latLng, String placeName) {
                                             LatLng nextStopLatLng = new LatLng(nextStopWithDepartures.getLocation().get(1), nextStopWithDepartures.getLocation().get(0));

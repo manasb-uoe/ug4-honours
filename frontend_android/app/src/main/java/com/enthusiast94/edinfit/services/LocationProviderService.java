@@ -90,9 +90,9 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
         return null;
     }
 
-    public void requestLastKnownLocationInfo(LocationCallback locationCallback) {
+    public void requestLastKnownLocationInfo(boolean shouldIncludePlaceName, LocationCallback locationCallback) {
         if (isGoogleApiClientAvailable) {
-            Thread thread = new Thread(new LocationInfoFetcherRunnable(locationCallback));
+            Thread thread = new Thread(new LocationInfoFetcherRunnable(shouldIncludePlaceName, locationCallback));
             thread.start();
         } else {
             locationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
@@ -109,9 +109,11 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
 
     private class LocationInfoFetcherRunnable implements Runnable {
 
+        private boolean shouldIncludePlaceName;
         private LocationCallback locationCallback;
 
-        public LocationInfoFetcherRunnable(LocationCallback locationCallback) {
+        public LocationInfoFetcherRunnable(boolean shouldIncludePlaceName, LocationCallback locationCallback) {
+            this.shouldIncludePlaceName = shouldIncludePlaceName;
             this.locationCallback = locationCallback;
         }
 
@@ -124,7 +126,9 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
 
             if (location != null) {
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                placeName = getPlaceName(latLng);
+                if (shouldIncludePlaceName) {
+                    placeName = getPlaceName(latLng);
+                }
             }
 
             handler.post(new CallbackInvokerRunnable(latLng, placeName, locationCallback));
@@ -145,7 +149,7 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
 
         @Override
         public void run() {
-            if (latLng != null && placeName != null) {
+            if (latLng != null) {
                 locationCallback.onLocationSuccess(latLng, placeName);
             } else {
                 locationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));

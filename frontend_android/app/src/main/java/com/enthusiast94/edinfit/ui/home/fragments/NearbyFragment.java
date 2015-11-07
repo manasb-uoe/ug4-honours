@@ -116,7 +116,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 isShowingNearestStops = tab.getPosition() == 0;
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(NearbyFragment.this);
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(true, NearbyFragment.this);
             }
 
             @Override
@@ -144,7 +144,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(NearbyFragment.this);
+                LocationProviderService.getInstance().requestLastKnownLocationInfo(true, NearbyFragment.this);
             }
         });
 
@@ -160,7 +160,7 @@ public class NearbyFragment extends Fragment implements LocationProviderService.
          * Finally, request user location in order to get things started
          */
 
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(this);
+        LocationProviderService.getInstance().requestLastKnownLocationInfo(true, this);
 
         return view;
     }
