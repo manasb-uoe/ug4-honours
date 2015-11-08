@@ -90,8 +90,10 @@ public class CountdownNotificationService extends android.app.Service {
         @Override
         public void onTick(long millisUntilFinished) {
             String contentTitle = waitOrWalkResult.getType() == ResultFragment.WaitOrWalkResultType.WALK
-                    ? "Walk to " + waitOrWalkResult.getStop().getName() + " by " + waitOrWalkResult.getUpcomingDeparture().getTime()
-                    : "Wait at " + waitOrWalkResult.getStop().getName() + " until " + waitOrWalkResult.getUpcomingDeparture().getTime();
+                    ? String.format(getString(R.string.label_walk_to_stop_by_time),
+                    waitOrWalkResult.getStop().getName(), waitOrWalkResult.getUpcomingDeparture().getTime())
+                    : String.format(getString(R.string.label_walk_to_stop_by_time),
+                    waitOrWalkResult.getStop().getName(), waitOrWalkResult.getUpcomingDeparture().getTime());
 
             Intent stopIntent = new Intent(ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getBroadcast(
@@ -112,12 +114,13 @@ public class CountdownNotificationService extends android.app.Service {
             );
 
             Notification notification = new Notification.Builder(CountdownNotificationService.this)
-                    .setContentTitle("Time remaining: " + Helpers.humanizeDurationInMillis(millisUntilFinished))
+                    .setContentTitle(String.format(getString(R.string.label_time_remaining),
+                            Helpers.humanizeDurationInMillis(millisUntilFinished)))
                     .setContentText(contentTitle)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setOngoing(true)
-                    .addAction(R.drawable.ic_action_av_stop, "Stop", stopPendingIntent)
-                    .addAction(R.drawable.ic_action_maps_directions, "Directions", directionsPendingIntent)
+                    .addAction(R.drawable.ic_action_av_stop, getString(R.string.label_stop), stopPendingIntent)
+                    .addAction(R.drawable.ic_action_maps_directions, getString(R.string.label_directions), directionsPendingIntent)
                     .build();
 
             notificationManager.notify(NOTIFICATION_ID_COUNTDOWN, notification);

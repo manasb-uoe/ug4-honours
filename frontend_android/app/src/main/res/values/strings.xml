@@ -80,6 +80,11 @@
     <string name="label_distance_km">%1$s km</string>
     <string name="label_nothing_found">Nothing found here…</string>
     <string name="label_fetching_walking_direction">Fetching walking directions…</string>
+    <string name="label_walk_to_stop_by_time">Walk to %1$s by %2$s</string>
+    <string name="label_wait_at_stop_until_time">Wait at %1$s until %2$s</string>
+    <string name="label_time_remaining">Time remaining: %1$s</string>
+    <string name="label_stop">Stop</string>
+    <string name="label_directions">Directions</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
