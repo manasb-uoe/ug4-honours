@@ -2,6 +2,8 @@ package com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -186,6 +188,8 @@ public class ResultFragment extends Fragment {
                                                                     WaitOrWalkResultType.WALK,
                                                                     nextStopWithoutDepartures,
                                                                     finalUpcomingDeparture,
+                                                                    finalRemainingTimeMillis,
+                                                                    walkingTimeMillis,
                                                                     result
                                                             );
 
@@ -209,6 +213,8 @@ public class ResultFragment extends Fragment {
                                                                                         WaitOrWalkResultType.WAIT,
                                                                                         selectedOriginStop,
                                                                                         selectedOriginStopWithDepartures.getDepartures().get(0),
+                                                                                        finalRemainingTimeMillis,
+                                                                                        0,
                                                                                         null
                                                                                 );
 
@@ -380,21 +386,46 @@ public class ResultFragment extends Fragment {
     }
 
     public enum WaitOrWalkResultType {
-        WAIT, WALK
+        WAIT(0), WALK(1);
+
+        private int value;
+
+        WaitOrWalkResultType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static @Nullable WaitOrWalkResultType getTypeByValue(int value) {
+            for (WaitOrWalkResultType type : values()) {
+                if (type.getValue() == value) {
+                    return type;
+                }
+            }
+
+            return null;
+        }
     }
 
-    public static class WaitOrWalkResult {
+    public static class WaitOrWalkResult implements Parcelable {
 
         private WaitOrWalkResultType type;
         private Stop stop;
         private Departure upcomingDeparture;
+        private long remainingTimeMillis;
+        private long walkingTimeMillis;
         @Nullable private DirectionsService.DirectionsResult walkingDirections;
 
         public WaitOrWalkResult(WaitOrWalkResultType type, Stop stop, Departure upcomingDeparture,
+                                long remainingTimeMillis, long walkingTimeMillis,
                                 @Nullable DirectionsService.DirectionsResult walkingDirections) {
             this.type = type;
             this.stop = stop;
             this.upcomingDeparture = upcomingDeparture;
+            this.remainingTimeMillis = remainingTimeMillis;
+            this.walkingTimeMillis = walkingTimeMillis;
             this.walkingDirections = walkingDirections;
         }
 
@@ -413,6 +444,53 @@ public class ResultFragment extends Fragment {
 
         public WaitOrWalkResultType getType() {
             return type;
+        }
+
+        public long getRemainingTimeMillis() {
+            return remainingTimeMillis;
+        }
+
+        public long getWalkingTimeMillis() {
+            return walkingTimeMillis;
+        }
+
+        /**
+         * Parcelable implementation
+         * Note that DirectionsService.DirectionsResult is not retained.
+         */
+
+        public WaitOrWalkResult(Parcel in) {
+            type = WaitOrWalkResultType.getTypeByValue(in.readInt());
+            stop = in.readParcelable(Stop.class.getClassLoader());
+            upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
+            remainingTimeMillis = in.readLong();
+            walkingTimeMillis = in.readLong();
+        }
+
+        public static final Creator<WaitOrWalkResult> CREATOR = new Creator<WaitOrWalkResult>() {
+            @Override
+            public WaitOrWalkResult createFromParcel(Parcel in) {
+                return new WaitOrWalkResult(in);
+            }
+
+            @Override
+            public WaitOrWalkResult[] newArray(int size) {
+                return new WaitOrWalkResult[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(type.getValue());
+            dest.writeParcelable(stop, flags);
+            dest.writeParcelable(upcomingDeparture, flags);
+            dest.writeLong(remainingTimeMillis);
+            dest.writeLong(walkingTimeMillis);
         }
     }
 }
