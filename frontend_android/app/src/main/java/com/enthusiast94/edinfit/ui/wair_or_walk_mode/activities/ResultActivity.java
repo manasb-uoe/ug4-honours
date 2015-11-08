@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
 
 import de.greenrobot.event.EventBus;
 
@@ -34,6 +36,7 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_SERVICE = "selectedService";
     public static final String EXTRA_SELECTED_DESTINATION_STOP = "selectedDestinationStop";
     public static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
+    public static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkResult";
 
     private Stop selectedOriginStop;
     private Service selectedService;
@@ -162,5 +165,11 @@ public class ResultActivity extends AppCompatActivity {
                 tab.setText(R.string.label_wait);
             }
         }
+
+        // start countdown notification service
+        Intent startServiceIntent = new Intent(this, CountdownNotificationService.class);
+        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT,
+                event.getWaitOrWalkResult());
+        startService(startServiceIntent);
     }
 }

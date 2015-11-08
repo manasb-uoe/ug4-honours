@@ -137,4 +137,16 @@ public class Helpers {
         String[] split = durationText.split("\\s");
         return (Integer.valueOf(split[0]) * 60 * 1000);
     }
+
+    public static String humanizeDurationInMillis(long millis) {
+        int seconds = (int) ((millis / 1000) % 60);
+        int minutes = (int) ((millis / (1000 * 60)) % 60);
+        int hours = (int) (millis / (1000 * 60 * 60) % 24);
+
+        if (hours != 0) {
+            return hours + ":" + minutes + ":" + minutes;
+        } else {
+            return minutes + ":" + seconds;
+        }
+    }
 }
