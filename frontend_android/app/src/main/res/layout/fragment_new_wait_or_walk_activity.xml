@@ -42,7 +42,7 @@
                     <ImageView
                         android:layout_width="@dimen/app_bar_icon_width_with_text"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_action_navigation_check"
+                        android:src="@drawable/ic_action_av_play_arrow"
                         />
 
                     <TextView
