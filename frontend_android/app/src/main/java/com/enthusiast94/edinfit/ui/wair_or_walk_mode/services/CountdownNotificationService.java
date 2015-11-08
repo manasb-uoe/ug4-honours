@@ -103,8 +103,7 @@ public class CountdownNotificationService extends android.app.Service {
 
             Intent directionsIntent =
                     new Intent(CountdownNotificationService.this, ResultActivity.class);
-//            directionsIntent.putExtra(ResultActivity.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
-            directionsIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            directionsIntent.putExtra(ResultActivity.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
             PendingIntent directionsPendingIntent = PendingIntent.getActivity(
                     CountdownNotificationService.this,
                     REQUEST_CODE_DIRECTIONS,
@@ -113,8 +112,8 @@ public class CountdownNotificationService extends android.app.Service {
             );
 
             Notification notification = new Notification.Builder(CountdownNotificationService.this)
-                    .setContentTitle(contentTitle)
-                    .setContentText("Time remaining: " + Helpers.humanizeDurationInMillis(millisUntilFinished))
+                    .setContentTitle("Time remaining: " + Helpers.humanizeDurationInMillis(millisUntilFinished))
+                    .setContentText(contentTitle)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setOngoing(true)
                     .addAction(R.drawable.ic_action_av_stop, "Stop", stopPendingIntent)

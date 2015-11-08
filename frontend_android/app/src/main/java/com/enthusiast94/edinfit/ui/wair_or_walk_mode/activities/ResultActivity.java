@@ -17,6 +17,7 @@ import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
@@ -42,6 +43,7 @@ public class ResultActivity extends AppCompatActivity {
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
+    private ResultFragment.WaitOrWalkResult waitOrWalkResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +51,15 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wait_or_walk_result);
 
         /**
-         * Get user selections from intent
+         * Get intent extras.
+         *
+         * A WaitOrWalk result would only be passed in if a the directions action on a countdown
+         * notification is clicked, while user selections for service, stop and route will be
+         * passed in if a new wait or walk activity is started.
          */
 
         Bundle bundle = getIntent().getExtras();
+        waitOrWalkResult = bundle.getParcelable(EXTRA_WAIT_OR_WALK_RESULT);
         selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
         selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
         selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
@@ -122,6 +129,9 @@ public class ResultActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
+                    if (waitOrWalkResult != null) {
+                        return ResultFragment.newInstance(waitOrWalkResult);
+                    }
                     return ResultFragment.newInstance(selectedOriginStop, selectedService,
                             selectedDestinationStop, selectedRoute);
                 case 1:
@@ -165,11 +175,9 @@ public class ResultActivity extends AppCompatActivity {
                 tab.setText(R.string.label_wait);
             }
         }
+    }
 
-        // start countdown notification service
-        Intent startServiceIntent = new Intent(this, CountdownNotificationService.class);
-        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT,
-                event.getWaitOrWalkResult());
-        startService(startServiceIntent);
+    public void onEventMainThread(ShowWalkingDirectionsFragmentEvent event) {
+        viewPager.setCurrentItem(1);
     }
 }
