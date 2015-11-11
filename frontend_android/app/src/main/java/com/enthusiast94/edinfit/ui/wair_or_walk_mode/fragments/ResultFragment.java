@@ -31,11 +31,6 @@ import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificat
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import de.greenrobot.event.EventBus;
 
 /**
@@ -233,9 +228,9 @@ public class ResultFragment extends Fragment {
 
                                         LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LocationCallback() {
                                             @Override
-                                            public void onLocationSuccess(LatLng latLng, String placeName) {
+                                            public void onLocationSuccess(final LatLng userLatLng, String placeName) {
                                                 LatLng nextStopLatLng = new LatLng(nextStopWithDepartures.getLocation().get(1), nextStopWithDepartures.getLocation().get(0));
-                                                DirectionsService.getInstance().getWalkingDirections(latLng, nextStopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
+                                                DirectionsService.getInstance().getWalkingDirections(userLatLng, nextStopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
 
                                                     @Override
                                                     public void onSuccess(DirectionsService.DirectionsResult result) {
@@ -255,7 +250,6 @@ public class ResultFragment extends Fragment {
                                                                         nextStopWithoutDepartures,
                                                                         finalUpcomingDeparture,
                                                                         finalRemainingTimeMillis,
-                                                                        walkingTimeMillis,
                                                                         result
                                                                 );
 
@@ -279,31 +273,46 @@ public class ResultFragment extends Fragment {
                                                                         new BaseService.Callback<Stop>() {
 
                                                                             @Override
-                                                                            public void onSuccess(Stop selectedOriginStopWithDepartures) {
+                                                                            public void onSuccess(final Stop selectedOriginStopWithDepartures) {
                                                                                 if (getActivity() != null) {
-                                                                                    Departure upcomingDepartureAtOriginStop =
-                                                                                            selectedOriginStopWithDepartures.getDepartures().get(0);
-                                                                                    long remainingTimeMillisForUpcomingDepartureAtOriginStop =
-                                                                                            Helpers.getRemainingTimeMillisFromNow(upcomingDepartureAtOriginStop.getTime());
-
-                                                                                    mainResult = new WaitOrWalkResult(
-                                                                                            WaitOrWalkResultType.WAIT,
-                                                                                            selectedOriginStop,
-                                                                                            upcomingDepartureAtOriginStop,
-                                                                                            remainingTimeMillisForUpcomingDepartureAtOriginStop,
-                                                                                            0,
-                                                                                            null
+                                                                                    LatLng originStopLatLng = new LatLng(
+                                                                                            selectedOriginStopWithDepartures.getLocation().get(1),
+                                                                                            selectedOriginStopWithDepartures.getLocation().get(0)
                                                                                     );
+                                                                                    DirectionsService.getInstance().getWalkingDirections(userLatLng, originStopLatLng,
+                                                                                            new BaseService.Callback<DirectionsService.DirectionsResult>() {
 
-                                                                                    resultsAdapter.notifyDataSetChanged();
+                                                                                        @Override
+                                                                                        public void onSuccess(DirectionsService.DirectionsResult data) {
+                                                                                            Departure upcomingDepartureAtOriginStop =
+                                                                                                    selectedOriginStopWithDepartures.getDepartures().get(0);
+                                                                                            long remainingTimeMillisForUpcomingDepartureAtOriginStop =
+                                                                                                    Helpers.getRemainingTimeMillisFromNow(upcomingDepartureAtOriginStop.getTime());
 
-                                                                                    EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
+                                                                                            mainResult = new WaitOrWalkResult(
+                                                                                                    WaitOrWalkResultType.WAIT,
+                                                                                                    selectedOriginStop,
+                                                                                                    upcomingDepartureAtOriginStop,
+                                                                                                    remainingTimeMillisForUpcomingDepartureAtOriginStop,
+                                                                                                    data
+                                                                                            );
 
-                                                                                    showTimeRemainingCountdownNotification(mainResult);
+                                                                                            resultsAdapter.notifyDataSetChanged();
 
-                                                                                    progressDialog.dismiss();
+                                                                                            EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
 
-                                                                                    Log.d(TAG, "result: WAIT");
+                                                                                            showTimeRemainingCountdownNotification(mainResult);
+
+                                                                                            progressDialog.dismiss();
+
+                                                                                            Log.d(TAG, "result: WAIT");
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onFailure(String message) {
+
+                                                                                        }
+                                                                                    });
                                                                                 }
                                                                             }
 
@@ -501,17 +510,14 @@ public class ResultFragment extends Fragment {
         private Stop stop;
         private Departure upcomingDeparture;
         private long remainingTimeMillis;
-        private long walkingTimeMillis;
         @Nullable private DirectionsService.DirectionsResult walkingDirections;
 
         public WaitOrWalkResult(WaitOrWalkResultType type, Stop stop, Departure upcomingDeparture,
-                                long remainingTimeMillis, long walkingTimeMillis,
-                                @Nullable DirectionsService.DirectionsResult walkingDirections) {
+                                long remainingTimeMillis, @Nullable DirectionsService.DirectionsResult walkingDirections) {
             this.type = type;
             this.stop = stop;
             this.upcomingDeparture = upcomingDeparture;
             this.remainingTimeMillis = remainingTimeMillis;
-            this.walkingTimeMillis = walkingTimeMillis;
             this.walkingDirections = walkingDirections;
         }
 
@@ -536,10 +542,6 @@ public class ResultFragment extends Fragment {
             return remainingTimeMillis;
         }
 
-        public long getWalkingTimeMillis() {
-            return walkingTimeMillis;
-        }
-
         public void setType(WaitOrWalkResultType type) {
             this.type = type;
         }
@@ -556,10 +558,6 @@ public class ResultFragment extends Fragment {
             this.remainingTimeMillis = remainingTimeMillis;
         }
 
-        public void setWalkingTimeMillis(long walkingTimeMillis) {
-            this.walkingTimeMillis = walkingTimeMillis;
-        }
-
         public void setWalkingDirections(@Nullable DirectionsService.DirectionsResult walkingDirections) {
             this.walkingDirections = walkingDirections;
         }
@@ -574,7 +572,6 @@ public class ResultFragment extends Fragment {
             stop = in.readParcelable(Stop.class.getClassLoader());
             upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
             remainingTimeMillis = in.readLong();
-            walkingTimeMillis = in.readLong();
         }
 
         public static final Creator<WaitOrWalkResult> CREATOR = new Creator<WaitOrWalkResult>() {
@@ -600,7 +597,6 @@ public class ResultFragment extends Fragment {
             dest.writeParcelable(stop, flags);
             dest.writeParcelable(upcomingDeparture, flags);
             dest.writeLong(remainingTimeMillis);
-            dest.writeLong(walkingTimeMillis);
         }
     }
 }

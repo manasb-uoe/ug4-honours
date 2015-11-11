@@ -155,29 +155,20 @@ public class WalkingDirectionsFragment extends Fragment {
                     // move map focus to stop marker
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
-                    if (event.getWaitOrWalkResult().getType() == ResultFragment.WaitOrWalkResultType.WALK) {
-                        // add walking route from user's last known location to stop
-                        DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
+                    // add walking route from user's last known location to stop
+                    DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
 
-                        if (directionsResult != null) {
-                            PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
-                                    .color(ContextCompat.getColor(getActivity(), R.color.red))
-                                    .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
-                            map.addPolyline(polylineOptions);
+                    if (directionsResult != null) {
+                        PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
+                                .color(ContextCompat.getColor(getActivity(), R.color.red))
+                                .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                        map.addPolyline(polylineOptions);
 
-                            marker.setSnippet(directionsResult.getRoute().getDistanceText());
-                            marker.showInfoWindow();
-
-                            // update directions list
-                            directionSegments = directionsResult.getRoute().getSegments();
-                            directionsAdapter.notifyDirectionsChanged();
-                        }
-                    } else {
-                        marker.setSnippet(getString(R.string.label_wait_here));
+                        marker.setSnippet(directionsResult.getRoute().getDistanceText());
                         marker.showInfoWindow();
 
-                        // update directions list to be empty
-                        directionSegments = new ArrayList<Segment>();
+                        // update directions list
+                        directionSegments = directionsResult.getRoute().getSegments();
                         directionsAdapter.notifyDirectionsChanged();
                     }
                 }
