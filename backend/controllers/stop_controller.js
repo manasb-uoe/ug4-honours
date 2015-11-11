@@ -109,19 +109,21 @@ router.get("/stops/saved", authenticationMiddleware, function (req, res) {
                     function (stop, callback) {
                         // add departures if they don't already exist
                         // also filter out departures that are not for today
-                        stop.filterDepartures(helpers.getDayCode(), time, function () {
-                            if (stop.departures.length == 0) {
-                                stop.updateDepartures(function (err, departures) {
-                                    if (err) return callback(err);
+                        if (stop.departures.length == 0) {
+                            stop.updateDepartures(function (err, departures) {
+                                if (err) return callback(err);
 
-                                    stop.departures = departures;
+                                stop.departures = departures;
 
+                                stop.filterDepartures(helpers.getDayCode(), time, function () {
                                     return callback();
                                 });
-                            } else {
+                            });     
+                        } else {
+                            stop.filterDepartures(helpers.getDayCode(), time, function () {
                                 return callback();
-                            }
-                        });
+                            });
+                        }
                     },
                     function (err) {
                         if (err) return res.sendError(500, err.message);
@@ -149,20 +151,23 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
         if (err) return res.sendError(500, err.message);
 
         // add departures if they don't already exist
-        // also filter out departures that do not belong to provided day
-        stop.filterDepartures(day, time, function () {
-            if (stop.departures.length == 0) {
-                stop.updateDepartures(function (err, departures) {
-                    if (err) return callbackA(err);
+        // also filter out departures that are not for 
+        // provided day
+        if (stop.departures.length == 0) {
+            stop.updateDepartures(function (err, departures) {
+                if (err) return callback(err);
 
-                    stop.departures = departures;
+                stop.departures = departures;
 
+                stop.filterDepartures(day, time, function () {
                     return res.sendOk(stop);
                 });
-            } else {
+            });     
+        } else {
+            stop.filterDepartures(day, time, function () {
                 return res.sendOk(stop);
-            }
-        });
+            });
+        }
     });
 });
 
