@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
@@ -19,10 +18,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Created by manas on 26-09-2015.
@@ -163,17 +161,22 @@ public class Helpers {
         }
     }
 
-    // time must be in 24h format (eg. 08:55)
+    // time must be in 24h form14 (eg. 08:55)
     public static long getRemainingTimeMillisFromNow(String time) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.UK);
+        Calendar calendar = Calendar.getInstance();
+        String dateText = simpleDateFormat.format(calendar.getTime());
+
+        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.UK);
 
         try {
-            Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
-            Date due = simpleDateFormat.parse(time);
+            Date parsedDate = simpleDateFormat.parse(dateText + " " + time);
+            Date now = new Date();
 
-            return due.getTime() - now.getTime();
+            return parsedDate.getTime() - now.getTime();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 }
+
