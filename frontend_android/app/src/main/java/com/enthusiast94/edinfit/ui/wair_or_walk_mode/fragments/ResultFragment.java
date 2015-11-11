@@ -218,20 +218,11 @@ public class ResultFragment extends Fragment {
                                         Departure departure = nextStopWithDepartures.getDepartures().get(i);
 
                                         if (departure.getServiceName().equals(selectedService.getName())) {
-                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+                                            upcomingDeparture = departure;
+                                            remainingTimeMillis = Helpers.getRemainingTimeMillisFromNow(departure.getTime());
 
-                                            try {
-                                                Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
-                                                Date due = simpleDateFormat.parse(departure.getTime());
-
-                                                upcomingDeparture = departure;
-                                                remainingTimeMillis = due.getTime() - now.getTime();
-
-                                                Log.d(TAG, "upcoming departure at: " + departure.getTime());
-                                                break;
-                                            } catch (ParseException e) {
-                                                throw new RuntimeException(e);
-                                            }
+                                            Log.d(TAG, "upcoming departure at: " + departure.getTime());
+                                            break;
                                         }
                                     }
 
@@ -254,11 +245,11 @@ public class ResultFragment extends Fragment {
                                                             long walkingTimeMillis = Helpers.parseDirectionsApiDurationToMillis(resultRoute.getDurationText());
 
 
-                                                            Log.d(TAG, "remaining time: " + finalRemainingTimeMillis);
+                                                            Log.d(TAG, "remaining time: " + finalRemainingTimeMillis / (1000*60));
                                                             Log.d(TAG, "api duration: " + resultRoute.getDurationText());
-                                                            Log.d(TAG, "parsed api duration: " + walkingTimeMillis);
+                                                            Log.d(TAG, "parsed api duration: " + walkingTimeMillis / (1000*60));
 
-                                                            if (finalRemainingTimeMillis > walkingTimeMillis) {
+                                                            if (finalRemainingTimeMillis >= walkingTimeMillis) {
                                                                 mainResult = new WaitOrWalkResult(
                                                                         WaitOrWalkResultType.WALK,
                                                                         nextStopWithoutDepartures,
@@ -278,7 +269,11 @@ public class ResultFragment extends Fragment {
 
                                                                 Log.d(TAG, "result: WALK");
                                                             } else {
-                                                                // fetch origin stop with upcoming departures for current day
+                                                                // Fetch origin stop with upcoming departures for current day.
+                                                                // The latest departure from this list is needed since there's
+                                                                // not enough time left for the user to reach the next stop, and
+                                                                // therefore they must wait at the origin stop until the latest
+                                                                // upcoming departure.
                                                                 StopService.getInstance().getStop(selectedOriginStop.getId(),
                                                                         Helpers.getDayCode(Helpers.getCurrentDay()), Helpers.getCurrentTime24h(),
                                                                         new BaseService.Callback<Stop>() {
@@ -286,11 +281,16 @@ public class ResultFragment extends Fragment {
                                                                             @Override
                                                                             public void onSuccess(Stop selectedOriginStopWithDepartures) {
                                                                                 if (getActivity() != null) {
+                                                                                    Departure upcomingDepartureAtOriginStop =
+                                                                                            selectedOriginStopWithDepartures.getDepartures().get(0);
+                                                                                    long remainingTimeMillisForUpcomingDepartureAtOriginStop =
+                                                                                            Helpers.getRemainingTimeMillisFromNow(upcomingDepartureAtOriginStop.getTime());
+
                                                                                     mainResult = new WaitOrWalkResult(
                                                                                             WaitOrWalkResultType.WAIT,
                                                                                             selectedOriginStop,
-                                                                                            selectedOriginStopWithDepartures.getDepartures().get(0),
-                                                                                            finalRemainingTimeMillis,
+                                                                                            upcomingDepartureAtOriginStop,
+                                                                                            remainingTimeMillisForUpcomingDepartureAtOriginStop,
                                                                                             0,
                                                                                             null
                                                                                     );

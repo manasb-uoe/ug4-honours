@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.enthusiast94.edinfit.R;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -147,6 +148,20 @@ public class Helpers {
             return hours + ":" + minutes + ":" + minutes;
         } else {
             return minutes + ":" + seconds;
+        }
+    }
+
+    // time must be in 24h format (eg. 08:55)
+    public static long getRemainingTimeMillisFromNow(String time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+
+        try {
+            Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
+            Date due = simpleDateFormat.parse(time);
+
+            return due.getTime() - now.getTime();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
     }
 }
