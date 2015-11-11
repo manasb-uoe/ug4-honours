@@ -21,6 +21,7 @@ import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirection
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
+import com.enthusiast94.edinfit.utils.Helpers;
 
 import de.greenrobot.event.EventBus;
 
@@ -163,16 +164,15 @@ public class ResultActivity extends AppCompatActivity {
         // update tab 2 title depending on wait or walk result
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         if (tab != null) {
-            if (event.getWaitOrWalkResult().getType() == ResultFragment.WaitOrWalkResultType.WALK) {
-                DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
-
-                if (directionsResult != null) {
-                    tab.setText(String.format(
-                            getString(R.string.label_walk_duration),
-                            event.getWaitOrWalkResult().getWalkingDirections().getRoute().getDurationText()));
+            DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
+            if (directionsResult != null) {
+                if (event.getWaitOrWalkResult().getType() == ResultFragment.WaitOrWalkResultType.WALK) {
+                    tab.setText(String.format(getString(R.string.label_walk_duration),
+                            directionsResult.getRoute().getDurationText()));
+                } else {
+                    tab.setText(String.format(getString(R.string.label_wait_duration),
+                            Helpers.humanizeDurationInMillisToMinutes(event.getWaitOrWalkResult().getRemainingTimeMillis())));
                 }
-            } else {
-                tab.setText(R.string.label_wait);
             }
         }
     }

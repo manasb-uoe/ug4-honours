@@ -52,6 +52,7 @@
     <string name="label_start">Start</string>
     <string name="label_end">End</string>
     <string name="label_walk_duration">Walk (%1$s)</string>
+    <string name="label_wait_duration">Wait (%1$s)</string>
     <string name="label_nearest">Nearest</string>
     <string name="label_save">Save</string>
     <string name="label_unsave">Unsave</string>

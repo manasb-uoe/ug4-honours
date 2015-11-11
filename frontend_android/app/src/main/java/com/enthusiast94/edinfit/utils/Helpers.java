@@ -145,9 +145,21 @@ public class Helpers {
         int hours = (int) (millis / (1000 * 60 * 60) % 24);
 
         if (hours != 0) {
-            return hours + ":" + minutes + ":" + minutes;
+            return hours + "h " + minutes + "m " + seconds + "s";
+        } else if (minutes != 0) {
+            return minutes + "m " + seconds + "s";
         } else {
-            return minutes + ":" + seconds;
+            return seconds + "s";
+        }
+    }
+
+    public static String humanizeDurationInMillisToMinutes(long millis) {
+        int minutes = (int) ((millis / (1000 * 60)));
+
+        if (minutes == 1) {
+            return minutes + " min";
+        } else {
+            return minutes + " mins";
         }
     }
 
