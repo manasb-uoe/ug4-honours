@@ -3,13 +3,10 @@ package com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,19 +14,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
-import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
-import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -53,7 +50,7 @@ public class ResultFragment extends Fragment {
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private WaitOrWalkResult mainResult;
+    private WaitOrWalkService.WaitOrWalkResult mainResult;
 
     /**
      * Used when a new wait or walk activity is started.
@@ -76,7 +73,7 @@ public class ResultFragment extends Fragment {
      * Used when the directions action on a countdown notification is clicked.
      */
 
-    public static ResultFragment newInstance(WaitOrWalkResult waitOrWalkResult) {
+    public static ResultFragment newInstance(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
         ResultFragment resultFragment = new ResultFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
@@ -150,8 +147,10 @@ public class ResultFragment extends Fragment {
 
                                                 resultsAdapter.notifyDataSetChanged();
 
-                                                EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
-                                                EventBus.getDefault().post(new ShowWalkingDirectionsFragmentEvent());
+                                                EventBus.getDefault()
+                                                        .post(new OnWaitOrWalkResultComputedEvent(mainResult));
+                                                EventBus.getDefault()
+                                                        .post(new ShowWalkingDirectionsFragmentEvent());
 
                                                 fetchingDirectionsProgressDialog.dismiss();
                                             }
@@ -183,203 +182,42 @@ public class ResultFragment extends Fragment {
             progressDialog.setMessage(getString(R.string.label_making_complex_calculations));
             progressDialog.show();
 
-            // find next stop index
-            int nextStopIndex = -1;
+            WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(
+                    selectedRoute,
+                    selectedService,
+                    selectedOriginStop,
+                    new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkResult>>() {
 
-            for (int i=0; i<selectedRoute.getStops().size(); i++) {
-                Stop currentStop = selectedRoute.getStops().get(i);
-                if (currentStop.getId().equals(selectedOriginStop.getId())) {
-                    nextStopIndex = i + 1;
-                }
-            }
+                        @Override
+                        public void onSuccess(List<WaitOrWalkService.WaitOrWalkResult> data) {
+                            mainResult = data.get(0);
 
-            if (nextStopIndex != -1) {
-                final Stop nextStopWithoutDepartures = selectedRoute.getStops().get(nextStopIndex);
+                            resultsAdapter.notifyDataSetChanged();
 
-                // fetch next stop with upcoming departures for current day
-                StopService.getInstance().getStop(nextStopWithoutDepartures.getId(),
-                        Helpers.getDayCode(Helpers.getCurrentDay()),
-                        Helpers.getCurrentTime24h(), new BaseService.Callback<Stop>() {
+                            EventBus.getDefault()
+                                    .post(new OnWaitOrWalkResultComputedEvent(mainResult));
 
-                            @Override
-                            public void onSuccess(final Stop nextStopWithDepartures) {
-                                if (getActivity() != null) {
-                                    // find the amount of time remaining until upcoming departure of
-                                    // selected service
-                                    Departure upcomingDeparture = null;
-                                    long remainingTimeMillis = 0;
+                            showTimeRemainingCountdownNotification(mainResult);
 
-                                    for (int i=0; i<nextStopWithDepartures.getDepartures().size(); i++) {
-                                        Departure departure = nextStopWithDepartures.getDepartures().get(i);
+                            progressDialog.dismiss();
+                        }
 
-                                        if (departure.getServiceName().equals(selectedService.getName())) {
-                                            upcomingDeparture = departure;
-                                            remainingTimeMillis = Helpers.getRemainingTimeMillisFromNow(departure.getTime());
+                        @Override
+                        public void onFailure(String message) {
+                            progressDialog.dismiss();
 
-                                            Log.d(TAG, "upcoming departure at: " + departure.getTime());
-                                            break;
-                                        }
-                                    }
-
-                                    // check if there's enough time left to walk to the next stop or not
-                                    if (upcomingDeparture != null) {
-                                        final long finalRemainingTimeMillis = remainingTimeMillis;
-                                        final Departure finalUpcomingDeparture = upcomingDeparture;
-
-                                        LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LocationCallback() {
-                                            @Override
-                                            public void onLocationSuccess(final LatLng userLatLng, String placeName) {
-                                                LatLng nextStopLatLng = new LatLng(nextStopWithDepartures.getLocation().get(1), nextStopWithDepartures.getLocation().get(0));
-                                                DirectionsService.getInstance().getWalkingDirections(userLatLng, nextStopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
-
-                                                    @Override
-                                                    public void onSuccess(DirectionsService.DirectionsResult result) {
-                                                        if (getActivity() != null) {
-                                                            com.directions.route.Route resultRoute = result.getRoute();
-
-                                                            long walkingTimeMillis = Helpers.parseDirectionsApiDurationToMillis(resultRoute.getDurationText());
-
-
-                                                            Log.d(TAG, "remaining time: " + finalRemainingTimeMillis / (1000*60));
-                                                            Log.d(TAG, "api duration: " + resultRoute.getDurationText());
-                                                            Log.d(TAG, "parsed api duration: " + walkingTimeMillis / (1000*60));
-
-                                                            if (finalRemainingTimeMillis >= walkingTimeMillis) {
-                                                                mainResult = new WaitOrWalkResult(
-                                                                        WaitOrWalkResultType.WALK,
-                                                                        nextStopWithoutDepartures,
-                                                                        finalUpcomingDeparture,
-                                                                        finalRemainingTimeMillis,
-                                                                        result
-                                                                );
-
-                                                                resultsAdapter.notifyDataSetChanged();
-
-                                                                EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
-
-                                                                showTimeRemainingCountdownNotification(mainResult);
-
-                                                                progressDialog.dismiss();
-
-                                                                Log.d(TAG, "result: WALK");
-                                                            } else {
-                                                                // Fetch origin stop with upcoming departures for current day.
-                                                                // The latest departure from this list is needed since there's
-                                                                // not enough time left for the user to reach the next stop, and
-                                                                // therefore they must wait at the origin stop until the latest
-                                                                // upcoming departure.
-                                                                StopService.getInstance().getStop(selectedOriginStop.getId(),
-                                                                        Helpers.getDayCode(Helpers.getCurrentDay()), Helpers.getCurrentTime24h(),
-                                                                        new BaseService.Callback<Stop>() {
-
-                                                                            @Override
-                                                                            public void onSuccess(final Stop selectedOriginStopWithDepartures) {
-                                                                                if (getActivity() != null) {
-                                                                                    LatLng originStopLatLng = new LatLng(
-                                                                                            selectedOriginStopWithDepartures.getLocation().get(1),
-                                                                                            selectedOriginStopWithDepartures.getLocation().get(0)
-                                                                                    );
-                                                                                    DirectionsService.getInstance().getWalkingDirections(userLatLng, originStopLatLng,
-                                                                                            new BaseService.Callback<DirectionsService.DirectionsResult>() {
-
-                                                                                        @Override
-                                                                                        public void onSuccess(DirectionsService.DirectionsResult data) {
-                                                                                            Departure upcomingDepartureAtOriginStop =
-                                                                                                    selectedOriginStopWithDepartures.getDepartures().get(0);
-                                                                                            long remainingTimeMillisForUpcomingDepartureAtOriginStop =
-                                                                                                    Helpers.getRemainingTimeMillisFromNow(upcomingDepartureAtOriginStop.getTime());
-
-                                                                                            mainResult = new WaitOrWalkResult(
-                                                                                                    WaitOrWalkResultType.WAIT,
-                                                                                                    selectedOriginStop,
-                                                                                                    upcomingDepartureAtOriginStop,
-                                                                                                    remainingTimeMillisForUpcomingDepartureAtOriginStop,
-                                                                                                    data
-                                                                                            );
-
-                                                                                            resultsAdapter.notifyDataSetChanged();
-
-                                                                                            EventBus.getDefault().post(new OnWaitOrWalkResultComputedEvent(mainResult));
-
-                                                                                            showTimeRemainingCountdownNotification(mainResult);
-
-                                                                                            progressDialog.dismiss();
-
-                                                                                            Log.d(TAG, "result: WAIT");
-                                                                                        }
-
-                                                                                        @Override
-                                                                                        public void onFailure(String message) {
-
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onFailure(String message) {
-                                                                                if (getActivity() != null) {
-                                                                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
-                                                                                            .show();
-                                                                                    progressDialog.dismiss();
-                                                                                }
-                                                                            }
-                                                                        });
-                                                            }
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(String message) {
-                                                        if (getActivity() != null) {
-                                                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
-                                                                    .show();
-                                                            progressDialog.dismiss();
-                                                        }
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onLocationFailure(String error) {
-                                                if (getActivity() != null) {
-                                                    Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT)
-                                                            .show();
-                                                    progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
-
-                                    } else {
-                                        Toast.makeText(getActivity(), getString(R.string.label_no_upcoming_departure),
-                                                Toast.LENGTH_LONG).show();
-                                        progressDialog.dismiss();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                if (getActivity() != null) {
-                                    progressDialog.dismiss();
-
-                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
-                                            .show();
-                                }
-                            }
-                        });
-            } else {
-                progressDialog.dismiss();
-
-                Toast.makeText(getActivity(), getString(R.string.error_unexpected), Toast.LENGTH_SHORT)
-                        .show();
-            }
+                            Toast.makeText(getActivity(),
+                                    getString(R.string.error_unexpected), Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    }
+            );
         }
 
         return view;
     }
 
-    private void showTimeRemainingCountdownNotification(WaitOrWalkResult waitOrWalkResult) {
+    private void showTimeRemainingCountdownNotification(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
         Intent startServiceIntent = new Intent(getActivity(), CountdownNotificationService.class);
         startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
         getActivity().startService(startServiceIntent);
@@ -431,7 +269,7 @@ public class ResultFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                if (mainResult.getType() == WaitOrWalkResultType.WALK) {
+                if (mainResult.getType() == WaitOrWalkService.WaitOrWalkResultType.WALK) {
                     return WALK_RESULT_ViEW_TYPE;
                 } else {
                     return WAIT_RESULT_VIEW_TYPE;
@@ -454,7 +292,7 @@ public class ResultFragment extends Fragment {
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
-            public void bindItem(WaitOrWalkResult result) {
+            public void bindItem(WaitOrWalkService.WaitOrWalkResult result) {
                 stopNameTextview.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }
@@ -473,130 +311,10 @@ public class ResultFragment extends Fragment {
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
-            public void bindItem(WaitOrWalkResult result) {
+            public void bindItem(WaitOrWalkService.WaitOrWalkResult result) {
                 stopNameTextview.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }
-        }
-    }
-
-    public enum WaitOrWalkResultType {
-        WAIT(0), WALK(1);
-
-        private int value;
-
-        WaitOrWalkResultType(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static @Nullable WaitOrWalkResultType getTypeByValue(int value) {
-            for (WaitOrWalkResultType type : values()) {
-                if (type.getValue() == value) {
-                    return type;
-                }
-            }
-
-            return null;
-        }
-    }
-
-    public static class WaitOrWalkResult implements Parcelable {
-
-        private WaitOrWalkResultType type;
-        private Stop stop;
-        private Departure upcomingDeparture;
-        private long remainingTimeMillis;
-        @Nullable private DirectionsService.DirectionsResult walkingDirections;
-
-        public WaitOrWalkResult(WaitOrWalkResultType type, Stop stop, Departure upcomingDeparture,
-                                long remainingTimeMillis, @Nullable DirectionsService.DirectionsResult walkingDirections) {
-            this.type = type;
-            this.stop = stop;
-            this.upcomingDeparture = upcomingDeparture;
-            this.remainingTimeMillis = remainingTimeMillis;
-            this.walkingDirections = walkingDirections;
-        }
-
-        public Departure getUpcomingDeparture() {
-            return upcomingDeparture;
-        }
-
-        @Nullable
-        public DirectionsService.DirectionsResult getWalkingDirections() {
-            return walkingDirections;
-        }
-
-        public Stop getStop() {
-            return stop;
-        }
-
-        public WaitOrWalkResultType getType() {
-            return type;
-        }
-
-        public long getRemainingTimeMillis() {
-            return remainingTimeMillis;
-        }
-
-        public void setType(WaitOrWalkResultType type) {
-            this.type = type;
-        }
-
-        public void setStop(Stop stop) {
-            this.stop = stop;
-        }
-
-        public void setUpcomingDeparture(Departure upcomingDeparture) {
-            this.upcomingDeparture = upcomingDeparture;
-        }
-
-        public void setRemainingTimeMillis(long remainingTimeMillis) {
-            this.remainingTimeMillis = remainingTimeMillis;
-        }
-
-        public void setWalkingDirections(@Nullable DirectionsService.DirectionsResult walkingDirections) {
-            this.walkingDirections = walkingDirections;
-        }
-
-        /**
-         * Parcelable implementation
-         * Note that DirectionsService.DirectionsResult is not retained.
-         */
-
-        public WaitOrWalkResult(Parcel in) {
-            type = WaitOrWalkResultType.getTypeByValue(in.readInt());
-            stop = in.readParcelable(Stop.class.getClassLoader());
-            upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
-            remainingTimeMillis = in.readLong();
-        }
-
-        public static final Creator<WaitOrWalkResult> CREATOR = new Creator<WaitOrWalkResult>() {
-            @Override
-            public WaitOrWalkResult createFromParcel(Parcel in) {
-                return new WaitOrWalkResult(in);
-            }
-
-            @Override
-            public WaitOrWalkResult[] newArray(int size) {
-                return new WaitOrWalkResult[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(type.getValue());
-            dest.writeParcelable(stop, flags);
-            dest.writeParcelable(upcomingDeparture, flags);
-            dest.writeLong(remainingTimeMillis);
         }
     }
 }

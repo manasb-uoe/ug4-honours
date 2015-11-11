@@ -1,6 +1,5 @@
 package com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,11 +15,11 @@ import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.DirectionsService;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import de.greenrobot.event.EventBus;
@@ -44,7 +43,7 @@ public class ResultActivity extends AppCompatActivity {
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private ResultFragment.WaitOrWalkResult waitOrWalkResult;
+    private WaitOrWalkService.WaitOrWalkResult waitOrWalkResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,7 +165,7 @@ public class ResultActivity extends AppCompatActivity {
         if (tab != null) {
             DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
             if (directionsResult != null) {
-                if (event.getWaitOrWalkResult().getType() == ResultFragment.WaitOrWalkResultType.WALK) {
+                if (event.getWaitOrWalkResult().getType() == WaitOrWalkService.WaitOrWalkResultType.WALK) {
                     tab.setText(String.format(getString(R.string.label_walk_duration),
                             directionsResult.getRoute().getDurationText()));
                 } else {

@@ -10,6 +10,7 @@ import com.enthusiast94.edinfit.services.ServiceService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.services.UserService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
 
 /**
  * Created by manas on 26-09-2015.
@@ -32,6 +33,7 @@ public class App extends Application {
         StopService.init(this);
         ServiceService.init(this);
         LiveBusService.init(this);
+        WaitOrWalkService.init(this);
     }
 
     public static Context getAppContext() {

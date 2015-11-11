@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -59,7 +60,7 @@ public class CountdownNotificationService extends android.app.Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // retrieve wait or walk result from intent and build notification accordingly
-        ResultFragment.WaitOrWalkResult waitOrWalkResult =
+        WaitOrWalkService.WaitOrWalkResult waitOrWalkResult =
                 intent.getParcelableExtra(EXTRA_WAIT_OR_WALK_RESULT);
 
         startCountdownNotification(waitOrWalkResult);
@@ -67,7 +68,7 @@ public class CountdownNotificationService extends android.app.Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void startCountdownNotification(final ResultFragment.WaitOrWalkResult waitOrWalkResult) {
+    private void startCountdownNotification(final WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
@@ -78,9 +79,9 @@ public class CountdownNotificationService extends android.app.Service {
 
     private class TimeRemainingCountdownTimer extends CountDownTimer {
 
-        private ResultFragment.WaitOrWalkResult waitOrWalkResult;
+        private WaitOrWalkService.WaitOrWalkResult waitOrWalkResult;
 
-        public TimeRemainingCountdownTimer(ResultFragment.WaitOrWalkResult waitOrWalkResult,
+        public TimeRemainingCountdownTimer(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult,
                                            long countDownInterval) {
             super(waitOrWalkResult.getRemainingTimeMillis(), countDownInterval);
 
@@ -89,7 +90,7 @@ public class CountdownNotificationService extends android.app.Service {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            String contentTitle = waitOrWalkResult.getType() == ResultFragment.WaitOrWalkResultType.WALK
+            String contentTitle = waitOrWalkResult.getType() == WaitOrWalkService.WaitOrWalkResultType.WALK
                     ? String.format(getString(R.string.label_walk_to_stop_by_time),
                     waitOrWalkResult.getStop().getName(), waitOrWalkResult.getUpcomingDeparture().getTime())
                     : String.format(getString(R.string.label_walk_to_stop_by_time),

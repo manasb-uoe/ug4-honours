@@ -1,19 +1,19 @@
 package com.enthusiast94.edinfit.ui.wair_or_walk_mode.events;
 
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
 
 /**
  * Created by manas on 04-11-2015.
  */
 public class OnWaitOrWalkResultComputedEvent {
 
-    private ResultFragment.WaitOrWalkResult waitOrWalkResult;
+    private WaitOrWalkService.WaitOrWalkResult waitOrWalkResult;
 
-    public OnWaitOrWalkResultComputedEvent(ResultFragment.WaitOrWalkResult waitOrWalkResult) {
+    public OnWaitOrWalkResultComputedEvent(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
         this.waitOrWalkResult = waitOrWalkResult;
     }
 
-    public ResultFragment.WaitOrWalkResult getWaitOrWalkResult() {
+    public WaitOrWalkService.WaitOrWalkResult getWaitOrWalkResult() {
         return waitOrWalkResult;
     }
 }
