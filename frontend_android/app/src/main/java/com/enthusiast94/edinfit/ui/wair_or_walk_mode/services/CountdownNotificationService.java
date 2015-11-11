@@ -121,6 +121,7 @@ public class CountdownNotificationService extends android.app.Service {
                     .setOngoing(true)
                     .addAction(R.drawable.ic_action_av_stop, getString(R.string.label_stop), stopPendingIntent)
                     .addAction(R.drawable.ic_action_maps_directions, getString(R.string.label_directions), directionsPendingIntent)
+                    .setContentIntent(directionsPendingIntent)
                     .build();
 
             notificationManager.notify(NOTIFICATION_ID_COUNTDOWN, notification);
