@@ -259,10 +259,12 @@ public class SelectDestinationStopFragment extends Fragment {
                 service = data;
 
                 // filter out routes that do not contain origin stop
+                // or if they contain origin stop as their last stop
                 destinationsWithOriginStop = new ArrayList<>();
                 for (Route route : service.getRoutes()) {
-                    for (Stop stop : route.getStops()) {
-                        if (stop.getId().equals(originStopId)) {
+                    for (int i=0; i<route.getStops().size(); i++) {
+                        Stop stop = route.getStops().get(i);
+                        if (stop.getId().equals(originStopId) && i != route.getStops().size() - 1) {
                             destinationsWithOriginStop.add(route.getDestination());
                             break;
                         }
