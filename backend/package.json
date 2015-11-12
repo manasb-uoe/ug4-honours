@@ -25,7 +25,9 @@
     "validator": "latest",
     "async": "latest",
     "underscore": "latest",
-    "moment": "latest"
+    "moment": "latest",
+    "googlemaps": "latest",
+    "polyline": "latest"
   },
   "devDependencies": {
     "nodemon": "latest",

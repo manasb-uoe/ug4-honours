@@ -65,3 +65,10 @@ module.exports.getDistanceBetweenPoints = function(pt1, pt2) {
 
     return d/1000; // returns the distance in km
 };
+
+module.exports.createErrorMessage = function (statusCode, message) {
+  return {
+      statusCode: statusCode,
+      message: message
+  }
+};
