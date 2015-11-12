@@ -20,16 +20,17 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.directions.route.Route;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.models.Departure;
+import com.enthusiast94.edinfit.models.Directions;
+import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.services.UserService;
+import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -337,29 +338,33 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
         DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
-                new BaseService.Callback<DirectionsService.DirectionsResult>() {
+                new BaseService.Callback<Directions>() {
 
                     @Override
-                    public void onSuccess(DirectionsService.DirectionsResult directionsResult) {
+                    public void onSuccess(Directions directions) {
                         if (getActivity() != null) {
                             // add walking route from user to stop
-                            PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
-                                    .color(ContextCompat.getColor(getActivity(), R.color.red))
-                                    .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                            PolylineOptions polylineOptions = new PolylineOptions();
+
+                            for (Point point : directions.getOverviewPoints()) {
+                                polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                            }
+
+                            polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
+                            polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+
                             map.addPolyline(polylineOptions);
 
                             // update drag view title with travel duration
-                            Route route = directionsResult.getRoute();
                             walkDurationTextView.setText(String.format(
-                                    getString(R.string.label_walk_duration), route.getDurationText()));
+                                    getString(R.string.label_walk_duration), directions.getDurationText()));
                         }
                     }
 
                     @Override
                     public void onFailure(String message) {
                         if (getActivity() != null) {
-                            Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
-                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     }
                 });

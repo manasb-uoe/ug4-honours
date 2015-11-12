@@ -6,16 +6,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.directions.route.Segment;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.services.DirectionsService;
+import com.enthusiast94.edinfit.models.Directions;
+import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -28,7 +27,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -46,7 +44,7 @@ public class WalkingDirectionsFragment extends Fragment {
     private TextView noDirectionsFoundTextView;
 
     private GoogleMap map;
-    private List<Segment> directionSegments;
+    private List<Directions.Step> directionSteps;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -156,19 +154,25 @@ public class WalkingDirectionsFragment extends Fragment {
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
                     // add walking route from user's last known location to stop
-                    DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
+                    Directions directions = event.getWaitOrWalkResult().getWalkingDirections();
 
-                    if (directionsResult != null) {
-                        PolylineOptions polylineOptions = directionsResult.getPolylineOptions()
-                                .color(ContextCompat.getColor(getActivity(), R.color.red))
-                                .width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+                    if (directions != null) {
+                        PolylineOptions polylineOptions = new PolylineOptions();
+
+                        for (Point point : directions.getOverviewPoints()) {
+                            polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                        }
+
+                        polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
+                        polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+
                         map.addPolyline(polylineOptions);
 
-                        marker.setSnippet(directionsResult.getRoute().getDistanceText());
+                        marker.setSnippet(directions.getDistanceText());
                         marker.showInfoWindow();
 
                         // update directions list
-                        directionSegments = directionsResult.getRoute().getSegments();
+                        directionSteps = directions.getSteps();
                         directionsAdapter.notifyDirectionsChanged();
                     }
                 }
@@ -200,20 +204,20 @@ public class WalkingDirectionsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DirectionsAdapter.DirectionSegmentViewHolder holder, int position) {
-            holder.bindItem(directionSegments.get(position));
+            holder.bindItem(directionSteps.get(position));
         }
 
         @Override
         public int getItemCount() {
-            if (directionSegments != null) {
-                return directionSegments.size();
+            if (directionSteps != null) {
+                return directionSteps.size();
             } else {
                 return 0;
             }
         }
 
         public void notifyDirectionsChanged() {
-            if (directionSegments.size() > 0) {
+            if (directionSteps.size() > 0) {
                 directionsRecyclerView.setVisibility(View.VISIBLE);
                 noDirectionsFoundTextView.setVisibility(View.GONE);
             } else {
@@ -237,10 +241,10 @@ public class WalkingDirectionsFragment extends Fragment {
                 distanceTextView = (TextView) itemView.findViewById(R.id.distance_textview);
             }
 
-            public void bindItem(Segment directionSegment) {
-                instructionTextView.setText(directionSegment.getInstruction());
+            public void bindItem(Directions.Step directionStep) {
+                instructionTextView.setText(directionStep.getInstruction());
                 distanceTextView.setText(String.format(getString(R.string.label_distance_km),
-                        directionSegment.getDistance()));
+                        directionStep.getDistance()));
             }
         }
     }

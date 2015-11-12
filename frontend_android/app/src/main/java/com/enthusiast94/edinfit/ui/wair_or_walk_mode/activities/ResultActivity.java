@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
@@ -163,11 +164,11 @@ public class ResultActivity extends AppCompatActivity {
         // update tab 2 title depending on wait or walk result
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         if (tab != null) {
-            DirectionsService.DirectionsResult directionsResult = event.getWaitOrWalkResult().getWalkingDirections();
-            if (directionsResult != null) {
+            Directions directions = event.getWaitOrWalkResult().getWalkingDirections();
+            if (directions != null) {
                 if (event.getWaitOrWalkResult().getType() == WaitOrWalkService.WaitOrWalkResultType.WALK) {
                     tab.setText(String.format(getString(R.string.label_walk_duration),
-                            directionsResult.getRoute().getDurationText()));
+                            directions.getDurationText()));
                 } else {
                     tab.setText(String.format(getString(R.string.label_wait_duration),
                             Helpers.humanizeDurationInMillisToMinutes(event.getWaitOrWalkResult().getRemainingTimeMillis())));

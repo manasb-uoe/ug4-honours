@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Departure;
+import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
@@ -101,17 +102,15 @@ public class WaitOrWalkService extends BaseService {
                                     @Override
                                     public void onLocationSuccess(final LatLng userLatLng, String placeName) {
                                         LatLng nextStopLatLng = new LatLng(nextStopWithDepartures.getLocation().get(1), nextStopWithDepartures.getLocation().get(0));
-                                        DirectionsService.getInstance().getWalkingDirections(userLatLng, nextStopLatLng, new BaseService.Callback<DirectionsService.DirectionsResult>() {
+                                        DirectionsService.getInstance().getWalkingDirections(userLatLng, nextStopLatLng, new BaseService.Callback<Directions>() {
 
                                             @Override
-                                            public void onSuccess(DirectionsService.DirectionsResult result) {
-                                                com.directions.route.Route resultRoute = result.getRoute();
-
-                                                long walkingTimeMillis = Helpers.parseDirectionsApiDurationToMillis(resultRoute.getDurationText());
+                                            public void onSuccess(Directions result) {
+                                                long walkingTimeMillis = Helpers.parseDirectionsApiDurationToMillis(result.getDurationText());
 
 
                                                 Log.d(TAG, "remaining time: " + finalRemainingTimeMillis / (1000*60));
-                                                Log.d(TAG, "api duration: " + resultRoute.getDurationText());
+                                                Log.d(TAG, "api duration: " + result.getDurationText());
                                                 Log.d(TAG, "parsed api duration: " + walkingTimeMillis / (1000*60));
 
                                                 if (finalRemainingTimeMillis >= walkingTimeMillis) {
@@ -144,10 +143,10 @@ public class WaitOrWalkService extends BaseService {
                                                                     );
 
                                                                     DirectionsService.getInstance().getWalkingDirections(userLatLng, originStopLatLng,
-                                                                            new BaseService.Callback<DirectionsService.DirectionsResult>() {
+                                                                            new BaseService.Callback<Directions>() {
 
                                                                                 @Override
-                                                                                public void onSuccess(DirectionsService.DirectionsResult data) {
+                                                                                public void onSuccess(Directions data) {
                                                                                     Departure upcomingDepartureAtOriginStop =
                                                                                             selectedOriginStopWithDepartures.getDepartures().get(0);
                                                                                     long remainingTimeMillisForUpcomingDepartureAtOriginStop =
@@ -240,10 +239,10 @@ public class WaitOrWalkService extends BaseService {
         private Stop stop;
         private Departure upcomingDeparture;
         private long remainingTimeMillis;
-        @Nullable private DirectionsService.DirectionsResult walkingDirections;
+        private Directions walkingDirections;
 
         public WaitOrWalkResult(WaitOrWalkResultType type, Stop stop, Departure upcomingDeparture,
-                                long remainingTimeMillis, @Nullable DirectionsService.DirectionsResult walkingDirections) {
+                                long remainingTimeMillis, Directions walkingDirections) {
             this.type = type;
             this.stop = stop;
             this.upcomingDeparture = upcomingDeparture;
@@ -255,8 +254,7 @@ public class WaitOrWalkService extends BaseService {
             return upcomingDeparture;
         }
 
-        @Nullable
-        public DirectionsService.DirectionsResult getWalkingDirections() {
+        public Directions getWalkingDirections() {
             return walkingDirections;
         }
 
@@ -272,29 +270,16 @@ public class WaitOrWalkService extends BaseService {
             return remainingTimeMillis;
         }
 
-        public void setType(WaitOrWalkResultType type) {
-            this.type = type;
-        }
-
         public void setStop(Stop stop) {
             this.stop = stop;
         }
 
-        public void setUpcomingDeparture(Departure upcomingDeparture) {
-            this.upcomingDeparture = upcomingDeparture;
-        }
-
-        public void setRemainingTimeMillis(long remainingTimeMillis) {
-            this.remainingTimeMillis = remainingTimeMillis;
-        }
-
-        public void setWalkingDirections(@Nullable DirectionsService.DirectionsResult walkingDirections) {
+        public void setWalkingDirections(Directions walkingDirections) {
             this.walkingDirections = walkingDirections;
         }
 
         /**
          * Parcelable implementation
-         * Note that DirectionsService.DirectionsResult is not retained.
          */
 
         public WaitOrWalkResult(Parcel in) {
@@ -302,6 +287,7 @@ public class WaitOrWalkService extends BaseService {
             stop = in.readParcelable(Stop.class.getClassLoader());
             upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
             remainingTimeMillis = in.readLong();
+            walkingDirections = in.readParcelable(Directions.class.getClassLoader());
         }
 
         public static final Creator<WaitOrWalkResult> CREATOR = new Creator<WaitOrWalkResult>() {
@@ -327,6 +313,7 @@ public class WaitOrWalkService extends BaseService {
             dest.writeParcelable(stop, flags);
             dest.writeParcelable(upcomingDeparture, flags);
             dest.writeLong(remainingTimeMillis);
+            dest.writeParcelable(walkingDirections, flags);
         }
     }
 }

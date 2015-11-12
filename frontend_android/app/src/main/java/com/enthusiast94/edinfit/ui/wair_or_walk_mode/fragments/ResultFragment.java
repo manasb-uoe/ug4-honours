@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
@@ -119,9 +120,9 @@ public class ResultFragment extends Fragment {
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         /**
-         * If WaitOrWalkResult is passed in as a bundle argument then just fetch directions from
-         * current user location to the required stop (since they are not serialized), else make
-         * computations to decide whether to wait or walk.
+         * If WaitOrWalkResult is passed in as a bundle argument then just fetch and update
+         * directions from current user location to the required stop, else make computations
+         * to decide whether to wait or walk.
          */
 
         if (mainResult != null) {
@@ -138,10 +139,10 @@ public class ResultFragment extends Fragment {
                             LatLng stoplatLng = new LatLng(mainResult.getStop().getLocation().get(1),
                                     mainResult.getStop().getLocation().get(0));
                             DirectionsService.getInstance().getWalkingDirections(latLng, stoplatLng,
-                                    new BaseService.Callback<DirectionsService.DirectionsResult>() {
+                                    new BaseService.Callback<Directions>() {
 
                                         @Override
-                                        public void onSuccess(DirectionsService.DirectionsResult data) {
+                                        public void onSuccess(Directions data) {
                                             if (getActivity() != null) {
                                                 mainResult.setWalkingDirections(data);
 
