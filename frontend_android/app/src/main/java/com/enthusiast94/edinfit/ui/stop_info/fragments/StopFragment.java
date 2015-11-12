@@ -248,7 +248,7 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
     private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getInstance().getStop(stopId, -1, null, new BaseService.Callback<Stop>() {
+        StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
 
             @Override
             public void onSuccess(Stop data) {

@@ -49,7 +49,7 @@ public class StopService extends BaseService {
         return instance;
     }
 
-    public void getStop(String stopId, int dayCode, String time,  final Callback<Stop> callback) {
+    public void getStop(String stopId, Integer dayCode, String time,  final Callback<Stop> callback) {
         RequestParams requestParams = new RequestParams();
         requestParams.put("day", dayCode);
         requestParams.put("time", time);
