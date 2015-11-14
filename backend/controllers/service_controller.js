@@ -17,46 +17,18 @@ var router = express.Router();
 router.get("/services/:service_name", authenticationMiddleware, function (req, res) {
     var serviceName = req.params.service_name;
 
-    Service.findOne({name: serviceName}, function (err, service) {
-        if (!service) return res.sendError(404, "No service with name '" + serviceName +"'");
-
-        if (err) return res.sendError(500, err.message);
-
-        async.each(
-            service.routes,
-            function (route, callbackA) {
-                async.each(
-                    route.stops,
-                    function (stopId, callbackB) {
-                        Stop.findOne({stopId: stopId}, function (err, stop) {
-                            if (err) return callbackB(err);
-
-                            var index = route.stops.indexOf(stop.stopId);
-
-                            route.stops[index] = {stopId: stop.stopId, name: stop.name, location: stop.location};
-
-                            return callbackB();
-                        });
-                    },
-                    function (err) {
-                        if (err) return callbackA(err);
-
-                        return callbackA();
-                    }
-                )
-            },
-            function (err) {
-                if (err) return res.sendError(500, err.message);
-
-                return res.sendOk(service);
-            }
-        );
+    Service.findByNameWithDetailedRouteInfo(serviceName, function (err, service) {
+        if (err) {
+            return res.sendError(err.statusCode, err.message);
+        } else {
+            return res.sendOk(service);
+        }
     });
 });
 
 
 /**
- * Get list of services corresponding to provided list of service names, exluding any route information. 
+ * Get list of services corresponding to provided list of service names, exluding any route information.
  */
 
 router.get("/services/", function (req, res) {

@@ -106,4 +106,46 @@ serviceSchema.statics.upsertAll = function (cbA) {
     });
 };
 
+serviceSchema.statics.findByNameWithDetailedRouteInfo = function (name, callback) {
+
+    var Service = mongoose.model("Service");
+    var Stop = mongoose.model("Stop");
+
+    Service.findOne({name: name}, function (err, service) {
+        if (!service) return callback(helpers.createErrorMessage(404, "No service with name '" + name +"'"));
+
+        if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+        async.each(
+            service.routes,
+            function (route, callbackA) {
+                async.each(
+                    route.stops,
+                    function (stopId, callbackB) {
+                        Stop.findOne({stopId: stopId}, function (err, stop) {
+                            if (err) return callbackB(err);
+
+                            var index = route.stops.indexOf(stop.stopId);
+
+                            route.stops[index] = {stopId: stop.stopId, name: stop.name, location: stop.location};
+
+                            return callbackB();
+                        });
+                    },
+                    function (err) {
+                        if (err) return callbackA(err);
+
+                        return callbackA();
+                    }
+                )
+            },
+            function (err) {
+                if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+                return callback(null, service);
+            }
+        );
+    });
+};
+
 module.exports = mongoose.model('Service', serviceSchema);

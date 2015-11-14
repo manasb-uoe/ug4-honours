@@ -102,6 +102,52 @@ stopSchema.statics.upsertAll = function (cbA) {
 
 
 /**
+ * Get stops corresponding to the provided stop ids along with filtered departures
+ */
+
+stopSchema.statics.findByIdWithDepartures = function (stopIds, day, time, callback) {
+
+    var Stop = mongoose.model("Stop");
+
+    Stop
+        .where("stopId")
+        .in(stopIds)
+        .exec(function (err, stops) {
+            if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+            async.each(
+                stops,
+                function (stop, callbackA) {
+                    // add departures if they don't already exist
+                    // also filter out departures that are not for
+                    // provided day
+                    if (stop.departures.length == 0) {
+                        stop.updateDepartures(function (err, departures) {
+                            if (err) return callbackA(err);
+
+                            stop.departures = departures;
+
+                            stop.filterDepartures(day, time, function () {
+                                return callbackA(null);
+                            });
+                        });
+                    } else {
+                        stop.filterDepartures(day, time, function () {
+                            return callbackA(null);
+                        });
+                    }
+                },
+                function (err) {
+                    if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+                    return callback(null, stops);
+                }
+            )
+        });
+};
+
+
+/**
  * Instance methods
  */
 
