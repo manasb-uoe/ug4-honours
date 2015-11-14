@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +52,7 @@ public class ResultFragment extends Fragment {
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private WaitOrWalkService.WaitOrWalkResult mainResult;
+    private WaitOrWalkService.WaitOrWalkSuggestion mainResult;
 
     /**
      * Used when a new wait or walk activity is started.
@@ -74,10 +75,10 @@ public class ResultFragment extends Fragment {
      * Used when the directions action on a countdown notification is clicked.
      */
 
-    public static ResultFragment newInstance(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
+    public static ResultFragment newInstance(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
         ResultFragment resultFragment = new ResultFragment();
         Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
+        bundle.putParcelable(EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkSuggestion);
         resultFragment.setArguments(bundle);
 
         return resultFragment;
@@ -120,7 +121,7 @@ public class ResultFragment extends Fragment {
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         /**
-         * If WaitOrWalkResult is passed in as a bundle argument then just fetch and update
+         * If WaitOrWalkSuggestion is passed in as a bundle argument then just fetch and update
          * directions from current user location to the required stop, else make computations
          * to decide whether to wait or walk.
          */
@@ -183,44 +184,60 @@ public class ResultFragment extends Fragment {
             progressDialog.setMessage(getString(R.string.label_making_complex_calculations));
             progressDialog.show();
 
-            WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(
-                    selectedRoute,
-                    selectedService,
-                    selectedOriginStop,
-                    new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkResult>>() {
+            LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LocationCallback() {
 
-                        @Override
-                        public void onSuccess(List<WaitOrWalkService.WaitOrWalkResult> data) {
-                            mainResult = data.get(0);
+                @Override
+                public void onLocationSuccess(LatLng latLng, String placeName) {
+                    WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(
+                            selectedRoute.getDestination(),
+                            selectedService.getName(), selectedOriginStop.getId(),
+                            selectedDestinationStop.getId(),
+                            latLng,
+                            new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkSuggestion>>() {
 
-                            resultsAdapter.notifyDataSetChanged();
+                                @Override
+                                public void onSuccess(List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions) {
+                                    if (waitOrWalkSuggestions.size() > 0) {
+                                        mainResult = waitOrWalkSuggestions.get(0);
 
-                            EventBus.getDefault()
-                                    .post(new OnWaitOrWalkResultComputedEvent(mainResult));
+                                        resultsAdapter.notifyDataSetChanged();
 
-                            showTimeRemainingCountdownNotification(mainResult);
+                                        EventBus.getDefault()
+                                                .post(new OnWaitOrWalkResultComputedEvent(mainResult));
 
-                            progressDialog.dismiss();
-                        }
+                                        showTimeRemainingCountdownNotification(mainResult);
+                                    } else {
+                                        Toast.makeText(getActivity(), getString(R.string.error_unexpected),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
 
-                        @Override
-                        public void onFailure(String message) {
-                            progressDialog.dismiss();
+                                    progressDialog.dismiss();
+                                }
 
-                            Toast.makeText(getActivity(),
-                                    getString(R.string.error_unexpected), Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-                    }
-            );
+                                @Override
+                                public void onFailure(String message) {
+                                    progressDialog.dismiss();
+
+                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+
+                @Override
+                public void onLocationFailure(String error) {
+                    progressDialog.dismiss();
+
+                    Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         return view;
     }
 
-    private void showTimeRemainingCountdownNotification(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
+    private void showTimeRemainingCountdownNotification(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
         Intent startServiceIntent = new Intent(getActivity(), CountdownNotificationService.class);
-        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkResult);
+        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkSuggestion);
         getActivity().startService(startServiceIntent);
     }
 
@@ -270,7 +287,7 @@ public class ResultFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                if (mainResult.getType() == WaitOrWalkService.WaitOrWalkResultType.WALK) {
+                if (mainResult.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
                     return WALK_RESULT_ViEW_TYPE;
                 } else {
                     return WAIT_RESULT_VIEW_TYPE;
@@ -293,7 +310,7 @@ public class ResultFragment extends Fragment {
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
-            public void bindItem(WaitOrWalkService.WaitOrWalkResult result) {
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
                 stopNameTextview.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }
@@ -312,7 +329,7 @@ public class ResultFragment extends Fragment {
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
-            public void bindItem(WaitOrWalkService.WaitOrWalkResult result) {
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
                 stopNameTextview.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }

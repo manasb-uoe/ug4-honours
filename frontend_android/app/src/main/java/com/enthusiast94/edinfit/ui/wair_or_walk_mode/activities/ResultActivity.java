@@ -15,7 +15,6 @@ import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
-import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
@@ -38,13 +37,13 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_SERVICE = "selectedService";
     public static final String EXTRA_SELECTED_DESTINATION_STOP = "selectedDestinationStop";
     public static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
-    public static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkResult";
+    public static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkSuggestion";
 
     private Stop selectedOriginStop;
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private WaitOrWalkService.WaitOrWalkResult waitOrWalkResult;
+    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,7 @@ public class ResultActivity extends AppCompatActivity {
          */
 
         Bundle bundle = getIntent().getExtras();
-        waitOrWalkResult = bundle.getParcelable(EXTRA_WAIT_OR_WALK_RESULT);
+        waitOrWalkSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_RESULT);
         selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
         selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
         selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
@@ -130,8 +129,8 @@ public class ResultActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    if (waitOrWalkResult != null) {
-                        return ResultFragment.newInstance(waitOrWalkResult);
+                    if (waitOrWalkSuggestion != null) {
+                        return ResultFragment.newInstance(waitOrWalkSuggestion);
                     }
                     return ResultFragment.newInstance(selectedOriginStop, selectedService,
                             selectedDestinationStop, selectedRoute);
@@ -164,14 +163,14 @@ public class ResultActivity extends AppCompatActivity {
         // update tab 2 title depending on wait or walk result
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         if (tab != null) {
-            Directions directions = event.getWaitOrWalkResult().getWalkingDirections();
+            Directions directions = event.getWaitOrWalkSuggestion().getWalkingDirections();
             if (directions != null) {
-                if (event.getWaitOrWalkResult().getType() == WaitOrWalkService.WaitOrWalkResultType.WALK) {
+                if (event.getWaitOrWalkSuggestion().getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
                     tab.setText(String.format(getString(R.string.label_walk_duration),
                             directions.getDurationText()));
                 } else {
                     tab.setText(String.format(getString(R.string.label_wait_duration),
-                            Helpers.humanizeDurationInMillisToMinutes(event.getWaitOrWalkResult().getRemainingTimeMillis())));
+                            Helpers.humanizeDurationInMillisToMinutes(event.getWaitOrWalkSuggestion().getRemainingTimeMillis())));
                 }
             }
         }
