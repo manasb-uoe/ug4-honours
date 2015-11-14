@@ -16,11 +16,14 @@ import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
+
+import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
@@ -37,13 +40,15 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_SERVICE = "selectedService";
     public static final String EXTRA_SELECTED_DESTINATION_STOP = "selectedDestinationStop";
     public static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
-    public static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkSuggestion";
+    public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
+    public static final String EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS = "waitOrWalkAllSuggestion";
 
     private Stop selectedOriginStop;
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion;
+    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion;
+    private ArrayList<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +58,14 @@ public class ResultActivity extends AppCompatActivity {
         /**
          * Get intent extras.
          *
-         * A WaitOrWalk result would only be passed in if a the directions action on a countdown
-         * notification is clicked, while user selections for service, stop and route will be
-         * passed in if a new wait or walk activity is started.
+         * WaitOrWalk suggestions would only be passed in if the directions action on a countdown
+         * notification is clicked (or the notification itself is clicked), while user selections
+         * for service, stop and route will be passed in if a new wait or walk activity is started.
          */
 
         Bundle bundle = getIntent().getExtras();
-        waitOrWalkSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_RESULT);
+        waitOrWalkSelectedSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
+        waitOrWalkSuggestions = bundle.getParcelableArrayList(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS);
         selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
         selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
         selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
@@ -129,13 +135,14 @@ public class ResultActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    if (waitOrWalkSuggestion != null) {
-                        return ResultFragment.newInstance(waitOrWalkSuggestion);
+                    if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
+                        return ResultFragment.newInstance(waitOrWalkSuggestions,
+                                waitOrWalkSelectedSuggestion);
                     }
                     return ResultFragment.newInstance(selectedOriginStop, selectedService,
                             selectedDestinationStop, selectedRoute);
                 case 1:
-                    return new WalkingDirectionsFragment();
+                    return WalkingDirectionsFragment.newInstance(waitOrWalkSelectedSuggestion);
                 default:
                     return null;
             }
@@ -159,7 +166,7 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
-    public void onEventMainThread(OnWaitOrWalkResultComputedEvent event) {
+    public void onEventMainThread(OnWaitOrWalkSuggestionSelected event) {
         // update tab 2 title depending on wait or walk result
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         if (tab != null) {
@@ -169,8 +176,10 @@ public class ResultActivity extends AppCompatActivity {
                     tab.setText(String.format(getString(R.string.label_walk_duration),
                             directions.getDurationText()));
                 } else {
+                    long remainingTimeMillis = Helpers.getRemainingTimeMillisFromNow(
+                            event.getWaitOrWalkSuggestion().getUpcomingDeparture().getTime());
                     tab.setText(String.format(getString(R.string.label_wait_duration),
-                            Helpers.humanizeDurationInMillisToMinutes(event.getWaitOrWalkSuggestion().getRemainingTimeMillis())));
+                            Helpers.humanizeDurationInMillisToMinutes(remainingTimeMillis)));
                 }
             }
         }

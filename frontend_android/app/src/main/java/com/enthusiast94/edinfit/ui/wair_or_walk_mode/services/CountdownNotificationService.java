@@ -16,12 +16,16 @@ import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by manas on 08-11-2015.
  */
 public class CountdownNotificationService extends android.app.Service {
 
-    public static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkSuggestion";
+    public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
+    public static final String EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS = "waitOrWalkAllSuggestion";
     private static final int NOTIFICATION_ID_COUNTDOWN = 0;
     private static final int REQUEST_CODE_STOP = 0;
     private static final int REQUEST_CODE_DIRECTIONS = 1;
@@ -30,6 +34,8 @@ public class CountdownNotificationService extends android.app.Service {
     private CountDownTimer countDownTimer;
     private NotificationManager notificationManager;
     private NotificationBroadcastReceiver receiver;
+    private WaitOrWalkService.WaitOrWalkSuggestion selectedWaitOrWalkSuggestion;
+    private ArrayList<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
 
     @Override
     public void onCreate() {
@@ -58,42 +64,37 @@ public class CountdownNotificationService extends android.app.Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // retrieve wait or walk result from intent and build notification accordingly
-        WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion =
-                intent.getParcelableExtra(EXTRA_WAIT_OR_WALK_RESULT);
+        selectedWaitOrWalkSuggestion = intent.getParcelableExtra(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
+        waitOrWalkSuggestions = intent.getParcelableArrayListExtra(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS);
 
-        startCountdownNotification(waitOrWalkSuggestion);
+        startCountdownNotification();
 
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void startCountdownNotification(final WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
+    private void startCountdownNotification() {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
 
-        countDownTimer = new TimeRemainingCountdownTimer(waitOrWalkSuggestion, 1000);
+        countDownTimer = new TimeRemainingCountdownTimer(1000);
         countDownTimer.start();
     }
 
     private class TimeRemainingCountdownTimer extends CountDownTimer {
 
-        private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion;
-
-        public TimeRemainingCountdownTimer(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion,
-                                           long countDownInterval) {
-            super(waitOrWalkSuggestion.getRemainingTimeMillis(), countDownInterval);
-
-            this.waitOrWalkSuggestion = waitOrWalkSuggestion;
+        public TimeRemainingCountdownTimer(long countDownInterval) {
+            super(Helpers.getRemainingTimeMillisFromNow(
+                    selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime()), countDownInterval);
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
-            String contentTitle = waitOrWalkSuggestion.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK
+            String contentTitle = selectedWaitOrWalkSuggestion.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK
                     ? String.format(getString(R.string.label_walk_to_stop_by_time),
-                    waitOrWalkSuggestion.getStop().getName(), waitOrWalkSuggestion.getUpcomingDeparture().getTime())
+                    selectedWaitOrWalkSuggestion.getStop().getName(), selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime())
                     : String.format(getString(R.string.label_walk_to_stop_by_time),
-                    waitOrWalkSuggestion.getStop().getName(), waitOrWalkSuggestion.getUpcomingDeparture().getTime());
+                    selectedWaitOrWalkSuggestion.getStop().getName(), selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime());
 
             Intent stopIntent = new Intent(ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getBroadcast(
@@ -105,7 +106,8 @@ public class CountdownNotificationService extends android.app.Service {
 
             Intent directionsIntent =
                     new Intent(CountdownNotificationService.this, ResultActivity.class);
-            directionsIntent.putExtra(ResultActivity.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkSuggestion);
+            directionsIntent.putParcelableArrayListExtra(ResultActivity.EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS, waitOrWalkSuggestions);
+            directionsIntent.putExtra(ResultActivity.EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION, selectedWaitOrWalkSuggestion);
             PendingIntent directionsPendingIntent = PendingIntent.getActivity(
                     CountdownNotificationService.this,
                     REQUEST_CODE_DIRECTIONS,

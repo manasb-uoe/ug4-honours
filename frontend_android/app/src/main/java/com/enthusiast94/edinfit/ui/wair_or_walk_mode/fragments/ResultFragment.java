@@ -3,11 +3,11 @@ package com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,19 +15,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.DirectionsService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -46,13 +45,15 @@ public class ResultFragment extends Fragment {
     private static final String EXTRA_SELECTED_SERVICE = "selectedService";
     private static final String EXTRA_SELECTED_DESTINATION_STOP = "selectedDestinationStop";
     private static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
-    private static final String EXTRA_WAIT_OR_WALK_RESULT = "waitOrWalkResult";
+    public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
+    public static final String EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS = "waitOrWalkAllSuggestion";
 
     private Stop selectedOriginStop;
     private Service selectedService;
     private Stop selectedDestinationStop;
     private Route selectedRoute;
-    private WaitOrWalkService.WaitOrWalkSuggestion mainResult;
+    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion;
+    private List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
 
     /**
      * Used when a new wait or walk activity is started.
@@ -72,13 +73,17 @@ public class ResultFragment extends Fragment {
     }
 
     /**
-     * Used when the directions action on a countdown notification is clicked.
+     * Used when the directions action on a countdown notification is clicked (or the notification
+     * itself is clicked).
      */
 
-    public static ResultFragment newInstance(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
+    public static ResultFragment newInstance(ArrayList<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions,
+                                             WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion) {
+
         ResultFragment resultFragment = new ResultFragment();
         Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkSuggestion);
+        bundle.putParcelableArrayList(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS, waitOrWalkSuggestions);
+        bundle.putParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION, waitOrWalkSelectedSuggestion);
         resultFragment.setArguments(bundle);
 
         return resultFragment;
@@ -100,7 +105,8 @@ public class ResultFragment extends Fragment {
          */
 
         Bundle bundle = getArguments();
-        mainResult = bundle.getParcelable(EXTRA_WAIT_OR_WALK_RESULT);
+        waitOrWalkSuggestions = bundle.getParcelableArrayList(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS);
+        waitOrWalkSelectedSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
         selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
         selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
         selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
@@ -120,64 +126,11 @@ public class ResultFragment extends Fragment {
         resultsRecyclerView.setAdapter(resultsAdapter);
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        /**
-         * If WaitOrWalkSuggestion is passed in as a bundle argument then just fetch and update
-         * directions from current user location to the required stop, else make computations
-         * to decide whether to wait or walk.
-         */
+        if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
+            resultsAdapter.notifySuggestionsChanged();
 
-        if (mainResult != null) {
-            final ProgressDialog fetchingDirectionsProgressDialog = new ProgressDialog(getActivity());
-            fetchingDirectionsProgressDialog
-                    .setMessage(getString(R.string.label_fetching_walking_direction));
-            fetchingDirectionsProgressDialog.show();
-
-            LocationProviderService.getInstance().requestLastKnownLocationInfo(false,
-                    new LocationProviderService.LocationCallback() {
-
-                        @Override
-                        public void onLocationSuccess(LatLng latLng, String placeName) {
-                            LatLng stoplatLng = new LatLng(mainResult.getStop().getLocation().get(1),
-                                    mainResult.getStop().getLocation().get(0));
-                            DirectionsService.getInstance().getWalkingDirections(latLng, stoplatLng,
-                                    new BaseService.Callback<Directions>() {
-
-                                        @Override
-                                        public void onSuccess(Directions data) {
-                                            if (getActivity() != null) {
-                                                mainResult.setWalkingDirections(data);
-
-                                                resultsAdapter.notifyDataSetChanged();
-
-                                                EventBus.getDefault()
-                                                        .post(new OnWaitOrWalkResultComputedEvent(mainResult));
-                                                EventBus.getDefault()
-                                                        .post(new ShowWalkingDirectionsFragmentEvent());
-
-                                                fetchingDirectionsProgressDialog.dismiss();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(String message) {
-                                            if (getActivity() != null) {
-                                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT)
-                                                        .show();
-                                                fetchingDirectionsProgressDialog.dismiss();
-                                            }
-                                        }
-                                    });
-                        }
-
-                        @Override
-                        public void onLocationFailure(String error) {
-                            if (getActivity() != null) {
-                                Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT)
-                                        .show();
-                                fetchingDirectionsProgressDialog.dismiss();
-                            }
-                        }
-                    });
+            EventBus.getDefault()
+                    .post(new ShowWalkingDirectionsFragmentEvent());
         } else {
             // show indeterminate progress dialog before starting calculations
             final ProgressDialog progressDialog = new ProgressDialog(getActivity());
@@ -198,14 +151,9 @@ public class ResultFragment extends Fragment {
                                 @Override
                                 public void onSuccess(List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions) {
                                     if (waitOrWalkSuggestions.size() > 0) {
-                                        mainResult = waitOrWalkSuggestions.get(0);
+                                        ResultFragment.this.waitOrWalkSuggestions = waitOrWalkSuggestions;
 
-                                        resultsAdapter.notifyDataSetChanged();
-
-                                        EventBus.getDefault()
-                                                .post(new OnWaitOrWalkResultComputedEvent(mainResult));
-
-                                        showTimeRemainingCountdownNotification(mainResult);
+                                        resultsAdapter.notifySuggestionsChanged();
                                     } else {
                                         Toast.makeText(getActivity(), getString(R.string.error_unexpected),
                                                 Toast.LENGTH_SHORT).show();
@@ -235,17 +183,25 @@ public class ResultFragment extends Fragment {
         return view;
     }
 
-    private void showTimeRemainingCountdownNotification(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
+    private void showTimeRemainingCountdownNotification() {
         Intent startServiceIntent = new Intent(getActivity(), CountdownNotificationService.class);
-        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_RESULT, waitOrWalkSuggestion);
+        startServiceIntent.putParcelableArrayListExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS,
+                (ArrayList<? extends Parcelable>) waitOrWalkSuggestions);
+        startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION,
+                waitOrWalkSelectedSuggestion);
         getActivity().startService(startServiceIntent);
     }
 
     private class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private static final int WALK_RESULT_ViEW_TYPE = 0;
-        private static final int WAIT_RESULT_VIEW_TYPE = 1;
+        private static final int WALK_SUGGESTION_ViEW_TYPE_SELECTED = 0;
+        private static final int WAIT_SUGGESTION_VIEW_TYPE_SELECTED = 1;
+        private static final int HEADING_VIEW_TYPE = 2;
+        private static final int WALK_SUGGESTION_VIEW_TYPE = 3;
+        private static final int WAIT_SUGGESTION_VIEW_TYPE = 4;
         private LayoutInflater inflater;
+        private int currentlySelectedItemIndex;
+        private int previouslySelectedItemIndex;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -253,32 +209,40 @@ public class ResultFragment extends Fragment {
                 inflater = LayoutInflater.from(getActivity());
             }
 
-            if (viewType == WALK_RESULT_ViEW_TYPE) {
-                return new WaitResultViewHolder(inflater.inflate(
-                        R.layout.row_wait_or_walk_results_result_walk, parent, false));
-            } else if (viewType == WAIT_RESULT_VIEW_TYPE) {
-                return new WalkResultViewHolder(inflater.inflate(
-                        R.layout.row_wait_or_walk_results_result_wait, parent, false));
+            if (viewType == WALK_SUGGESTION_ViEW_TYPE_SELECTED) {
+                return new WaitSuggestionSelectedViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_suggestion_walk_selected, parent, false));
+            } else if (viewType == WAIT_SUGGESTION_VIEW_TYPE_SELECTED) {
+                return new WalkSuggestionSelectedViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_suggestion_wait_selected, parent, false));
+            } else if (viewType == HEADING_VIEW_TYPE) {
+                return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
+            } else if (viewType == WALK_SUGGESTION_VIEW_TYPE) {
+                return new WalkSuggestionViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_suggestion_walk, parent, false));
             } else {
-                return null;
+                return new WaitSuggestionViewHolder(inflater.inflate(
+                        R.layout.row_wait_or_walk_suggestion_wait, parent, false));
             }
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (position == 0) {
-                if (holder instanceof WalkResultViewHolder) {
-                    ((WalkResultViewHolder) holder).bindItem(mainResult);
-                } else if (holder instanceof WaitResultViewHolder) {
-                    ((WaitResultViewHolder) holder).bindItem(mainResult);
-                }
+            if (holder instanceof WalkSuggestionSelectedViewHolder) {
+                ((WalkSuggestionSelectedViewHolder) holder).bindItem(waitOrWalkSelectedSuggestion);
+            } else if (holder instanceof WaitSuggestionSelectedViewHolder) {
+                ((WaitSuggestionSelectedViewHolder) holder).bindItem(waitOrWalkSelectedSuggestion);
+            } else if (holder instanceof WalkSuggestionViewHolder) {
+                ((WalkSuggestionViewHolder) holder).bindItem(waitOrWalkSuggestions.get(position - 2));
+            } else if (holder instanceof WaitSuggestionViewHolder) {
+                ((WaitSuggestionViewHolder) holder).bindItem(waitOrWalkSuggestions.get(position - 2));
             }
         }
 
         @Override
         public int getItemCount() {
-            if (mainResult != null) {
-                return 1;
+            if (waitOrWalkSuggestions != null) {
+                return  1 /* Selected suggestion */ + 1 /* Heading */ + waitOrWalkSuggestions.size();
             } else {
                 return 0;
             }
@@ -287,52 +251,180 @@ public class ResultFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                if (mainResult.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
-                    return WALK_RESULT_ViEW_TYPE;
+                if (waitOrWalkSelectedSuggestion.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
+                    return WALK_SUGGESTION_ViEW_TYPE_SELECTED;
                 } else {
-                    return WAIT_RESULT_VIEW_TYPE;
+                    return WAIT_SUGGESTION_VIEW_TYPE_SELECTED;
+                }
+            } else if (position == 1) {
+                return HEADING_VIEW_TYPE;
+            } else {
+                if (waitOrWalkSuggestions.get(position - 2).getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
+                    return WALK_SUGGESTION_VIEW_TYPE;
+                } else {
+                    return WAIT_SUGGESTION_VIEW_TYPE;
                 }
             }
-
-            return -1;
         }
 
-        private class WalkResultViewHolder extends RecyclerView.ViewHolder {
+        private void notifySuggestionsChanged() {
+            if (waitOrWalkSelectedSuggestion != null) {
+                // find index of selected suggestion
+                // (can't use indexOf since object references changed after deserialization)
+                for (int i=0; i<waitOrWalkSuggestions.size(); i++) {
+                    WaitOrWalkService.WaitOrWalkSuggestion suggestion = waitOrWalkSuggestions.get(i);
+                    if (suggestion.getStop().getId().equals(waitOrWalkSelectedSuggestion.getStop().getId())) {
+                        selectSuggestion(i);
+                        break;
+                    }
+                }
+            } else {
+                selectSuggestion(0);
+            }
 
-            private TextView stopNameTextview;
+            notifyDataSetChanged();
+        }
+
+        private class WalkSuggestionSelectedViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextView;
             private TextView departureTextView;
 
-            public WalkResultViewHolder(View itemView) {
+            public WalkSuggestionSelectedViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
-                stopNameTextview = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
             public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
-                stopNameTextview.setText(result.getStop().getName());
+                stopNameTextView.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }
         }
 
-        private class WaitResultViewHolder extends RecyclerView.ViewHolder {
+        private class WaitSuggestionSelectedViewHolder extends RecyclerView.ViewHolder {
 
-            private TextView stopNameTextview;
+            private TextView stopNameTextView;
             private TextView departureTextView;
 
-            public WaitResultViewHolder(View itemView) {
+            public WaitSuggestionSelectedViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
-                stopNameTextview = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
             }
 
             public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
-                stopNameTextview.setText(result.getStop().getName());
+                stopNameTextView.setText(result.getStop().getName());
                 departureTextView.setText(result.getUpcomingDeparture().getTime());
             }
+        }
+
+        private class HeadingViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView headingTextView;
+
+            public HeadingViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
+
+                // set heading
+                headingTextView.setText(getString(R.string.label_all_suggestions));
+            }
+        }
+
+        private class WaitSuggestionViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextView;
+            private TextView departureTextView;
+
+            public WaitSuggestionViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
+
+                // bind event listeners
+                itemView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        selectSuggestion(getAdapterPosition() - 2);
+                    }
+                });
+            }
+
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
+                stopNameTextView.setText(result.getStop().getName());
+                departureTextView.setText(result.getUpcomingDeparture().getTime());
+
+                if (getAdapterPosition() == currentlySelectedItemIndex) {
+                    itemView.setBackgroundResource(R.color.green_selection);
+                } else {
+                    itemView.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        }
+
+        private class WalkSuggestionViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextView;
+            private TextView departureTextView;
+            private TextView numStopsSkippedTextView;
+
+            public WalkSuggestionViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
+                numStopsSkippedTextView = (TextView) itemView.findViewById(R.id.num_stops_skipped_textview);
+
+                // bind event listeners
+                itemView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        selectSuggestion(getAdapterPosition() - 2);
+                    }
+                });
+            }
+
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
+                stopNameTextView.setText(result.getStop().getName());
+                departureTextView.setText(result.getUpcomingDeparture().getTime());
+                numStopsSkippedTextView.setText(String.valueOf(waitOrWalkSuggestions.indexOf(result) + 1));
+
+                if (getAdapterPosition() == currentlySelectedItemIndex) {
+                    itemView.setBackgroundResource(R.color.green_selection);
+                } else {
+                    itemView.setBackgroundResource(android.R.color.transparent);
+                }
+            }
+        }
+
+        private void selectSuggestion(int suggestionIndex) {
+            waitOrWalkSelectedSuggestion = waitOrWalkSuggestions.get(suggestionIndex);
+
+            EventBus.getDefault()
+                    .post(new OnWaitOrWalkSuggestionSelected(waitOrWalkSelectedSuggestion));
+
+            showTimeRemainingCountdownNotification();
+
+            notifyItemChanged(0);
+
+            currentlySelectedItemIndex = suggestionIndex + 2;
+
+            notifyItemChanged(currentlySelectedItemIndex);
+            notifyItemChanged(previouslySelectedItemIndex);
+
+            previouslySelectedItemIndex = currentlySelectedItemIndex;
         }
     }
 }

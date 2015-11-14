@@ -124,15 +124,13 @@ public class WaitOrWalkService extends BaseService {
         private WaitOrWalkSuggestionType type;
         private Stop stop;
         private Departure upcomingDeparture;
-        private long remainingTimeMillis;
         private Directions walkingDirections;
 
         public WaitOrWalkSuggestion(WaitOrWalkSuggestionType type, Stop stop, Departure upcomingDeparture,
-                                    long remainingTimeMillis, Directions walkingDirections) {
+                                    Directions walkingDirections) {
             this.type = type;
             this.stop = stop;
             this.upcomingDeparture = upcomingDeparture;
-            this.remainingTimeMillis = remainingTimeMillis;
             this.walkingDirections = walkingDirections;
         }
 
@@ -152,10 +150,6 @@ public class WaitOrWalkService extends BaseService {
             return type;
         }
 
-        public long getRemainingTimeMillis() {
-            return remainingTimeMillis;
-        }
-
         public void setStop(Stop stop) {
             this.stop = stop;
         }
@@ -172,7 +166,6 @@ public class WaitOrWalkService extends BaseService {
             type = WaitOrWalkSuggestionType.getTypeByValue(in.readInt());
             stop = in.readParcelable(Stop.class.getClassLoader());
             upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
-            remainingTimeMillis = in.readLong();
             walkingDirections = in.readParcelable(Directions.class.getClassLoader());
         }
 
@@ -198,7 +191,6 @@ public class WaitOrWalkService extends BaseService {
             dest.writeInt(type.getValue());
             dest.writeParcelable(stop, flags);
             dest.writeParcelable(upcomingDeparture, flags);
-            dest.writeLong(remainingTimeMillis);
             dest.writeParcelable(walkingDirections, flags);
         }
     }

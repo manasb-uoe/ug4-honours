@@ -5,11 +5,11 @@ import com.enthusiast94.edinfit.services.WaitOrWalkService;
 /**
  * Created by manas on 04-11-2015.
  */
-public class OnWaitOrWalkResultComputedEvent {
+public class OnWaitOrWalkSuggestionSelected {
 
     private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion;
 
-    public OnWaitOrWalkResultComputedEvent(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
+    public OnWaitOrWalkSuggestionSelected(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
         this.waitOrWalkSuggestion = waitOrWalkSuggestion;
     }
 

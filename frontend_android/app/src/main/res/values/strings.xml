@@ -86,6 +86,7 @@
     <string name="label_time_remaining">Time remaining: %1$s</string>
     <string name="label_stop">Stop</string>
     <string name="label_directions">Directions</string>
+    <string name="label_all_suggestions">All Suggestions</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

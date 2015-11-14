@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,8 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.services.LocationProviderService;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkResultComputedEvent;
+import com.enthusiast94.edinfit.services.WaitOrWalkService;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -37,6 +40,7 @@ import de.greenrobot.event.EventBus;
 public class WalkingDirectionsFragment extends Fragment {
 
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
+    public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
 
     private RecyclerView directionsRecyclerView;
     private DirectionsAdapter directionsAdapter;
@@ -45,6 +49,25 @@ public class WalkingDirectionsFragment extends Fragment {
 
     private GoogleMap map;
     private List<Directions.Step> directionSteps;
+
+    /**
+     * The argument is non-null only when the directions action on a countdown
+     * notification is clicked (or the notification itself is clicked).
+     */
+
+    public static WalkingDirectionsFragment newInstance(
+            WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion) {
+
+        WalkingDirectionsFragment walkingDirectionsFragment = new WalkingDirectionsFragment();
+
+        if (waitOrWalkSelectedSuggestion != null) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION, waitOrWalkSelectedSuggestion);
+            walkingDirectionsFragment.setArguments(bundle);
+        }
+
+        return walkingDirectionsFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +89,22 @@ public class WalkingDirectionsFragment extends Fragment {
         noDirectionsFoundTextView = (TextView) view.findViewById(R.id.nothing_found_textview);
 
         /**
+         * Retrieve selected wait or walk suggestion from intent.
+         * Note that this suggestion is only passed when the directions action on a countdown
+         * notification is clicked (or the notification itself is clicked).
+         */
+
+        WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion = null;
+
+        Bundle args = getArguments();
+
+        if (args != null) {
+            waitOrWalkSelectedSuggestion = args.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
+        }
+
+
+
+        /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
          */
 
@@ -85,6 +124,10 @@ public class WalkingDirectionsFragment extends Fragment {
         directionsAdapter = new DirectionsAdapter();
         directionsRecyclerView.setAdapter(directionsAdapter);
         directionsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        if (waitOrWalkSelectedSuggestion != null) {
+            updateDirections(waitOrWalkSelectedSuggestion);
+        }
 
         return view;
     }
@@ -129,63 +172,67 @@ public class WalkingDirectionsFragment extends Fragment {
         mapView.onLowMemory();
     }
 
-    public void onEventMainThread(final OnWaitOrWalkResultComputedEvent event) {
+    public void onEventMainThread(final OnWaitOrWalkSuggestionSelected event) {
+        updateDirections(event.getWaitOrWalkSuggestion());
+    }
+
+    private void updateDirections(final WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
         LocationProviderService.getInstance().requestLastKnownLocationInfo(false,
                 new LocationProviderService.LocationCallback() {
 
-            @Override
-            public void onLocationSuccess(LatLng latLng, String placeName) {
-                if (getActivity() != null) {
-                    // clear all markers and polylines
-                    map.clear();
+                    @Override
+                    public void onLocationSuccess(LatLng latLng, String placeName) {
+                        if (getActivity() != null) {
+                            // clear all markers and polylines
+                            map.clear();
 
-                    // add stop marker with info window containing stop name
-                    LatLng stopLatLng = new LatLng(
-                            event.getWaitOrWalkSuggestion().getStop().getLocation().get(1),
-                            event.getWaitOrWalkSuggestion().getStop().getLocation().get(0)
-                    );
+                            // add stop marker with info window containing stop name
+                            LatLng stopLatLng = new LatLng(
+                                    waitOrWalkSuggestion.getStop().getLocation().get(1),
+                                    waitOrWalkSuggestion.getStop().getLocation().get(0)
+                            );
 
-                    Marker marker= map.addMarker(new MarkerOptions()
-                            .position(stopLatLng)
-                            .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
-                            .title(event.getWaitOrWalkSuggestion().getStop().getName()));
+                            Marker marker= map.addMarker(new MarkerOptions()
+                                    .position(stopLatLng)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
+                                    .title(waitOrWalkSuggestion.getStop().getName()));
 
-                    // move map focus to stop marker
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
+                            // move map focus to stop marker
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
-                    // add walking route from user's last known location to stop
-                    Directions directions = event.getWaitOrWalkSuggestion().getWalkingDirections();
+                            // add walking route from user's last known location to stop
+                            Directions directions = waitOrWalkSuggestion.getWalkingDirections();
 
-                    if (directions != null) {
-                        PolylineOptions polylineOptions = new PolylineOptions();
+                            if (directions != null) {
+                                PolylineOptions polylineOptions = new PolylineOptions();
 
-                        for (Point point : directions.getOverviewPoints()) {
-                            polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                                for (Point point : directions.getOverviewPoints()) {
+                                    polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                                }
+
+                                polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
+                                polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+
+                                map.addPolyline(polylineOptions);
+
+                                marker.setSnippet(directions.getDistanceText());
+                                marker.showInfoWindow();
+
+                                // update directions list
+                                directionSteps = directions.getSteps();
+                                directionsAdapter.notifyDirectionsChanged();
+                            }
                         }
-
-                        polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
-                        polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
-
-                        map.addPolyline(polylineOptions);
-
-                        marker.setSnippet(directions.getDistanceText());
-                        marker.showInfoWindow();
-
-                        // update directions list
-                        directionSteps = directions.getSteps();
-                        directionsAdapter.notifyDirectionsChanged();
                     }
-                }
-            }
 
-            @Override
-            public void onLocationFailure(String error) {
-                if (getActivity() != null) {
-                    Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+                    @Override
+                    public void onLocationFailure(String error) {
+                        if (getActivity() != null) {
+                            Toast.makeText(getActivity(), getString(R.string.error_could_not_fetch_directions),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     private class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.DirectionSegmentViewHolder> {

@@ -176,7 +176,6 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
                                 waitOrWalkSuggestions.push({
                                     stop: stop,
                                     upcomingDeparture: upcomingDeparture,
-                                    remainingTimeMillis: remainingTimeForDepartureSeconds * 1000,
                                     type: "WALK",
                                     walkingDirections: walkingDirections
                                 });
@@ -223,8 +222,6 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
                                         waitOrWalkSuggestions.push({
                                             stop: originStop,
                                             upcomingDeparture: upcomingDepartureAtOriginStop,
-                                            remainingTimeMillis:
-                                            remainingTimeSecondsForUpcomingDepartureAtOriginStop * 1000,
                                             type: "WAIT",
                                             walkingDirections: walkingDirections
                                         });
