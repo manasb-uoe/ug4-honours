@@ -7,13 +7,13 @@ import com.enthusiast94.edinfit.services.WaitOrWalkService;
  */
 public class OnWaitOrWalkResultComputedEvent {
 
-    private WaitOrWalkService.WaitOrWalkResult waitOrWalkResult;
+    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion;
 
-    public OnWaitOrWalkResultComputedEvent(WaitOrWalkService.WaitOrWalkResult waitOrWalkResult) {
-        this.waitOrWalkResult = waitOrWalkResult;
+    public OnWaitOrWalkResultComputedEvent(WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {
+        this.waitOrWalkSuggestion = waitOrWalkSuggestion;
     }
 
-    public WaitOrWalkService.WaitOrWalkResult getWaitOrWalkResult() {
-        return waitOrWalkResult;
+    public WaitOrWalkService.WaitOrWalkSuggestion getWaitOrWalkSuggestion() {
+        return waitOrWalkSuggestion;
     }
 }

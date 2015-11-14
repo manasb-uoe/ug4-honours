@@ -141,20 +141,20 @@ public class WalkingDirectionsFragment extends Fragment {
 
                     // add stop marker with info window containing stop name
                     LatLng stopLatLng = new LatLng(
-                            event.getWaitOrWalkResult().getStop().getLocation().get(1),
-                            event.getWaitOrWalkResult().getStop().getLocation().get(0)
+                            event.getWaitOrWalkSuggestion().getStop().getLocation().get(1),
+                            event.getWaitOrWalkSuggestion().getStop().getLocation().get(0)
                     );
 
                     Marker marker= map.addMarker(new MarkerOptions()
                             .position(stopLatLng)
                             .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
-                            .title(event.getWaitOrWalkResult().getStop().getName()));
+                            .title(event.getWaitOrWalkSuggestion().getStop().getName()));
 
                     // move map focus to stop marker
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
 
                     // add walking route from user's last known location to stop
-                    Directions directions = event.getWaitOrWalkResult().getWalkingDirections();
+                    Directions directions = event.getWaitOrWalkSuggestion().getWalkingDirections();
 
                     if (directions != null) {
                         PolylineOptions polylineOptions = new PolylineOptions();
