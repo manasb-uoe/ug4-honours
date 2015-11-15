@@ -5,7 +5,10 @@
 var mongoose = require("mongoose");
 var helpers = require("../utils/helpers");
 var async = require("async");
-var moment = require("moment");
+var moment = require("moment-timezone")
+var config = require("../config");
+
+var timeZone = config.timeZone;
 
 var stopSchema = new mongoose.Schema({
     id: false,
@@ -202,7 +205,7 @@ stopSchema.methods.updateDepartures = function (callback) {
 };
 
 stopSchema.methods.filterDepartures = function (day, time, callback) {
-    time = time ? moment(time, "HH:mm") : undefined;
+    time = time ? moment(time, "HH:mm").tz(timeZone) : undefined;
 
     this.departures = this.departures.filter(function (departure) {
         var doesDayMatch = true;
@@ -213,7 +216,7 @@ stopSchema.methods.filterDepartures = function (day, time, callback) {
         }
 
         if (time) {
-            var due = moment(departure.time, "HH:mm");
+            var due = moment(departure.time, "HH:mm").tz(timeZone);
             isUpcoming = due >= time;
         }
 

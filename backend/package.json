@@ -25,7 +25,7 @@
     "validator": "latest",
     "async": "latest",
     "underscore": "latest",
-    "moment": "latest",
+    "moment-timezone": "latest",
     "googlemaps": "latest",
     "polyline": "latest"
   },

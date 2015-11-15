@@ -8,10 +8,12 @@ var Stop = require("../models/stop");
 var Service = require("../models/service");
 var helpers = require("../utils/helpers");
 var authenticationMiddleware = require("../middleware/authentication");
-var moment = require("moment");
+var moment = require("moment-timezone");
 var directionHelpers = require("../controllers/directions_controller").helpers;
+var config = require("../config");
 
 var router = express.Router();
+var timeZone = config.timeZone;
 
 router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req, res) {
 
@@ -108,7 +110,7 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
             },
             function (stopIds, callback) {
                 // retrieve stops with departures (for current day and time) for the corresponding stop ids
-                var currentTime = moment();
+                var currentTime = moment().tz(timeZone);
                 var currentTimeUnix = currentTime.unix();
                 var currentTime24h = currentTime.format("HH:mm");
 
@@ -170,7 +172,7 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
                         // retrieve walking directions from user's location to stop's location, along with
                         // time remaining for upcoming departure
                         var remainingTimeForDepartureSeconds =
-                            moment(upcomingDeparture.time, "HH:mm").unix() - currentTimeUnix;
+                            moment(upcomingDeparture.time, "HH:mm").tz(timeZone).unix() - currentTimeUnix;
 
                         console.log("upcoming: " + upcomingDeparture.time);
                         console.log(remainingTimeForDepartureSeconds / (60) + " mins");
@@ -222,7 +224,7 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
                                 }
 
                                 var remainingTimeSecondsForUpcomingDepartureAtOriginStop =
-                                    moment(upcomingDepartureAtOriginStop.time, "HH:mm").unix() - currentTimeUnix;
+                                    moment(upcomingDepartureAtOriginStop.time, "HH:mm").tz(timeZone).unix() - currentTimeUnix;
 
                                 directionHelpers.getDirections(userLocation,
                                     originStop.location[1] + "," + originStop.location[0],
