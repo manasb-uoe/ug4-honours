@@ -117,7 +117,20 @@ router.get("/wait-or-walk-suggestions", authenticationMiddleware, function (req,
                     if (err != null) {
                         return callback(err);
                     } else {
-                        return callback(null, currentTimeUnix, stops);
+                        // reorder the stops according to stopIds list
+                        var stopsOrdered = [];
+
+                        stopIds.forEach(function (stopId) {
+                            for (var i=0; i<stops.length; i++) {
+                                var currentStop = stops[i];
+                                if (currentStop.stopId == stopId) {
+                                    stopsOrdered.push(currentStop);
+                                    break;
+                                }
+                            }
+                        });
+
+                        return callback(null, currentTimeUnix, stopsOrdered);
                     }
                 });
             },
