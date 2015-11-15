@@ -14,10 +14,13 @@ import android.support.annotation.Nullable;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTick;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 08-11-2015.
@@ -115,9 +118,10 @@ public class CountdownNotificationService extends android.app.Service {
                     PendingIntent.FLAG_UPDATE_CURRENT
             );
 
+            String humanizedRemainingTime = Helpers.humanizeDurationInMillis(millisUntilFinished);
+
             Notification notification = new Notification.Builder(CountdownNotificationService.this)
-                    .setContentTitle(String.format(getString(R.string.label_time_remaining),
-                            Helpers.humanizeDurationInMillis(millisUntilFinished)))
+                    .setContentTitle(String.format(getString(R.string.label_time_remaining), humanizedRemainingTime))
                     .setContentText(contentTitle)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setOngoing(true)
@@ -127,6 +131,8 @@ public class CountdownNotificationService extends android.app.Service {
                     .build();
 
             notificationManager.notify(NOTIFICATION_ID_COUNTDOWN, notification);
+
+            EventBus.getDefault().post(new OnCountdownTick(humanizedRemainingTime));
         }
 
         @Override

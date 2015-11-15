@@ -21,7 +21,6 @@ import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirection
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
 
 import java.util.ArrayList;
 
@@ -157,7 +156,7 @@ public class ResultActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return getString(R.string.label_result);
+                    return getString(R.string.label_suggestions);
                 case 1:
                     return getString(R.string.label_loading);
                 default:
@@ -173,12 +172,12 @@ public class ResultActivity extends AppCompatActivity {
             Directions directions = event.getWaitOrWalkSuggestion().getWalkingDirections();
             if (directions != null) {
                 if (event.getWaitOrWalkSuggestion().getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
-                    tab.setText(String.format(getString(R.string.label_walk_duration),
+                    tab.setText(String.format(getString(R.string.label_walk_duration_base),
                             directions.getDurationText()));
                 } else {
                     long remainingTimeMillis = Helpers.getRemainingTimeMillisFromNow(
                             event.getWaitOrWalkSuggestion().getUpcomingDeparture().getTime());
-                    tab.setText(String.format(getString(R.string.label_wait_duration),
+                    tab.setText(String.format(getString(R.string.label_wait_duration_base),
                             Helpers.humanizeDurationInMillisToMinutes(remainingTimeMillis)));
                 }
             }

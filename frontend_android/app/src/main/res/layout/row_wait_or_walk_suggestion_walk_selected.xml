@@ -1,56 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="@dimen/spacing_normal"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     >
 
-    <TextView
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.AppCompat.Display3"
-        android:text="@string/label_walk"
-        android:gravity="center_horizontal"
-        />
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:baselineAligned="false"
+        >
 
-    <TextView
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/spacing_tiny"
+            android:paddingBottom="@dimen/spacing_normal"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingRight="@dimen/spacing_normal"
+            >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Display3"
+                android:text="@string/label_walk"
+                android:gravity="center_horizontal"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_to"
+                android:gravity="center_horizontal"
+                />
+
+            <TextView
+                android:id="@+id/stop_name_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="North Bridge"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="@dimen/font_large"
+                android:layout_marginTop="@dimen/spacing_tiny"
+                android:gravity="center_horizontal"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_by"
+                android:layout_marginTop="@dimen/spacing_tiny"
+                android:gravity="center_horizontal"
+                />
+
+            <TextView
+                android:id="@+id/departure_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="12:50"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="@dimen/font_large"
+                android:layout_marginTop="@dimen/spacing_tiny"
+                android:gravity="center_horizontal"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="@dimen/spacing_tiny"
+            android:paddingBottom="@dimen/spacing_normal"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingRight="@dimen/spacing_normal"
+            >
+
+            <TextView
+                android:id="@+id/time_remaining_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="18m 56s"
+                style="@style/TextAppearance.AppCompat.Display1"
+                android:gravity="center"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_time_remaining_2"
+                android:textAllCaps="true"
+                android:gravity="center"
+                />
+
+            <TextView
+                android:id="@+id/walk_duration_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="58 mins"
+                style="@style/TextAppearance.AppCompat.Display1"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/spacing_small"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_walk_duration"
+                android:textAllCaps="true"
+                android:gravity="center"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/label_to"
-        android:gravity="center_horizontal"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
         />
-
-    <TextView
-        android:id="@+id/stop_name_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="North Bridge"
-        style="@style/TextAppearance.AppCompat.Body1"
-        android:textSize="@dimen/font_large"
-        android:layout_marginTop="@dimen/spacing_tiny"
-        android:gravity="center_horizontal"
-        />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/label_by"
-        android:layout_marginTop="@dimen/spacing_tiny"
-        android:gravity="center_horizontal"
-        />
-
-    <TextView
-        android:id="@+id/departure_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="12:50"
-        style="@style/TextAppearance.AppCompat.Body1"
-        android:textSize="@dimen/font_large"
-        android:layout_marginTop="@dimen/spacing_tiny"
-        android:gravity="center_horizontal"
-        />
-
 
 </LinearLayout>

@@ -21,6 +21,7 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTick;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
@@ -183,6 +184,33 @@ public class ResultFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * Updates remaining time countdown in the first item of the recycler view
+     */
+    public void onEventMainThread(OnCountdownTick event) {
+        RecyclerView.ViewHolder viewHolder =
+                resultsRecyclerView.findViewHolderForAdapterPosition(0);
+
+        if (viewHolder instanceof ResultsAdapter.WalkSuggestionSelectedViewHolder) {
+            ((ResultsAdapter.WalkSuggestionSelectedViewHolder)
+                    viewHolder).updateRemainingTime(event.getHumanizedRemainingTime());
+        }
+    }
+
     private void showTimeRemainingCountdownNotification() {
         Intent startServiceIntent = new Intent(getActivity(), CountdownNotificationService.class);
         startServiceIntent.putParcelableArrayListExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS,
@@ -210,10 +238,10 @@ public class ResultFragment extends Fragment {
             }
 
             if (viewType == WALK_SUGGESTION_ViEW_TYPE_SELECTED) {
-                return new WaitSuggestionSelectedViewHolder(inflater.inflate(
+                return new WalkSuggestionSelectedViewHolder(inflater.inflate(
                         R.layout.row_wait_or_walk_suggestion_walk_selected, parent, false));
             } else if (viewType == WAIT_SUGGESTION_VIEW_TYPE_SELECTED) {
-                return new WalkSuggestionSelectedViewHolder(inflater.inflate(
+                return new WaitSuggestionSelectedViewHolder(inflater.inflate(
                         R.layout.row_wait_or_walk_suggestion_wait_selected, parent, false));
             } else if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
@@ -289,6 +317,8 @@ public class ResultFragment extends Fragment {
 
             private TextView stopNameTextView;
             private TextView departureTextView;
+            private TextView timeRemainingTextView;
+            private TextView walkDurationTextView;
 
             public WalkSuggestionSelectedViewHolder(View itemView) {
                 super(itemView);
@@ -296,11 +326,22 @@ public class ResultFragment extends Fragment {
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 departureTextView = (TextView) itemView.findViewById(R.id.departure_textview);
+                timeRemainingTextView = (TextView) itemView.findViewById(R.id.time_remaining_textview);
+                walkDurationTextView = (TextView) itemView.findViewById(R.id.walk_duration_textview);
             }
 
-            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
-                stopNameTextView.setText(result.getStop().getName());
-                departureTextView.setText(result.getUpcomingDeparture().getTime());
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
+                stopNameTextView.setText(suggestion.getStop().getName());
+                departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
+                walkDurationTextView.setText(suggestion.getWalkingDirections().getDurationText());
+            }
+
+            /**
+             * Called whenever an OnCountdownEvent is triggered. It simply updates the
+             * remainingTimeTextView using the provided humanized remaining time.
+             */
+            public void updateRemainingTime(String humanizedRemainingTime) {
+                timeRemainingTextView.setText(humanizedRemainingTime);
             }
         }
 
@@ -334,7 +375,7 @@ public class ResultFragment extends Fragment {
                 headingTextView = (TextView) itemView.findViewById(R.id.heading_textview);
 
                 // set heading
-                headingTextView.setText(getString(R.string.label_all_suggestions));
+                headingTextView.setText(getString(R.string.label_suggestions));
             }
         }
 
@@ -396,10 +437,10 @@ public class ResultFragment extends Fragment {
                 });
             }
 
-            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
-                stopNameTextView.setText(result.getStop().getName());
-                departureTextView.setText(result.getUpcomingDeparture().getTime());
-                numStopsSkippedTextView.setText(String.valueOf(waitOrWalkSuggestions.indexOf(result) + 1));
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
+                stopNameTextView.setText(suggestion.getStop().getName());
+                departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
+                numStopsSkippedTextView.setText(String.valueOf(waitOrWalkSuggestions.indexOf(suggestion) + 1));
 
                 if (getAdapterPosition() == currentlySelectedItemIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);

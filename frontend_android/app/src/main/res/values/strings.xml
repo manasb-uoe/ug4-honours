@@ -51,8 +51,10 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_start">Start</string>
     <string name="label_end">End</string>
-    <string name="label_walk_duration">Walk (%1$s)</string>
-    <string name="label_wait_duration">Wait (%1$s)</string>
+    <string name="label_walk_duration_base">Walk (%1$s)</string>
+    <string name="label_walk_duration">Walk Duration</string>
+    <string name="label_wait_duration_base">Wait (%1$s)</string>
+    <string name="label_wait_duration">Wait Duration</string>
     <string name="label_nearest">Nearest</string>
     <string name="label_save">Save</string>
     <string name="label_unsave">Unsave</string>
@@ -69,7 +71,6 @@
     <string name="label_service_name_and_description">%1$s (%2$s)</string>
     <string name="label_destination_stop_and_route">%1$s (towards %2$s)</string>
     <string name="label_making_complex_calculations">Making complex calculations…</string>
-    <string name="label_result">Result</string>
     <string name="label_walk">Walk</string>
     <string name="label_wait">Wait</string>
     <string name="label_wait_here">Wait here</string>
@@ -84,9 +85,10 @@
     <string name="label_walk_to_stop_by_time">Walk to %1$s by %2$s</string>
     <string name="label_wait_at_stop_until_time">Wait at %1$s until %2$s</string>
     <string name="label_time_remaining">Time remaining: %1$s</string>
+    <string name="label_time_remaining_2">Time Remaining</string>
     <string name="label_stop">Stop</string>
     <string name="label_directions">Directions</string>
-    <string name="label_all_suggestions">All Suggestions</string>
+    <string name="label_suggestions">Suggestions</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

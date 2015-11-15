@@ -357,7 +357,7 @@ public class StopFragment extends Fragment implements LocationProviderService.Lo
 
                             // update drag view title with travel duration
                             walkDurationTextView.setText(String.format(
-                                    getString(R.string.label_walk_duration), directions.getDurationText()));
+                                    getString(R.string.label_walk_duration_base), directions.getDurationText()));
                         }
                     }
 
