@@ -27,7 +27,7 @@
     <string name="label_loading">Loading…</string>
     <string name="label_activity">Activity</string>
     <string name="label_go">Go</string>
-    <string name="label_nearby">Nearby</string>
+    <string name="label_near_me">Near me</string>
     <string name="label_nav_open">Open navigation menu</string>
     <string name="label_nav_close">Close navigation menu</string>
     <string name="label_more_options">More options</string>

@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.home.activities.MainActivity;
+import com.enthusiast94.edinfit.ui.home.activities.HomeActivity;
 import com.enthusiast94.edinfit.ui.login_and_signup.fragments.LoginFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.ShowSignupFragmentEvent;
@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onEventMainThread(OnAuthenticatedEvent event) {
         Toast.makeText(this, getString(R.string.success_logged_in_as_base) + event.getUser().getName(), Toast.LENGTH_LONG)
                 .show();
-        Intent startActivityIntent = new Intent(this, MainActivity.class);
+        Intent startActivityIntent = new Intent(this, HomeActivity.class);
         finish();
         startActivity(startActivityIntent);
     }

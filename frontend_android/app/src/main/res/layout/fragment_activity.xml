@@ -1,31 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textSize="@dimen/font_larger"
-            android:text="@string/label_activity"
-            />
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/drop_shadow_height"
-        android:background="@drawable/drop_shadow"
+        android:gravity="center"
+        android:textSize="@dimen/font_larger"
+        android:text="@string/label_activity"
         />
 
-</FrameLayout>
+</LinearLayout>

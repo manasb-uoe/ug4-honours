@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/spacing_tiny"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_small"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    >
+
+    <ImageView
+        android:id="@+id/bus_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_maps_directions_bus"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="@dimen/spacing_7dp"
+        />
+
+    <TextView
+        android:id="@+id/stop_name_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Title"
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/bus_imageview"
+        android:layout_alignBottom="@+id/bus_imageview"
+        android:layout_toLeftOf="@+id/unsave_stop_button"
+        android:layout_toStartOf="@+id/unsave_stop_button"
+        />
+
+    <ImageButton
+        android:layout_width="@dimen/saved_stop_unsave_button_width"
+        android:layout_height="@dimen/saved_stop_unsave_button_height"
+        android:src="@drawable/ic_action_content_clear"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:background="?attr/selectableItemBackground"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/label_more_options"
+        android:id="@+id/unsave_stop_button"
+        />
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
+        android:layout_below="@+id/stop_name_textview"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        />
+
+    <LinearLayout
+        android:id="@+id/departure_container"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        android:layout_below="@+id/divider1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        >
+
+        <TextView
+            android:id="@+id/service_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginRight="@dimen/spacing_small"
+            />
+
+        <TextView
+            android:id="@+id/destination_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginRight="@dimen/spacing_small"
+            />
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:gravity="center_vertical|right"
+            />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
+        android:layout_below="@+id/departure_container"
+        />
+
+</RelativeLayout>
+
