@@ -7,6 +7,8 @@ var async = require("async");
 var Service = require("../models/service");
 var Stop = require("../models/stop");
 var authenticationMiddleware = require("../middleware/authentication");
+var async = require("async");
+var helpers = require("../utils/helpers");
 
 var router = express.Router();
 
@@ -29,24 +31,50 @@ router.get("/services/:service_name", authenticationMiddleware, function (req, r
 
 /**
  * Get list of services corresponding to provided list of service names, exluding any route information.
+ * All services are returned if no service names are provided. 
  */
 
 router.get("/services/", function (req, res) {
-    var serviceNames = req.query.services;
+    var serviceNames = req.query.services || [];
 
-    Service
-        .where("name")
-        .in(serviceNames)
-        .exec(function (err, services) {
-            if (err) return res.sendError(500, err.message);
+    async.waterfall([
+        function (callback) {
+            if (serviceNames.length == 0) {
+                Service.find({}, function (err, services) {
+                    if (err != null) {
+                        return helpers.createFailureMessage(500, err.message);
+                    }
 
+                    return callback(null, services);
+                });
+            } else {
+                Service
+                    .where("name")
+                    .in(serviceNames)
+                    .exec(function (err, services) {
+                        if (err != null) {
+                            return helpers.createFailureMessage(500, err.message);
+                        }
+
+                        return callback(null, services);
+                    });            
+            }
+        },
+        function (services, callback) {
             // remove route info 
             services.forEach(function (service) {
                 service.routes = undefined;
             });
 
-            return res.sendOk(services);
-        });
+            return callback(null, services);
+        }
+    ], function(err, services) {
+        if (err != null) {
+            return res.sendError(err.statusCode, err.message);
+        }
+
+        return res.sendOk(services);
+    });
 });
 
 
