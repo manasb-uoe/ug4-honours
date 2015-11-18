@@ -178,5 +178,13 @@ public class Helpers {
             throw new RuntimeException(e);
         }
     }
+
+    public static CharSequence trimTrailingWhitespace(CharSequence text) {
+        while (text.charAt(text.length() - 1) == '\n') {
+            text = text.subSequence(0, text.length() - 1);
+        }
+
+        return text;
+    }
 }
 

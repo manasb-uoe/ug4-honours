@@ -79,7 +79,6 @@
     <string name="label_to">to</string>
     <string name="label_by">by</string>
     <string name="label_until">until</string>
-    <string name="label_distance_km">%1$s km</string>
     <string name="label_nothing_found">Nothing found here…</string>
     <string name="label_fetching_walking_direction">Fetching walking directions…</string>
     <string name="label_walk_to_stop_by_time">Walk to %1$s by %2$s</string>

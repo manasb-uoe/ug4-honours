@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import de.greenrobot.event.EventBus;
  */
 public class WalkingDirectionsFragment extends Fragment {
 
+    public static final String TAG = WalkingDirectionsFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
     public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
 
@@ -289,9 +291,10 @@ public class WalkingDirectionsFragment extends Fragment {
             }
 
             public void bindItem(Directions.Step directionStep) {
-                instructionTextView.setText(directionStep.getInstruction());
-                distanceTextView.setText(String.format(getString(R.string.label_distance_km),
-                        directionStep.getDistance()));
+                String instruction = directionStep.getInstruction()
+                        .replaceAll("<div .*>(.*)</div>", "<br>$1");
+                instructionTextView.setText(Helpers.trimTrailingWhitespace(Html.fromHtml(instruction)));
+                distanceTextView.setText(directionStep.getDistanceText());
             }
         }
     }
