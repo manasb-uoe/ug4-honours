@@ -79,10 +79,7 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingTop="@dimen/spacing_tiny"
-            android:paddingBottom="@dimen/spacing_normal"
-            android:paddingLeft="@dimen/spacing_normal"
-            android:paddingRight="@dimen/spacing_normal"
+            android:padding="@dimen/spacing_normal"
             >
 
             <TextView
@@ -90,7 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="18m 56s"
-                style="@style/TextAppearance.AppCompat.Display1"
+                android:textSize="@dimen/font_huge"
                 android:gravity="center"
                 />
 
@@ -100,6 +97,7 @@
                 android:text="@string/label_time_remaining_2"
                 android:textAllCaps="true"
                 android:gravity="center"
+                android:textSize="@dimen/font_small"
                 />
 
             <TextView
@@ -107,8 +105,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="58 mins"
-                style="@style/TextAppearance.AppCompat.Display1"
                 android:gravity="center"
+                android:textSize="@dimen/font_huge"
                 android:layout_marginTop="@dimen/spacing_small"
                 />
 
@@ -117,7 +115,27 @@
                 android:layout_height="wrap_content"
                 android:text="@string/label_walk_duration"
                 android:textAllCaps="true"
+                android:textSize="@dimen/font_small"
                 android:gravity="center"
+                />
+
+            <TextView
+                android:id="@+id/distance_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0.5 mi"
+                android:gravity="center"
+                android:textSize="@dimen/font_huge"
+                android:layout_marginTop="@dimen/spacing_small"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/label_distance"
+                android:textAllCaps="true"
+                android:gravity="center"
+                android:textSize="@dimen/font_small"
                 />
 
         </LinearLayout>

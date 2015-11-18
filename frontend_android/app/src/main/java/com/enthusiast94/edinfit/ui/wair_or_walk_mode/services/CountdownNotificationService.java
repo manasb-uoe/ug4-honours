@@ -14,11 +14,10 @@ import android.support.annotation.Nullable;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTick;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -132,11 +131,12 @@ public class CountdownNotificationService extends android.app.Service {
 
             notificationManager.notify(NOTIFICATION_ID_COUNTDOWN, notification);
 
-            EventBus.getDefault().post(new OnCountdownTick(humanizedRemainingTime));
+            EventBus.getDefault().post(new OnCountdownTickEvent(humanizedRemainingTime));
         }
 
         @Override
         public void onFinish() {
+            EventBus.getDefault().post(new OnCountdownTickEvent(getString(R.string.label_none)));
             notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
             stopSelf();
         }

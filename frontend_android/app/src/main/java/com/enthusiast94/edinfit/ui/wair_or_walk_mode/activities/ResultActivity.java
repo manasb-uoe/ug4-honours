@@ -18,7 +18,7 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.ResultFragment;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.SuggestionsFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.utils.Helpers;
 
@@ -31,8 +31,6 @@ import de.greenrobot.event.EventBus;
  */
 public class ResultActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
     private ViewPager viewPager;
 
     public static final String EXTRA_SELECTED_ORIGIN_STOP = "selectedOriginStop";
@@ -74,8 +72,8 @@ public class ResultActivity extends AppCompatActivity {
          * Find views
          */
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        tabLayout = (TabLayout) findViewById(R.id.tablayout);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
 
         /**
@@ -135,10 +133,10 @@ public class ResultActivity extends AppCompatActivity {
             switch (position) {
                 case 0:
                     if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
-                        return ResultFragment.newInstance(waitOrWalkSuggestions,
+                        return SuggestionsFragment.newInstance(waitOrWalkSuggestions,
                                 waitOrWalkSelectedSuggestion);
                     }
-                    return ResultFragment.newInstance(selectedOriginStop, selectedService,
+                    return SuggestionsFragment.newInstance(selectedOriginStop, selectedService,
                             selectedDestinationStop, selectedRoute);
                 case 1:
                     return WalkingDirectionsFragment.newInstance(waitOrWalkSelectedSuggestion);
@@ -158,28 +156,9 @@ public class ResultActivity extends AppCompatActivity {
                 case 0:
                     return getString(R.string.label_suggestions);
                 case 1:
-                    return getString(R.string.label_loading);
+                    return getString(R.string.label_directions);
                 default:
                     return null;
-            }
-        }
-    }
-
-    public void onEventMainThread(OnWaitOrWalkSuggestionSelected event) {
-        // update tab 2 title depending on wait or walk result
-        TabLayout.Tab tab = tabLayout.getTabAt(1);
-        if (tab != null) {
-            Directions directions = event.getWaitOrWalkSuggestion().getWalkingDirections();
-            if (directions != null) {
-                if (event.getWaitOrWalkSuggestion().getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
-                    tab.setText(String.format(getString(R.string.label_walk_duration_base),
-                            directions.getDurationText()));
-                } else {
-                    long remainingTimeMillis = Helpers.getRemainingTimeMillisFromNow(
-                            event.getWaitOrWalkSuggestion().getUpcomingDeparture().getTime());
-                    tab.setText(String.format(getString(R.string.label_wait_duration_base),
-                            Helpers.humanizeDurationInMillisToMinutes(remainingTimeMillis)));
-                }
             }
         }
     }
