@@ -16,5 +16,10 @@
             android:icon="@drawable/ic_gps_fixed_black_24dp"
             android:title="@string/label_near_me"
             />
+        <item
+            android:id="@+id/nav_saved_stops"
+            android:icon="@drawable/ic_star_black_24dp"
+            android:title="@string/label_saved"
+            />
     </group>
 </menu>

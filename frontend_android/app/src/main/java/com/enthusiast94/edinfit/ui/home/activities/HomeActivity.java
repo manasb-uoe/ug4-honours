@@ -198,8 +198,8 @@ public class HomeActivity extends AppCompatActivity {
     private void onPageSelected(int position) {
         selectedPageIndex = position;
 
-//        MenuItem menuItem = navView.getMenu().getItem(position);
-//        menuItem.setChecked(true);
+        MenuItem menuItem = navView.getMenu().getItem(position);
+        menuItem.setChecked(true);
 
 //        setTitle(menuItem.getTitle());
 
