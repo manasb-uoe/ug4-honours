@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.services;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
@@ -73,11 +74,15 @@ public class ServiceService extends BaseService {
         });
     }
 
-    public void getServices(List<String> serviceNames, final Callback<List<Service>> callback) {
+    // if serviceNames is null then all services are returned by the server
+    public void getServices(@Nullable List<String> serviceNames, final Callback<List<Service>> callback) {
         RequestParams requestParams = new RequestParams();
-        // need to send unordered collection else the server throws an error if size of ordered
-        // collection > 20 (i.e. services[21] = blabla causes error)
-        requestParams.put("services", new HashSet<>(serviceNames));
+
+        if (serviceNames != null) {
+            // need to send unordered collection else the server throws an error if size of ordered
+            // collection > 20 (i.e. services[21] = blabla causes error)
+            requestParams.put("services", new HashSet<>(serviceNames));
+        }
 
         AsyncHttpClient client = getAsyncHttpClient(true);
         client.get(API_BASE + "/services", requestParams, new JsonHttpResponseHandler() {

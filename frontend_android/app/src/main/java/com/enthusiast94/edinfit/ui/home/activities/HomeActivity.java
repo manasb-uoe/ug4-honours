@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.ui.find_a_bus.activities.FindABusActivity;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.GoFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
@@ -36,9 +37,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navView;
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private View navHeaderContainer;
     private TextView navNameTextVeiew;
     private TextView navEmailTextView;
     private ViewPager viewPager;
@@ -71,9 +69,9 @@ public class HomeActivity extends AppCompatActivity {
 
             drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
             navView = (NavigationView) findViewById(R.id.navigation_view);
-            toolbar = (Toolbar) findViewById(R.id.toolbar);
-            tabLayout = (TabLayout) findViewById(R.id.tablayout);
-            navHeaderContainer = findViewById(R.id.nav_header_container);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
+            View navHeaderContainer = findViewById(R.id.nav_header_container);
             navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
             navEmailTextView = (TextView) findViewById(R.id.email_textview);
             viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -237,7 +235,8 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return true;
     }
 
     @Override
@@ -249,7 +248,14 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         }
 
-        return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                Intent startActivityIntent = new Intent(this, FindABusActivity.class);
+                startActivity(startActivityIntent);
+                return true;
+            default:
+                return false;
+        }
     }
 
     private class MainPagerAdapter extends FragmentPagerAdapter {

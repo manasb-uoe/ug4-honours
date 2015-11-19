@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingBottom="@dimen/spacing_small"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    >
+
+    <TextView
+        android:id="@+id/service_name_textview"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="45"
+        android:background="@color/light_grey"
+        android:layout_marginRight="@dimen/spacing_normal"
+        style="@style/TextAppearance.AppCompat.Body2"
+        />
+
+    <TextView
+        android:id="@+id/destination_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Princes Street - Brougham Place Princes Street"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
+        />
+
+</LinearLayout>

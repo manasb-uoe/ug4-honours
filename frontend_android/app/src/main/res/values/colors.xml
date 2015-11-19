@@ -13,7 +13,9 @@
     <color name="secondary_text_dark">@android:color/secondary_text_dark</color>
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">@color/background_material_dark</color>
-    <color name="divider">#E8E8E8</color>
+    <color name="divider">@color/light_grey</color>
+    <color name="light_grey">#E8E8E8</color>
+    <color name="dark_grey">#737373</color>
     <color name="red">#F44336</color>
     <color name="tab_indicator">#FFFFFF</color>
     <color name="drop_shadow_end_color">#40000000</color>
