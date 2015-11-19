@@ -59,6 +59,7 @@ public class SelectDestinationStopFragment extends Fragment {
     private RouteStopsAdapter routeStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private SlidingUpPanelLayout slidingUpPanelLayout;
+    private LinearLayoutManager linearLayoutManager;
     private TextView routeTextView;
     private TextView changeRouteButton;
     private MapView mapView;
@@ -156,7 +157,8 @@ public class SelectDestinationStopFragment extends Fragment {
          * Setup route stops recycler view
          */
 
-        routeStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+        routeStopsRecyclerView.setLayoutManager(linearLayoutManager);
         routeStopsAdapter = new RouteStopsAdapter();
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
 
@@ -469,6 +471,9 @@ public class SelectDestinationStopFragment extends Fragment {
                 currentlySelectedStopIndex = originStopIndex + 1;
                 previouslySelectedStopIndex = originStopIndex + 1;
             }
+
+            // scroll to the origin stop since stops before origin stop cannot be selected
+            linearLayoutManager.scrollToPositionWithOffset(originStopIndex, 50);
 
             notifyDataSetChanged();
         }

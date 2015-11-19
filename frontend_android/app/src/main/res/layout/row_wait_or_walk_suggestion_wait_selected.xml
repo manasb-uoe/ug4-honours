@@ -86,7 +86,7 @@
                 android:id="@+id/time_remaining_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="18m 56s"
+                android:text="@string/label_none"
                 android:textSize="@dimen/font_huge"
                 android:gravity="center"
                 />
