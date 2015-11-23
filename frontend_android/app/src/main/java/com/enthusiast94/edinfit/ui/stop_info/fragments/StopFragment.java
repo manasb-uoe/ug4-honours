@@ -27,11 +27,11 @@ import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.DirectionsService;
-import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
 import com.enthusiast94.edinfit.services.UserService;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -50,7 +50,7 @@ import java.util.Locale;
 /**
  * Created by manas on 04-10-2015.
  */
-public class StopFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
+public class StopFragment extends Fragment implements LocationProvider.LastKnowLocationCallback {
 
     public static final String EXTRA_STOP_ID = "stopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
@@ -62,6 +62,7 @@ public class StopFragment extends Fragment implements LocationProviderService.La
     private MapView mapView;
     private GoogleMap map;
     private TextView walkDurationTextView;
+    private LocationProvider locationProvider;
 
     // default values for day and time
     private String selectedDay = Helpers.getCurrentDay();
@@ -118,6 +119,12 @@ public class StopFragment extends Fragment implements LocationProviderService.La
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         /**
+         * Setup location provider
+         */
+
+        locationProvider = new LocationProvider(getActivity(), this);
+
+        /**
          * Setup swipe refresh layout
          */
 
@@ -126,7 +133,7 @@ public class StopFragment extends Fragment implements LocationProviderService.La
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(false, StopFragment.this);
+                locationProvider.requestLastKnownLocation();
             }
         });
 
@@ -138,12 +145,6 @@ public class StopFragment extends Fragment implements LocationProviderService.La
         departuresAdapter = new DeparturesAdapter();
         departuresRecyclerView.setAdapter(departuresAdapter);
 
-        /**
-         * Finally, request user location in order to get things started
-         */
-
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(false, this);
-
         return view;
     }
 
@@ -151,6 +152,7 @@ public class StopFragment extends Fragment implements LocationProviderService.La
     public void onResume() {
         super.onResume();
 
+        locationProvider.connect();
         mapView.onResume();
     }
 
@@ -158,6 +160,7 @@ public class StopFragment extends Fragment implements LocationProviderService.La
     public void onPause() {
         super.onPause();
 
+        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -381,14 +384,14 @@ public class StopFragment extends Fragment implements LocationProviderService.La
     }
 
     @Override
-    public void onLocationSuccess(LatLng latLng, String placeName) {
+    public void onLastKnownLocationSuccess(LatLng userLatLng) {
         if (getActivity() != null) {
-            loadStop(latLng);
+            loadStop(userLatLng);
         }
     }
 
     @Override
-    public void onLocationFailure(String error) {
+    public void onLastKnownLocationFailure(String error) {
         if (getActivity() != null) {
             setRefreshIndicatorVisiblity(false);
             Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();

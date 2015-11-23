@@ -17,13 +17,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnOriginStopSelectedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -40,7 +40,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 18-10-2015.
  */
-public class SelectOriginStopFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
+public class SelectOriginStopFragment extends Fragment implements LocationProvider.LastKnowLocationCallback {
 
     public static final String TAG = SelectOriginStopFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
@@ -52,6 +52,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     private TextView selectedStopTextView;
     private int currentlySelectedStopIndex = -1;
     private List<Stop> stops = new ArrayList<>();
+    private LocationProvider locationProvider;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 5;
@@ -112,6 +113,12 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         /**
+         * Setup location provider
+         */
+
+        locationProvider = new LocationProvider(getActivity(), this);
+
+        /**
          * Setup swipe refresh layout
          */
 
@@ -120,7 +127,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(false, SelectOriginStopFragment.this);
+                locationProvider.requestLastKnownLocation();
             }
         });
 
@@ -132,13 +139,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         stopsAdapter = new StopsAdapter();
         stopsRecyclerView.setAdapter(stopsAdapter);
 
-
-        /**
-         * Finally, request user location in order to get things started
-         */
-
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(false, this);
-
         return view;
     }
 
@@ -146,6 +146,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     public void onResume() {
         super.onResume();
 
+        locationProvider.connect();
         mapView.onResume();
     }
 
@@ -153,6 +154,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     public void onPause() {
         super.onPause();
 
+        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -254,14 +256,14 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     }
 
     @Override
-    public void onLocationSuccess(LatLng latLng, String placeName) {
+    public void onLastKnownLocationSuccess(LatLng userLatLng) {
         if (getActivity() != null) {
-            loadStops(latLng);
+            loadStops(userLatLng);
         }
     }
 
     @Override
-    public void onLocationFailure(String error) {
+    public void onLastKnownLocationFailure(String error) {
         if (getActivity() != null) {
             setRefreshIndicatorVisiblity(false);
             Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();

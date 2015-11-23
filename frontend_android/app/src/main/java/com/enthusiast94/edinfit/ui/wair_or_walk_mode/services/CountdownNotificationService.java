@@ -13,11 +13,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -39,20 +39,24 @@ public class CountdownNotificationService extends android.app.Service {
     private static final int REQUEST_CODE_STOP = 0;
     private static final int REQUEST_CODE_DIRECTIONS = 1;
     private static final String ACTION_STOP = "stop";
+    private static final int LOCATION_UPDATE_INTERVAL = 10000;
 
     private CountDownTimer countDownTimer;
     private NotificationManager notificationManager;
     private NotificationBroadcastReceiver receiver;
     private WaitOrWalkService.WaitOrWalkSuggestion selectedWaitOrWalkSuggestion;
     private ArrayList<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
-    private LocationProviderService locationProviderService;
+    private LocationProvider locationProvider;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        locationProviderService = LocationProviderService.getInstance();
+
+        locationProvider = new LocationProvider(this, new CheckIfUserReachedDestinationOnLocationUpdateCallback(),
+                LOCATION_UPDATE_INTERVAL);
+        locationProvider.connect();
 
         receiver = new NotificationBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
@@ -65,6 +69,13 @@ public class CountdownNotificationService extends android.app.Service {
         super.onDestroy();
 
         unregisterReceiver(receiver);
+
+        countDownTimer.cancel();
+
+        notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
+
+        locationProvider.stopLocationUpdates();
+        locationProvider.disconnect();
     }
 
     @Nullable
@@ -81,7 +92,8 @@ public class CountdownNotificationService extends android.app.Service {
         startCountdownNotification();
 
         if (selectedWaitOrWalkSuggestion.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
-            startCheckingIfUserReachedDestination();
+            locationProvider.stopLocationUpdates();
+            locationProvider.startLocationUpdates();
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -94,33 +106,6 @@ public class CountdownNotificationService extends android.app.Service {
 
         countDownTimer = new TimeRemainingCountdownTimer(1000);
         countDownTimer.start();
-    }
-
-    private void startCheckingIfUserReachedDestination() {
-        locationProviderService.stopLocationUpdates();
-
-        // check every 10 seconds
-        locationProviderService.startLocationUpdates(10000, new LocationProviderService.LocationUpdateCallback() {
-
-            @Override
-            public void onLocationChanged(LatLng userLatLng) {
-                List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
-                LatLng stopLatLng = new LatLng(stopLocation.get(1), stopLocation.get(0));
-
-                if (Helpers.getDistanceBetweenPoints(userLatLng, stopLatLng) <= 20 /* 20 meters */) {
-                    countDownTimer.cancel();
-                    notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
-                    locationProviderService.stopLocationUpdates();
-                    showSuccessNotification();
-                    stopSelf();
-                }
-            }
-
-            @Override
-            public void onLocationFailure(String error) {
-                Log.e(TAG, error);
-            }
-        });
     }
 
     public void showSuccessNotification() {
@@ -197,8 +182,6 @@ public class CountdownNotificationService extends android.app.Service {
         @Override
         public void onFinish() {
             EventBus.getDefault().post(new OnCountdownTickEvent(getString(R.string.label_none)));
-            notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
-            locationProviderService.stopLocationUpdates();
 
             if (selectedWaitOrWalkSuggestion.getType() ==
                     WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
@@ -215,12 +198,34 @@ public class CountdownNotificationService extends android.app.Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_STOP:
-                    countDownTimer.cancel();
-                    notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
-                    locationProviderService.stopLocationUpdates();
                     stopSelf();
                     break;
             }
+        }
+    }
+
+    private class CheckIfUserReachedDestinationOnLocationUpdateCallback
+            implements LocationProvider.LocationUpdateCallback {
+
+        @Override
+        public void onLocationUpdateSuccess(LatLng latLng) {
+            if (selectedWaitOrWalkSuggestion.getType() !=
+                    WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
+                return;
+            }
+
+            List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
+            LatLng stopLatLng = new LatLng(stopLocation.get(1), stopLocation.get(0));
+
+            if (Helpers.getDistanceBetweenPoints(latLng, stopLatLng) <= 20 /* 20 meters */) {
+                showSuccessNotification();
+                stopSelf();
+            }
+        }
+
+        @Override
+        public void onLocationUpdateFailure(String error) {
+            Log.e(TAG, error);
         }
     }
 }

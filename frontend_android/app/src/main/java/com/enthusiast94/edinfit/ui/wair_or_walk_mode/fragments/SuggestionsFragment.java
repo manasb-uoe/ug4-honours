@@ -19,12 +19,12 @@ import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.LocationProviderService;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
+import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -35,7 +35,8 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 01-11-2015.
  */
-public class SuggestionsFragment extends Fragment {
+public class SuggestionsFragment extends Fragment
+        implements LocationProvider.LastKnowLocationCallback {
 
     public static final String TAG = SuggestionsFragment.class.getSimpleName();
 
@@ -55,6 +56,7 @@ public class SuggestionsFragment extends Fragment {
     private Route selectedRoute;
     private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion;
     private List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
+    private LocationProvider locationProvider;
 
     /**
      * Used when a new wait or walk activity is started.
@@ -120,66 +122,18 @@ public class SuggestionsFragment extends Fragment {
         resultsRecyclerView = (RecyclerView) view.findViewById(R.id.results_recyclerview);
 
         /**
+         * Setup location provider
+         */
+
+        locationProvider = new LocationProvider(getActivity(), this);
+
+        /**
          * Setup results recycler view
          */
 
         resultsAdapter = new ResultsAdapter();
         resultsRecyclerView.setAdapter(resultsAdapter);
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
-            resultsAdapter.notifySuggestionsChanged();
-
-            EventBus.getDefault()
-                    .post(new ShowWalkingDirectionsFragmentEvent());
-        } else {
-            // show indeterminate progress dialog before starting calculations
-            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setMessage(getString(R.string.label_making_complex_calculations));
-            progressDialog.show();
-
-            LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LastKnownLocationCallback() {
-
-                @Override
-                public void onLocationSuccess(LatLng latLng, String placeName) {
-                    WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(
-                            selectedRoute.getDestination(),
-                            selectedService.getName(), selectedOriginStop.getId(),
-                            selectedDestinationStop.getId(),
-                            latLng,
-                            new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkSuggestion>>() {
-
-                                @Override
-                                public void onSuccess(List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions) {
-                                    if (waitOrWalkSuggestions.size() > 0) {
-                                        SuggestionsFragment.this.waitOrWalkSuggestions = waitOrWalkSuggestions;
-
-                                        resultsAdapter.notifySuggestionsChanged();
-                                    } else {
-                                        Toast.makeText(getActivity(), getString(R.string.error_unexpected),
-                                                Toast.LENGTH_SHORT).show();
-                                    }
-
-                                    progressDialog.dismiss();
-                                }
-
-                                @Override
-                                public void onFailure(String message) {
-                                    progressDialog.dismiss();
-
-                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                }
-
-                @Override
-                public void onLocationFailure(String error) {
-                    progressDialog.dismiss();
-
-                    Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
 
         return view;
     }
@@ -188,6 +142,7 @@ public class SuggestionsFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        locationProvider.connect();
         EventBus.getDefault().register(this);
     }
 
@@ -195,6 +150,7 @@ public class SuggestionsFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        locationProvider.disconnect();
         EventBus.getDefault().unregister(this);
     }
 
@@ -221,6 +177,55 @@ public class SuggestionsFragment extends Fragment {
         startServiceIntent.putExtra(CountdownNotificationService.EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION,
                 waitOrWalkSelectedSuggestion);
         getActivity().startService(startServiceIntent);
+    }
+
+    @Override
+    public void onLastKnownLocationSuccess(LatLng userLatLng) {
+        if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
+            resultsAdapter.notifySuggestionsChanged();
+
+            EventBus.getDefault()
+                    .post(new ShowWalkingDirectionsFragmentEvent());
+        } else {
+            // show indeterminate progress dialog before starting calculations
+            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage(getString(R.string.label_doing_complex_stuff));
+            progressDialog.show();
+
+            WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(
+                    selectedRoute.getDestination(),
+                    selectedService.getName(), selectedOriginStop.getId(),
+                    selectedDestinationStop.getId(),
+                    userLatLng,
+                    new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkSuggestion>>() {
+
+                        @Override
+                        public void onSuccess(List<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions) {
+                            if (waitOrWalkSuggestions.size() > 0) {
+                                SuggestionsFragment.this.waitOrWalkSuggestions = waitOrWalkSuggestions;
+
+                                resultsAdapter.notifySuggestionsChanged();
+                            } else {
+                                Toast.makeText(getActivity(), getString(R.string.error_unexpected),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+
+                            progressDialog.dismiss();
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            progressDialog.dismiss();
+
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onLastKnownLocationFailure(String error) {
+        Toast.makeText(getActivity(), error, Toast.LENGTH_SHORT).show();
     }
 
     private class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

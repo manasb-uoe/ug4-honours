@@ -16,13 +16,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.BaseService;
 import com.enthusiast94.edinfit.services.StopService;
+import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.enthusiast94.edinfit.services.LocationProviderService;
+import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,21 +42,24 @@ import java.util.Locale;
 /**
  * Created by manas on 01-10-2015.
  */
-public class NearMeFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
+public class NearMeFragment extends Fragment implements LocationProvider.LastKnowLocationCallback {
 
     public static final String TAG = NearMeFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
+
     private SlidingUpPanelLayout slidingUpPanelLayout;
     private RecyclerView nearbyStopsRecyclerView;
-    private NearbyStopsAdapter nearbyStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView currentLocationTextView;
     private TextView lastUpdatedAtTextView;
     private MapView mapView;
+
+    private NearbyStopsAdapter nearbyStopsAdapter;
     private GoogleMap map;
     private Date lastUpdatedAt;
     private List<Stop> stops = new ArrayList<>();
     private List<Marker> stopMarkers = new ArrayList<>();
+    private LocationProvider locationProvider;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 25;
@@ -100,6 +103,12 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
                 12));
 
         /**
+         * Setup location provider
+         */
+
+        locationProvider = new LocationProvider(getActivity(), this);
+
+        /**
          * Setup swipe refresh layout
          */
 
@@ -108,7 +117,7 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
 
             @Override
             public void onRefresh() {
-                LocationProviderService.getInstance().requestLastKnownLocationInfo(true, NearMeFragment.this);
+                locationProvider.requestLastKnownLocation();
             }
         });
 
@@ -120,12 +129,6 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
         nearbyStopsAdapter = new NearbyStopsAdapter();
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
-        /**
-         * Finally, request user location in order to get things started
-         */
-
-        LocationProviderService.getInstance().requestLastKnownLocationInfo(true, this);
-
         return view;
     }
 
@@ -133,6 +136,7 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
     public void onResume() {
         super.onResume();
 
+        locationProvider.connect();
         mapView.onResume();
     }
 
@@ -140,6 +144,7 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
     public void onPause() {
         super.onPause();
 
+        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -168,7 +173,9 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
     }
 
     private void loadStops(final LatLng userLocationLatLng, final String userLocationName) {
-        setRefreshIndicatorVisiblity(true);
+        if (stops.size() == 0) {
+            setRefreshIndicatorVisiblity(true);
+        }
 
         StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
                 userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE,
@@ -249,14 +256,14 @@ public class NearMeFragment extends Fragment implements LocationProviderService.
     }
 
     @Override
-    public void onLocationSuccess(LatLng latLng, String placeName) {
+    public void onLastKnownLocationSuccess(LatLng userLatLng) {
         if (getActivity() != null) {
-            loadStops(latLng, placeName);
+            loadStops(userLatLng, "Fake Place");
         }
     }
 
     @Override
-    public void onLocationFailure(String error) {
+    public void onLastKnownLocationFailure(String error) {
         if (getActivity() != null) {
             setRefreshIndicatorVisiblity(false);
             Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
