@@ -138,7 +138,7 @@ public class SuggestionsFragment extends Fragment {
             progressDialog.setMessage(getString(R.string.label_making_complex_calculations));
             progressDialog.show();
 
-            LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LocationCallback() {
+            LocationProviderService.getInstance().requestLastKnownLocationInfo(false, new LocationProviderService.LastKnownLocationCallback() {
 
                 @Override
                 public void onLocationSuccess(LatLng latLng, String placeName) {

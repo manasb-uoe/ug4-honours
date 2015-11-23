@@ -40,7 +40,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 18-10-2015.
  */
-public class SelectOriginStopFragment extends Fragment implements LocationProviderService.LocationCallback {
+public class SelectOriginStopFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
 
     public static final String TAG = SelectOriginStopFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";

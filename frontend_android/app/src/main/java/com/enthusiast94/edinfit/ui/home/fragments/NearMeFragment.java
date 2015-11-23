@@ -42,7 +42,7 @@ import java.util.Locale;
 /**
  * Created by manas on 01-10-2015.
  */
-public class NearMeFragment extends Fragment implements LocationProviderService.LocationCallback {
+public class NearMeFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
 
     public static final String TAG = NearMeFragment.class.getSimpleName();
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";

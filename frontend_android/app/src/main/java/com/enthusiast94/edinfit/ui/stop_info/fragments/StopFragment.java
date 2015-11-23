@@ -50,7 +50,7 @@ import java.util.Locale;
 /**
  * Created by manas on 04-10-2015.
  */
-public class StopFragment extends Fragment implements LocationProviderService.LocationCallback {
+public class StopFragment extends Fragment implements LocationProviderService.LastKnownLocationCallback {
 
     public static final String EXTRA_STOP_ID = "stopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";

@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -19,7 +21,7 @@ import java.util.List;
 /**
  * Created by manas on 13-10-2015.
  */
-public class LocationProviderService implements GoogleApiClient.ConnectionCallbacks {
+public class LocationProviderService implements GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     public static final String TAG = LocationProviderService.class.getSimpleName();
     private static LocationProviderService instance;
@@ -28,9 +30,17 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
     private Geocoder geocoder;
     private Handler handler;
     private boolean isGoogleApiClientAvailable;
+    private LocationUpdateCallback locationUpdateCallback;
 
-    public interface LocationCallback {
+
+    public interface LastKnownLocationCallback {
         void onLocationSuccess(LatLng latLng, String placeName);
+
+        void onLocationFailure(String error);
+    }
+
+    public interface LocationUpdateCallback {
+        void onLocationChanged(LatLng latLng);
 
         void onLocationFailure(String error);
     }
@@ -48,7 +58,6 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
         googleApiClient.connect();
 
         geocoder = new Geocoder(context);
-
     }
 
     public static void init(Context context) {
@@ -90,13 +99,34 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
         return null;
     }
 
-    public void requestLastKnownLocationInfo(boolean shouldIncludePlaceName, LocationCallback locationCallback) {
+    public void requestLastKnownLocationInfo(boolean shouldIncludePlaceName, LastKnownLocationCallback lastKnownLocationCallback) {
         if (isGoogleApiClientAvailable) {
-            Thread thread = new Thread(new LocationInfoFetcherRunnable(shouldIncludePlaceName, locationCallback));
+            Thread thread = new Thread(new LocationInfoFetcherRunnable(shouldIncludePlaceName, lastKnownLocationCallback));
             thread.start();
         } else {
-            locationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
+            lastKnownLocationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
         }
+    }
+
+    public void startLocationUpdates(long updateInterval, LocationUpdateCallback callback) {
+        this.locationUpdateCallback = callback;
+
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(updateInterval);
+        locationRequest.setFastestInterval(updateInterval);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (isGoogleApiClientAvailable) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    googleApiClient, locationRequest, this);
+        } else {
+            callback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
+        }
+    }
+
+    public void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        locationUpdateCallback = null;
     }
 
     @Override
@@ -105,16 +135,24 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
     }
 
     @Override
+    public void onLocationChanged(Location location) {
+        if (locationUpdateCallback != null) {
+            locationUpdateCallback.onLocationChanged(
+                    new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {}
 
     private class LocationInfoFetcherRunnable implements Runnable {
 
         private boolean shouldIncludePlaceName;
-        private LocationCallback locationCallback;
+        private LastKnownLocationCallback lastKnownLocationCallback;
 
-        public LocationInfoFetcherRunnable(boolean shouldIncludePlaceName, LocationCallback locationCallback) {
+        public LocationInfoFetcherRunnable(boolean shouldIncludePlaceName, LastKnownLocationCallback lastKnownLocationCallback) {
             this.shouldIncludePlaceName = shouldIncludePlaceName;
-            this.locationCallback = locationCallback;
+            this.lastKnownLocationCallback = lastKnownLocationCallback;
         }
 
         @Override
@@ -131,7 +169,7 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
                 }
             }
 
-            handler.post(new CallbackInvokerRunnable(latLng, placeName, locationCallback));
+            handler.post(new CallbackInvokerRunnable(latLng, placeName, lastKnownLocationCallback));
         }
     }
 
@@ -139,20 +177,20 @@ public class LocationProviderService implements GoogleApiClient.ConnectionCallba
 
         private LatLng latLng;
         private String placeName;
-        private LocationCallback locationCallback;
+        private LastKnownLocationCallback lastKnownLocationCallback;
 
-        public CallbackInvokerRunnable(LatLng latLng, String placeName, LocationCallback locationCallback) {
+        public CallbackInvokerRunnable(LatLng latLng, String placeName, LastKnownLocationCallback lastKnownLocationCallback) {
             this.latLng = latLng;
             this.placeName = placeName;
-            this.locationCallback = locationCallback;
+            this.lastKnownLocationCallback = lastKnownLocationCallback;
         }
 
         @Override
         public void run() {
             if (latLng != null) {
-                locationCallback.onLocationSuccess(latLng, placeName);
+                lastKnownLocationCallback.onLocationSuccess(latLng, placeName);
             } else {
-                locationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
+                lastKnownLocationCallback.onLocationFailure(context.getString(R.string.error_could_not_fetch_location));
             }
         }
     }
