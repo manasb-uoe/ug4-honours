@@ -18,7 +18,7 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnDestinationStopSelectedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnOriginStopSelectedEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnServiceSelectedEvent;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowDestinationStopSelectionEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowOriginStopSelectionFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowServiceSelectionFragmentEvent;
@@ -97,11 +97,11 @@ public class NewActivityFragment extends Fragment {
                 if (id == actionStart.getId()) {
                     if (selectedOriginStop != null && selectedService != null &&
                             selectedDestinationStop != null && selectedRoute != null) {
-                        Intent startActivityIntent = new Intent(getActivity(), ResultActivity.class);
-                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop);
-                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_SERVICE, selectedService);
-                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop);
-                        startActivityIntent.putExtra(ResultActivity.EXTRA_SELECTED_ROUTE, selectedRoute);
+                        Intent startActivityIntent = new Intent(getActivity(), SuggestionsActivity.class);
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop);
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_SERVICE, selectedService);
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop);
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ROUTE, selectedRoute);
                         startActivity(startActivityIntent);
                     }
                 } else if (id == selectOriginStopButton.getId()) {

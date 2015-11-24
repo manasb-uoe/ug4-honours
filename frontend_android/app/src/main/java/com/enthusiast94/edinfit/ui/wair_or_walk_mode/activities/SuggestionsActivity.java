@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -9,18 +10,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.SuggestionsFragment;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.fragments.WalkingDirectionsFragment;
-import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.services.CountdownNotificationService;
 
 import java.util.ArrayList;
 
@@ -29,9 +29,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 04-11-2015.
  */
-public class ResultActivity extends AppCompatActivity {
-
-    private ViewPager viewPager;
+public class SuggestionsActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECTED_ORIGIN_STOP = "selectedOriginStop";
     public static final String EXTRA_SELECTED_SERVICE = "selectedService";
@@ -39,6 +37,9 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
     public static final String EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION = "waitOrWalkSelectedSuggestion";
     public static final String EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS = "waitOrWalkAllSuggestion";
+
+    private ViewPager viewPager;
+    private View actionStop;
 
     private Stop selectedOriginStop;
     private Service selectedService;
@@ -50,7 +51,7 @@ public class ResultActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wait_or_walk_result);
+        setContentView(R.layout.activity_wait_or_walk_suggestions);
 
         /**
          * Get intent extras.
@@ -73,6 +74,7 @@ public class ResultActivity extends AppCompatActivity {
          */
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        actionStop = toolbar.findViewById(R.id.action_stop);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
 
@@ -87,6 +89,21 @@ public class ResultActivity extends AppCompatActivity {
             appBar.setDisplayHomeAsUpEnabled(true);
             appBar.setTitle(R.string.title_activity_wait_or_walk_result);
         }
+
+        /**
+         * Set event listeners
+         */
+
+        actionStop.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent stopServiceIntent = new Intent(SuggestionsActivity.this,
+                        CountdownNotificationService.class);
+                stopService(stopServiceIntent);
+                onBackPressed();
+            }
+        });
 
         /**
          * Setup viewpager to work with tabs

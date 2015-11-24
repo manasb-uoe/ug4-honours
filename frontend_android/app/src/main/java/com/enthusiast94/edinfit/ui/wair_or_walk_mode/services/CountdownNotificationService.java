@@ -14,7 +14,7 @@ import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.ResultActivity;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
@@ -158,9 +158,9 @@ public class CountdownNotificationService extends android.app.Service {
             );
 
             Intent directionsIntent =
-                    new Intent(CountdownNotificationService.this, ResultActivity.class);
-            directionsIntent.putParcelableArrayListExtra(ResultActivity.EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS, waitOrWalkSuggestions);
-            directionsIntent.putExtra(ResultActivity.EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION, selectedWaitOrWalkSuggestion);
+                    new Intent(CountdownNotificationService.this, SuggestionsActivity.class);
+            directionsIntent.putParcelableArrayListExtra(SuggestionsActivity.EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS, waitOrWalkSuggestions);
+            directionsIntent.putExtra(SuggestionsActivity.EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION, selectedWaitOrWalkSuggestion);
             PendingIntent directionsPendingIntent = PendingIntent.getActivity(
                     CountdownNotificationService.this,
                     REQUEST_CODE_DIRECTIONS,
