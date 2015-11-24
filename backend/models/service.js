@@ -127,7 +127,7 @@ serviceSchema.statics.findByNameWithDetailedRouteInfo = function (name, callback
 
                             var index = route.stops.indexOf(stop.stopId);
 
-                            route.stops[index] = {stopId: stop.stopId, name: stop.name, location: stop.location};
+                            route.stops[index] = {stopId: stop.stopId, name: stop.name, direction: stop.direction, location: stop.location};
 
                             return callbackB();
                         });
