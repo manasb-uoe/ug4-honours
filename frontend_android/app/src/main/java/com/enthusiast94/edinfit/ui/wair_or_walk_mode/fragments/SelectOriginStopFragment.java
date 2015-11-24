@@ -229,7 +229,9 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
         if (stops.size() > 0) {
             // update selected stop textview
-            selectedStopTextView.setText(stops.get(currentlySelectedStopIndex).getName());
+            Stop selectedStop = stops.get(currentlySelectedStopIndex);
+            selectedStopTextView.setText(String.format(getString(
+                    R.string.label_stop_name_with_direction), selectedStop.getName(), selectedStop.getDirection()));
 
             // add stop markers to map
             for (int i=0; i< stops.size(); i++) {
@@ -363,7 +365,8 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(stop.getName());
+                stopNameTextView.setText(String.format(getString(
+                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
                 distanceAwayTextView.setText(Helpers.humanizeDistance(stop.getDistanceAway()));
 
                 if (getAdapterPosition() - 2 == currentlySelectedStopIndex) {

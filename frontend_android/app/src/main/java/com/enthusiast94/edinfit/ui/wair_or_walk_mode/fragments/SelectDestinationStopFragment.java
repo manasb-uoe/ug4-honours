@@ -508,7 +508,8 @@ public class SelectDestinationStopFragment extends Fragment {
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(stop.getName());
+                stopNameTextView.setText(String.format(getString(
+                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
 
                 // show indicators for first/last stop in the route
                 int adapterPosition = getAdapterPosition() - 1;

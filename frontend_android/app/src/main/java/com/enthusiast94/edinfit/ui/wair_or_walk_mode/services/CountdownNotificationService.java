@@ -139,9 +139,15 @@ public class CountdownNotificationService extends android.app.Service {
         public void onTick(long millisUntilFinished) {
             String contentTitle = selectedWaitOrWalkSuggestion.getType() == WaitOrWalkService.WaitOrWalkSuggestionType.WALK
                     ? String.format(getString(R.string.label_walk_to_stop_by_time),
-                    selectedWaitOrWalkSuggestion.getStop().getName(), selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime())
+                    String.format(getString(R.string.label_stop_name_with_direction),
+                            selectedWaitOrWalkSuggestion.getStop().getName(),
+                            selectedWaitOrWalkSuggestion.getStop().getDirection()),
+                    selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime())
                     : String.format(getString(R.string.label_walk_to_stop_by_time),
-                    selectedWaitOrWalkSuggestion.getStop().getName(), selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime());
+                    String.format(getString(R.string.label_stop_name_with_direction),
+                            selectedWaitOrWalkSuggestion.getStop().getName(),
+                            selectedWaitOrWalkSuggestion.getStop().getDirection()),
+                    selectedWaitOrWalkSuggestion.getUpcomingDeparture().getTime());
 
             Intent stopIntent = new Intent(ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getBroadcast(

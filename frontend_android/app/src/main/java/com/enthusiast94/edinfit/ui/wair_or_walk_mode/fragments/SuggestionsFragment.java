@@ -341,7 +341,8 @@ public class SuggestionsFragment extends Fragment
             }
 
             public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
-                stopNameTextView.setText(suggestion.getStop().getName());
+                stopNameTextView.setText(String.format(getString(R.string.label_stop_name_with_direction),
+                        suggestion.getStop().getName(), suggestion.getStop().getDirection()));
                 departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
                 walkDurationTextView.setText(suggestion.getWalkingDirections().getDurationText());
                 distanceTextView.setText(suggestion.getWalkingDirections().getDistanceText());
@@ -376,7 +377,8 @@ public class SuggestionsFragment extends Fragment
             }
 
             public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
-                stopNameTextView.setText(suggestion.getStop().getName());
+                stopNameTextView.setText(String.format(getString(R.string.label_stop_name_with_direction),
+                        suggestion.getStop().getName(), suggestion.getStop().getDirection()));
                 departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
                 walkDurationTextView.setText(suggestion.getWalkingDirections().getDurationText());
                 distanceTextView.setText(suggestion.getWalkingDirections().getDistanceText());
@@ -428,9 +430,10 @@ public class SuggestionsFragment extends Fragment
                 });
             }
 
-            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion result) {
-                stopNameTextView.setText(result.getStop().getName());
-                departureTextView.setText(result.getUpcomingDeparture().getTime());
+            public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
+                stopNameTextView.setText(String.format(getString(R.string.label_stop_name_with_direction),
+                        suggestion.getStop().getName(), suggestion.getStop().getDirection()));
+                departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
 
                 if (getAdapterPosition() == currentlySelectedItemIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);
@@ -465,7 +468,8 @@ public class SuggestionsFragment extends Fragment
             }
 
             public void bindItem(WaitOrWalkService.WaitOrWalkSuggestion suggestion) {
-                stopNameTextView.setText(suggestion.getStop().getName());
+                stopNameTextView.setText(String.format(getString(R.string.label_stop_name_with_direction),
+                        suggestion.getStop().getName(), suggestion.getStop().getDirection()));
                 departureTextView.setText(suggestion.getUpcomingDeparture().getTime());
                 numStopsSkippedTextView.setText(String.valueOf(waitOrWalkSuggestions.indexOf(suggestion) + 1));
 

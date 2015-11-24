@@ -15,12 +15,13 @@ public class Stop implements Parcelable {
     private String name;
     private List<Double> location;
     private String serviceType;
+    private String direction;
     private List<String> destinations;
     private List<String> services;
     private List<Departure> departures;
     @Nullable private Double distanceAway;
 
-    public Stop(String id, String name, List<Double> location, String serviceType,
+    public Stop(String id, String name, List<Double> location, String serviceType, String direction,
                 List<String> destinations, List<String> services, List<Departure> departures,
                 @Nullable Double distanceAway) {
         this.stopId = id;
@@ -29,6 +30,7 @@ public class Stop implements Parcelable {
         this.destinations = destinations;
         this.services = services;
         this.serviceType = serviceType;
+        this.direction = direction;
         this.departures = departures;
         this.distanceAway = distanceAway;
     }
@@ -47,6 +49,10 @@ public class Stop implements Parcelable {
 
     public String getServiceType() {
         return serviceType;
+    }
+
+    public String getDirection() {
+        return direction;
     }
 
     public List<String> getDestinations() {
@@ -75,6 +81,7 @@ public class Stop implements Parcelable {
         location = new ArrayList<>();
         in.readList(location, Double.class.getClassLoader());
         serviceType = in.readString();
+        direction = in.readString();
         destinations = in.createStringArrayList();
         services = in.createStringArrayList();
         departures = in.createTypedArrayList(Departure.CREATOR);
@@ -105,6 +112,7 @@ public class Stop implements Parcelable {
         dest.writeString(name);
         dest.writeList(location);
         dest.writeString(serviceType);
+        dest.writeString(direction);
         dest.writeStringList(destinations);
         dest.writeStringList(services);
         dest.writeTypedList(departures);
