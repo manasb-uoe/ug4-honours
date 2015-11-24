@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         style="@style/TextAppearance.AppCompat.Body1"
-        android:textStyle="bold"
+        android:textSize="@dimen/font_normal_large"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignBottom="@+id/more_options_button"

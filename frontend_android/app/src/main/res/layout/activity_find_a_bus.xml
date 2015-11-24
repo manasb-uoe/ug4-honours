@@ -48,7 +48,7 @@
                     android:background="@android:color/transparent"
                     android:textColor="@android:color/black"
                     android:textColorHint="@color/dark_grey"
-                    android:textSize="@dimen/font_16sp"
+                    android:textSize="@dimen/font_normal_large"
                     android:inputType="text"
                     />
 
