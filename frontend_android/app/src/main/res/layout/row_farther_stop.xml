@@ -11,27 +11,19 @@
     android:paddingBottom="@dimen/spacing_tiny"
     >
 
-    <ImageView
-        android:id="@+id/bus_imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_maps_directions_bus"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="@dimen/spacing_7dp"
-        />
-
     <TextView
         android:id="@+id/stop_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="Title"
-        style="@style/TextAppearance.AppCompat.Body2"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:textStyle="bold"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/bus_imageview"
-        android:layout_alignBottom="@+id/bus_imageview"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/more_options_button"
         android:layout_toLeftOf="@+id/more_options_button"
         android:layout_toStartOf="@+id/more_options_button"
+        android:text="Title"
         />
 
     <ImageButton

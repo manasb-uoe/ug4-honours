@@ -7,38 +7,30 @@
     android:paddingTop="@dimen/spacing_tiny"
     android:paddingLeft="@dimen/spacing_normal"
     android:paddingRight="@dimen/spacing_normal"
-    android:paddingBottom="@dimen/spacing_small"
+    android:paddingBottom="@dimen/spacing_tiny"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     >
-
-    <ImageView
-        android:id="@+id/bus_imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_maps_directions_bus"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="@dimen/spacing_7dp"
-        />
 
     <TextView
         android:id="@+id/stop_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:text="Title"
-        style="@style/TextAppearance.AppCompat.Body2"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:textStyle="bold"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/bus_imageview"
-        android:layout_alignBottom="@+id/bus_imageview"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/unsave_stop_button"
         android:layout_toLeftOf="@+id/unsave_stop_button"
         android:layout_toStartOf="@+id/unsave_stop_button"
+        android:text="Title"
         />
 
     <ImageButton
         android:layout_width="@dimen/saved_stop_unsave_button_width"
         android:layout_height="@dimen/saved_stop_unsave_button_height"
-        android:src="@drawable/ic_action_content_clear"
+        android:src="@drawable/ic_action_action_highlight_remove"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:background="?attr/selectableItemBackground"
@@ -67,6 +59,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
+        android:background="@color/divider"
+        android:padding="@dimen/spacing_tiny"
         >
 
         <TextView
@@ -89,7 +83,6 @@
             android:id="@+id/time_textview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textStyle="bold"
             android:gravity="center_vertical|right"
             />
 
