@@ -3,6 +3,7 @@
  */
 
 var mongoose = require("mongoose");
+var Activity = require("../models/activity");
 var bcrypt = require("bcrypt-nodejs");
 var validator = require('validator');
 var async = require("async");
@@ -25,7 +26,8 @@ var userSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Number
-    }
+    },
+    activities: [Activity.schema]
 });
 
 
@@ -54,6 +56,16 @@ userSchema.methods.toJSON = function() {
 
     // delete password hash
     delete obj.password;
+
+    // replace activity _id with id and remove _id from each of the points
+    obj.activities.forEach(function (activity) {
+        activity.id = activity._id;
+        delete activity._id;
+
+        activity.points.forEach(function (point) {
+            delete point._id;
+        });
+    });
 
     return obj;
 };
@@ -148,5 +160,6 @@ userSchema.methods.comparePassword = function (password, callback) {
         return callback(null, match);
     });
 };
+
 
 module.exports = mongoose.model("User", userSchema);
