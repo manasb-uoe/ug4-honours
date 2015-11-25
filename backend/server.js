@@ -14,6 +14,7 @@ var stopRouter = require("./controllers/stop_controller");
 var serviceRouter = require("./controllers/service_controller");
 var directionsRouter = require("./controllers/directions_controller").router;
 var waitOrWalkRouter = require("./controllers/wait_or_walk_controller");
+var activityRouter = require("./controllers/activity_controller");
 var errorHandlerMiddleware = require("./middleware/404_error_handler");
 
 
@@ -52,6 +53,7 @@ function configure(apiExecutionMode) {
     app.use("/api", serviceRouter);
     app.use("/api", directionsRouter);
     app.use("/api", waitOrWalkRouter);
+    app.use("/api", activityRouter);
 
     // add 404 error handling middleware in order to send custom message when no route matches client's request
     app.use(errorHandlerMiddleware);
