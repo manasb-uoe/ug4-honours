@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.services.UserService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.find_a_bus.activities.FindABusActivity;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
@@ -30,7 +30,7 @@ import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.user_profile.activities.UserProfileActivity;
 import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
-import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.NewActivityActivity;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
 
 import de.greenrobot.event.EventBus;
 

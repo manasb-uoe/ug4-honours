@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.services.UserService;
+import com.enthusiast94.edinfit.network.UserService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

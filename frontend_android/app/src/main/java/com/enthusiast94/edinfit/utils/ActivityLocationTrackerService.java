@@ -7,8 +7,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.models.Activity;
-import com.enthusiast94.edinfit.services.ActivityService;
-import com.enthusiast94.edinfit.services.BaseService;
+import com.enthusiast94.edinfit.network.ActivityService;
+import com.enthusiast94.edinfit.network.BaseService;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;

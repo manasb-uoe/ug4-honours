@@ -15,8 +15,8 @@ import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
-import com.enthusiast94.edinfit.services.BaseService;
-import com.enthusiast94.edinfit.services.ServiceService;
+import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.ui.find_a_bus.events.OnSearchEvent;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 
