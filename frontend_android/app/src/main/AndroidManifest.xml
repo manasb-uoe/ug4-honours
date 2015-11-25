@@ -35,7 +35,7 @@
         </activity>
         <activity
             android:name=".ui.user_profile.activities.UserProfileActivity"
-            android:label="@string/title_activity_user_profile" >
+            android:label="@string/label_user_profile" >
         </activity>
         <activity
             android:name=".ui.stop_info.activities.StopActivity"

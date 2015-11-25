@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.ui.home.activities;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -20,29 +21,30 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.find_a_bus.activities.FindABusActivity;
-import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.GoFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
-import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.services.UserService;
+import com.enthusiast94.edinfit.ui.find_a_bus.activities.FindABusActivity;
+import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.user_profile.activities.UserProfileActivity;
+import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
+import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.NewActivityActivity;
 
 import de.greenrobot.event.EventBus;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
+
     private DrawerLayout drawerLayout;
-    private NavigationView navView;
     private TextView navNameTextVeiew;
     private TextView navEmailTextView;
-    private ViewPager viewPager;
+
+    private Handler handler;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private int selectedPageIndex;
-    private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +70,13 @@ public class HomeActivity extends AppCompatActivity {
              */
 
             drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            navView = (NavigationView) findViewById(R.id.navigation_view);
+            NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
             View navHeaderContainer = findViewById(R.id.nav_header_container);
             navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
             navEmailTextView = (TextView) findViewById(R.id.email_textview);
-            viewPager = (ViewPager) findViewById(R.id.viewpager);
+            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
 
             /**
              * Setup AppBar
@@ -116,15 +118,42 @@ public class HomeActivity extends AppCompatActivity {
              * Handle navigation view menu item clicks by displaying appropriate fragments/activities.
              */
 
+            handler = new Handler();
+
             navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
                 @Override
                 public boolean onNavigationItemSelected(MenuItem menuItem) {
-                    int menuItemIndex = getMenuItemIndex(menuItem, navView.getMenu());
+                    Intent startActivityIntent = null;
 
-                    if (menuItemIndex < MainPagerAdapter.FRAGMENT_COUNT) {
-                        navigateToPage(menuItemIndex);
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_wait_or_walk:
+                            startActivityIntent =
+                                    new Intent(HomeActivity.this, NewActivityActivity.class);
+                            break;
+
+                        case R.id.action_user_profile:
+                            startActivityIntent =
+                                    new Intent(HomeActivity.this, UserProfileActivity.class);
+                            break;
+
+                        case R.id.action_get_to_somewhere:
+                            // TODO
+                            break;
                     }
+
+                    drawerLayout.closeDrawers();
+
+                    // delay activity start by a short duration to prevent UI lag
+                    final Intent finalStartActivityIntent = startActivityIntent;
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (finalStartActivityIntent != null) {
+                                startActivity(finalStartActivityIntent);
+                            }
+                        }
+                    }, 300);
 
                     return false;
                 }
@@ -143,7 +172,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    HomeActivity.this.onPageSelected(position);
+                    selectedPageIndex = position;
                 }
 
                 @Override
@@ -164,7 +193,7 @@ public class HomeActivity extends AppCompatActivity {
                 selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
             }
 
-            navigateToPage(selectedPageIndex);
+            viewPager.setCurrentItem(selectedPageIndex);
         }
     }
 
@@ -190,41 +219,10 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void navigateToPage(int position) {
-        viewPager.setCurrentItem(position);
-        onPageSelected(position);
-    }
-
-    private void onPageSelected(int position) {
-        selectedPageIndex = position;
-
-        MenuItem menuItem = navView.getMenu().getItem(position);
-        menuItem.setChecked(true);
-
-//        setTitle(menuItem.getTitle());
-
-        drawerLayout.closeDrawers();
-    }
-
-    private int getMenuItemIndex(MenuItem menuItem, Menu menu) {
-        for (int i=0; i<menu.size(); i++) {
-            MenuItem currentMenuItem = menu.getItem(i);
-            if (currentMenuItem.getItemId() == menuItem.getItemId()) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     private void goToLogin() {
         Intent startLActivityIntent = new Intent(this, LoginActivity.class);
         finish();
         startActivity(startLActivityIntent);
-    }
-
-    public void onEventMainThread(OnDeauthenticatedEvent event) {
-        goToLogin();
     }
 
     @Override
@@ -258,9 +256,13 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    public void onEventMainThread(OnDeauthenticatedEvent event) {
+        goToLogin();
+    }
+
     private class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 4;
+        private static final int FRAGMENT_COUNT = 3;
 
         public MainPagerAdapter() {
             super(getSupportFragmentManager());
@@ -270,9 +272,8 @@ public class HomeActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0: return new ActivityFragment();
-                case 1: return new GoFragment();
-                case 2: return new NearMeFragment();
-                case 3: return new SavedStopsFragment();
+                case 1: return new NearMeFragment();
+                case 2: return new SavedStopsFragment();
                 default: return null;
             }
         }
@@ -281,9 +282,8 @@ public class HomeActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0: return getString(R.string.label_activity);
-                case 1: return getString(R.string.label_go);
-                case 2: return getString(R.string.label_near_me);
-                case 3: return getString(R.string.label_saved);
+                case 1: return getString(R.string.label_near_me);
+                case 2: return getString(R.string.label_saved);
                 default: return null;
             }
         }

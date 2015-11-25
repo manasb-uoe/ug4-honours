@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">EdinFit</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_user_profile">User Profile</string>
     <string name="title_activity_wait_or_walk_result">Wait or Walk?</string>
 
     <!-- Actions -->
@@ -11,7 +10,7 @@
     <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
     <string name="action_logout">Log out</string>
     <string name="action_select_time">Select time</string>
-    <string name="action_wait_or_walk">Wait or Walk</string>
+    <string name="action_wait_or_walk">Wait or Walk?</string>
     <string name="action_get_to_somewhere">Get to Somewhere</string>
     <string name="action_select_origin">Select Origin</string>
     <string name="action_done">Done</string>
@@ -27,6 +26,7 @@
     <string name="label_confirm_password">Confirm password</string>
     <string name="label_loading">Loading…</string>
     <string name="label_activity">Activity</string>
+    <string name="label_user_profile">User Profile</string>
     <string name="label_go">Go</string>
     <string name="label_near_me">Near me</string>
     <string name="label_nav_open">Open navigation menu</string>
@@ -71,7 +71,7 @@
     <string name="label_click_here_to_select">Click here to select</string>
     <string name="label_service_name_and_description">%1$s (%2$s)</string>
     <string name="label_destination_stop_and_route">%1$s (towards %2$s)</string>
-    <string name="label_making_complex_calculations">Making complex calculations…</string>
+    <string name="label_doing_complex_stuff">Doing complex stuff…</string>
     <string name="label_walk">Walk</string>
     <string name="label_wait">Wait</string>
     <string name="label_wait_here">Wait here</string>
@@ -95,6 +95,7 @@
     <string name="label_search_by_number_or_description">Search by number or description</string>
     <string name="label_success">Success!</string>
     <string name="label_failure">Failure!</string>
+    <string name="label_stop_name_with_direction">%1$s (%2$s)</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
