@@ -122,12 +122,6 @@ public class SuggestionsFragment extends Fragment
         resultsRecyclerView = (RecyclerView) view.findViewById(R.id.results_recyclerview);
 
         /**
-         * Setup location provider
-         */
-
-        locationProvider = new LocationProvider(getActivity(), this);
-
-        /**
          * Setup results recycler view
          */
 
@@ -135,38 +129,47 @@ public class SuggestionsFragment extends Fragment
         resultsRecyclerView.setAdapter(resultsAdapter);
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        return view;
-    }
+        /**
+         * Setup location provider
+         */
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
+        locationProvider = new LocationProvider(getActivity(), this);
         locationProvider.connect();
-        EventBus.getDefault().register(this);
+
+        return view;
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        locationProvider.disconnect();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        locationProvider.disconnect();
+
+        super.onDestroy();
     }
 
     /**
      * Updates remaining time countdown in the first item of the recycler view
      */
     public void onEventMainThread(OnCountdownTickEvent event) {
+        updateRemainingTimeForSelectedSuggestion(event.getHumanizedRemainingTime());
+    }
+
+    private void updateRemainingTimeForSelectedSuggestion(String time) {
         RecyclerView.ViewHolder viewHolder =
                 resultsRecyclerView.findViewHolderForAdapterPosition(0);
 
         if (viewHolder instanceof ResultsAdapter.WalkSuggestionSelectedViewHolder) {
             ((ResultsAdapter.WalkSuggestionSelectedViewHolder)
-                    viewHolder).updateRemainingTime(event.getHumanizedRemainingTime());
+                    viewHolder).updateRemainingTime(time);
         } else if (viewHolder instanceof ResultsAdapter.WaitSuggestionSelectedViewHolder) {
             ((ResultsAdapter.WaitSuggestionSelectedViewHolder)
-                    viewHolder).updateRemainingTime(event.getHumanizedRemainingTime());
+                    viewHolder).updateRemainingTime(time);
         }
     }
 
@@ -189,7 +192,9 @@ public class SuggestionsFragment extends Fragment
         } else {
             // show indeterminate progress dialog before starting calculations
             final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle(getString(R.string.label_please_waitt));
             progressDialog.setMessage(getString(R.string.label_doing_complex_stuff));
+            progressDialog.setCancelable(false);
             progressDialog.show();
 
             WaitOrWalkService.getInstance().getWaitOrWalkSuggestions(

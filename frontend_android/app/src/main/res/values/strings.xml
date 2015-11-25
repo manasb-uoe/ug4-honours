@@ -96,6 +96,7 @@
     <string name="label_success">Success!</string>
     <string name="label_failure">Failure!</string>
     <string name="label_stop_name_with_direction">%1$s (%2$s)</string>
+    <string name="label_please_waitt">Please wait…</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

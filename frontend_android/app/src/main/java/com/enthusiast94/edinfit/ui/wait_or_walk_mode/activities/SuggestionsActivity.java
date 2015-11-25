@@ -1,26 +1,33 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.WaitOrWalkService;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownFinishedOrCancelledEvent;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments.SuggestionsFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments.WalkingDirectionsFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.services.CountdownNotificationService;
+import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
 
@@ -39,7 +46,7 @@ public class SuggestionsActivity extends AppCompatActivity {
     public static final String EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS = "waitOrWalkAllSuggestion";
 
     private ViewPager viewPager;
-    private View actionStop;
+    private FrameLayout actionStop;
 
     private Stop selectedOriginStop;
     private Service selectedService;
@@ -74,7 +81,7 @@ public class SuggestionsActivity extends AppCompatActivity {
          */
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        actionStop = toolbar.findViewById(R.id.action_stop);
+        actionStop = (FrameLayout) toolbar.findViewById(R.id.action_stop);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
 
@@ -119,6 +126,12 @@ public class SuggestionsActivity extends AppCompatActivity {
         super.onResume();
 
         EventBus.getDefault().register(this);
+
+        if (Helpers.isServiceRunning(this, CountdownNotificationService.class)) {
+            setActionStopButtonEnabled(true);
+        } else {
+            setActionStopButtonEnabled(false);
+        }
     }
 
     @Override
@@ -182,5 +195,26 @@ public class SuggestionsActivity extends AppCompatActivity {
 
     public void onEventMainThread(ShowWalkingDirectionsFragmentEvent event) {
         viewPager.setCurrentItem(1);
+    }
+
+    public void onEventMainThread(OnCountdownTickEvent event) {
+        if (!actionStop.isClickable()) {
+            setActionStopButtonEnabled(true);
+        }
+    }
+
+    public void onEventMainThread(OnCountdownFinishedOrCancelledEvent event) {
+        setActionStopButtonEnabled(false);
+    }
+
+    private void setActionStopButtonEnabled(boolean shouldEnable) {
+        if (shouldEnable) {
+            actionStop.setClickable(true);
+            actionStop.setForeground(null);
+        } else {
+            actionStop.setClickable(false);
+            actionStop.setForeground(
+                    new ColorDrawable(ContextCompat.getColor(this, R.color.primary_opaque_40)));
+        }
     }
 }

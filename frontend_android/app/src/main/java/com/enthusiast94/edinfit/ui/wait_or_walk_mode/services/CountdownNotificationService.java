@@ -16,6 +16,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.SuggestionsActivity;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownFinishedOrCancelledEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -200,6 +201,7 @@ public class CountdownNotificationService extends android.app.Service {
         @Override
         public void onFinish() {
             EventBus.getDefault().post(new OnCountdownTickEvent(getString(R.string.label_none)));
+            EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
 
             if (selectedWaitOrWalkSuggestion.getType() ==
                     WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
@@ -216,6 +218,7 @@ public class CountdownNotificationService extends android.app.Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_STOP:
+                    EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
                     stopSelf();
                     break;
             }
