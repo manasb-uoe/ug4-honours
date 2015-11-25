@@ -59,6 +59,7 @@
         </activity>
 
         <service android:name=".ui.wair_or_walk_mode.services.CountdownNotificationService" />
+        <service android:name=".utils.ActivityLocationTrackerService" />
 
         <!-- This embeds the version of Google Play services that the app was compiled with. -->
         <meta-data

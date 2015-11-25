@@ -13,9 +13,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.services.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wair_or_walk_mode.events.OnCountdownTickEvent;
+import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,6 +49,7 @@ public class CountdownNotificationService extends android.app.Service {
     private WaitOrWalkService.WaitOrWalkSuggestion selectedWaitOrWalkSuggestion;
     private ArrayList<WaitOrWalkService.WaitOrWalkSuggestion> waitOrWalkSuggestions;
     private LocationProvider locationProvider;
+    private Intent activityLocationTrackerServiceIntent;
 
     @Override
     public void onCreate() {
@@ -62,6 +65,10 @@ public class CountdownNotificationService extends android.app.Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_STOP);
         registerReceiver(receiver, filter);
+
+        activityLocationTrackerServiceIntent = new Intent(this, ActivityLocationTrackerService.class);
+        activityLocationTrackerServiceIntent.putExtra(
+                ActivityLocationTrackerService.EXTRA_ACTIVITY_TYPE, Activity.Type.WAIT_OR_WALK.getValue());
     }
 
     @Override
@@ -76,6 +83,8 @@ public class CountdownNotificationService extends android.app.Service {
 
         locationProvider.stopLocationUpdates();
         locationProvider.disconnect();
+
+        stopService(activityLocationTrackerServiceIntent);
     }
 
     @Nullable
@@ -95,6 +104,9 @@ public class CountdownNotificationService extends android.app.Service {
             locationProvider.stopLocationUpdates();
             locationProvider.startLocationUpdates();
         }
+
+
+        startService(activityLocationTrackerServiceIntent);
 
         return super.onStartCommand(intent, flags, startId);
     }
