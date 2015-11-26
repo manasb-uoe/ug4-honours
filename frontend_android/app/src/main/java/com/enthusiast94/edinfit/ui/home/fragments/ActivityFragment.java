@@ -201,8 +201,10 @@ public class ActivityFragment extends Fragment {
         }
 
         private void notifyActivitiesChanged(List<Activity> activities) {
+            activityTimeSpansMap.clear();
+
             // iterate in reverse order since the dates must appear in descending order
-            for (int i=activities.size()-1; i>0; i--) {
+            for (int i=activities.size()-1; i>=0; i--) {
                 Activity activity = activities.get(i);
 
                 Date date = new Date(activity.getStart());
