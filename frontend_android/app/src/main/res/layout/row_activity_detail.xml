@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/spacing_normal"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
+    >
+
+    <LinearLayout
+        android:id="@+id/indicator_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/info_container"
+        android:layout_alignTop="@+id/info_container"
+        android:gravity="center_vertical"
+        >
+
+        <View
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/activity_indicator"
+            />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/info_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/indicator_container"
+        android:layout_toEndOf="@+id/indicator_container"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        >
+
+
+        <TextView
+            android:id="@+id/description_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Brougham Place to Chalmers Street"
+            style="@style/TextAppearance.AppCompat.Body2"
+            android:textStyle="normal"
+            />
+
+        <TextView
+            android:id="@+id/info_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wait or Walk"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>

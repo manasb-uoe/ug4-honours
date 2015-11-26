@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <TextView
+        android:id="@+id/timespan_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="27 Nov Monday"
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:textSize="@dimen/font_large"
+        />
+
+    <TextView
+        android:id="@+id/statistic_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0.02 km"
+        android:textSize="@dimen/font_large"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        android:gravity="right"
+        />
+
+</LinearLayout>

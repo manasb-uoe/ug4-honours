@@ -6,12 +6,20 @@
     android:layout_height="match_parent"
     >
 
-    <TextView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="@dimen/font_larger"
-        android:text="@string/label_activity"
-        />
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/activity_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
