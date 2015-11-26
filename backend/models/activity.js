@@ -9,10 +9,13 @@ var activitySchema = new mongoose.Schema({
     type: String,
     start: Number, /* unix timestamp in millis */
     end: Number, /* unix timestamp in millis */
+    distance: Number, /* in meters */
+    averageSpeed: Number, /* in meters/second */
     points: [{
         latitude: Number,
         longitude: Number,
-        timestamp: Number /* unix timestamp in millis */
+        timestamp: Number /* unix timestamp in millis */,
+        speed: Number /* in meters/second */
     }]
 });
 

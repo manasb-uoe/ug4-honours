@@ -10,9 +10,9 @@ import android.util.Log;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.BaseService;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by manas on 25-11-2015.
@@ -23,10 +23,13 @@ public class ActivityLocationTrackerService extends Service
     private static final String TAG = ActivityLocationTrackerService.class.getSimpleName();
     public static final String EXTRA_ACTIVITY_TYPE = "activityType";
     private static final int UPDATE_INTERVAL = 2000;
+    private static final long MINIMUM_ACTIVITY_DURATION = 60 * 2 * 1000;
 
     private LocationProvider locationProvider;
     private ActivityService activityService;
     private Activity currentActivity;
+    private double totalDistance;
+    private double speedSum;
 
     @Nullable
     @Override
@@ -50,9 +53,10 @@ public class ActivityLocationTrackerService extends Service
         locationProvider.disconnect();
 
         currentActivity.setEnd(System.currentTimeMillis());
+        currentActivity.setAverageSpeed(speedSum / Float.valueOf(currentActivity.getPoints().size()));
+        currentActivity.setDistance(totalDistance);
 
-        if ((currentActivity.getEnd() - currentActivity.getStart()) > (60 * 2 * 10)) {
-            Log.i(TAG, currentActivity.getType().getValue());
+        if ((currentActivity.getEnd() - currentActivity.getStart()) > MINIMUM_ACTIVITY_DURATION) {
             activityService.addNewActivity(currentActivity, new BaseService.Callback<Void>() {
 
                 @Override
@@ -75,7 +79,7 @@ public class ActivityLocationTrackerService extends Service
         String type = intent.getStringExtra(EXTRA_ACTIVITY_TYPE);
 
         currentActivity = new Activity(Activity.Type.getTypeByValue(type),
-                System.currentTimeMillis(), 0, new ArrayList<Activity.Point>());
+                System.currentTimeMillis(), 0, new ArrayList<Activity.Point>(), 0, 0);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -85,8 +89,21 @@ public class ActivityLocationTrackerService extends Service
         Log.i(TAG, "LOCATION UPDATE");
 
         if (currentActivity != null) {
-            currentActivity.getPoints().add(new Activity.Point(location.getLatitude(),
-                    location.getLongitude(), location.getTime()));
+            // add new point to list of points, compute distance covered so far and the total speed
+            // so far (which will be later converted into an average).
+            Activity.Point point = new Activity.Point(location.getLatitude(),
+                    location.getLongitude(), location.getTime(), location.getSpeed());
+
+            List<Activity.Point> points = currentActivity.getPoints();
+            points.add(point);
+
+            if (points.size() > 1) {
+                Activity.Point prevPoint = points.get(points.size() - 2);
+                totalDistance += Helpers.getDistanceBetweenPoints(point.getLatitude(),
+                        point.getLongitude(), prevPoint.getLatitude(), prevPoint.getLongitude());
+            }
+
+            speedSum += point.getSpeed();
         }
     }
 

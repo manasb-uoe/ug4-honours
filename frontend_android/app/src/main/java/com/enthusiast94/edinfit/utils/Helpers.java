@@ -188,14 +188,14 @@ public class Helpers {
         return text;
     }
 
-    public static double getDistanceBetweenPoints(LatLng pt1, LatLng pt2) {
+    public static double getDistanceBetweenPoints(double lat1, double lng1, double lat2, double lng2) {
         int R = 6378137; // Earth’s mean radius in meter
 
-        double dLat = Math.toRadians(pt2.latitude - pt1.latitude);
-        double dLong = Math.toRadians(pt2.longitude - pt2.longitude);
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLong = Math.toRadians(lng2 - lng1);
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(pt1.latitude))
-                * Math.cos(Math.toRadians(pt2.latitude)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 -a));
 

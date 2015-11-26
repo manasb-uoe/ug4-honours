@@ -40,11 +40,13 @@ public class Activity implements Parcelable {
         private double latitude;
         private double longitude;
         private long timestamp;
+        private double speed;
 
-        public Point(double latitude, double longitude, long timestamp) {
+        public Point(double latitude, double longitude, long timestamp, double speed) {
             this.latitude = latitude;
             this.longitude = longitude;
             this.timestamp = timestamp;
+            this.speed = speed;
         }
 
         public double getLatitude() {
@@ -59,6 +61,10 @@ public class Activity implements Parcelable {
             return timestamp;
         }
 
+        public double getSpeed() {
+            return speed;
+        }
+
         /**
          * Parcelable implementation
          */
@@ -67,6 +73,7 @@ public class Activity implements Parcelable {
             latitude = in.readDouble();
             longitude = in.readDouble();
             timestamp = in.readLong();
+            speed = in.readDouble();
         }
 
         public static final Creator<Point> CREATOR = new Creator<Point>() {
@@ -91,6 +98,7 @@ public class Activity implements Parcelable {
             dest.writeDouble(latitude);
             dest.writeDouble(longitude);
             dest.writeLong(timestamp);
+            dest.writeDouble(speed);
         }
     }
 
@@ -98,12 +106,17 @@ public class Activity implements Parcelable {
     private long start;
     private long end;
     private List<Point> points;
+    private double distance;
+    private double averageSpeed;
 
-    public Activity(Type type, long start, long end, List<Point> points) {
+    public Activity(Type type, long start, long end, List<Point> points, double distance,
+                    double averageSpeed) {
         this.type = type;
         this.start = start;
         this.end = end;
         this.points = points;
+        this.distance = distance;
+        this.averageSpeed = averageSpeed;
     }
 
     public Type getType() {
@@ -122,12 +135,24 @@ public class Activity implements Parcelable {
         return points;
     }
 
-    public void setStart(long start) {
-        this.start = start;
+    public double getAverageSpeed() {
+        return averageSpeed;
+    }
+
+    public double getDistance() {
+        return distance;
     }
 
     public void setEnd(long end) {
         this.end = end;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public void setAverageSpeed(double averageSpeed) {
+        this.averageSpeed = averageSpeed;
     }
 
     /**
@@ -139,6 +164,8 @@ public class Activity implements Parcelable {
         start = in.readLong();
         end = in.readLong();
         points = in.createTypedArrayList(Point.CREATOR);
+        distance = in.readDouble();
+        averageSpeed = in.readDouble();
     }
 
     public static final Creator<Activity> CREATOR = new Creator<Activity>() {
@@ -164,5 +191,7 @@ public class Activity implements Parcelable {
         dest.writeLong(start);
         dest.writeLong(end);
         dest.writeTypedList(points);
+        dest.writeDouble(distance);
+        dest.writeDouble(averageSpeed);
     }
 }

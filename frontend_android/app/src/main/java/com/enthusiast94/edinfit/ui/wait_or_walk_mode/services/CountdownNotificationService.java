@@ -22,7 +22,6 @@ import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent
 import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,12 +235,11 @@ public class CountdownNotificationService extends android.app.Service {
                 return;
             }
 
-            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-
             List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
-            LatLng stopLatLng = new LatLng(stopLocation.get(1), stopLocation.get(0));
 
-            if (Helpers.getDistanceBetweenPoints(userLatLng, stopLatLng) <= 20 /* 20 meters */) {
+            if (Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
+                    stopLocation.get(1), stopLocation.get(0)) <= 20 /* 20 meters */) {
+
                 showSuccessNotification();
                 stopSelf();
             }
