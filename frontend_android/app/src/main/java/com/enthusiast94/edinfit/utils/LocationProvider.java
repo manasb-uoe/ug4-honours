@@ -26,12 +26,12 @@ public class LocationProvider implements GoogleApiClient.ConnectionCallbacks,
     private String locationFetchErrorMessage;
 
     public interface LastKnowLocationCallback {
-        void onLastKnownLocationSuccess(LatLng userLatLng);
+        void onLastKnownLocationSuccess(Location location);
         void onLastKnownLocationFailure(String error);
     }
 
     public interface LocationUpdateCallback {
-        void onLocationUpdateSuccess(LatLng latLng);
+        void onLocationUpdateSuccess(Location location);
         void onLocationUpdateFailure(String error);
     }
 
@@ -74,8 +74,7 @@ public class LocationProvider implements GoogleApiClient.ConnectionCallbacks,
                 Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
                 if (location != null) {
-                    lastKnowLocationCallback.onLastKnownLocationSuccess(
-                            new LatLng(location.getLatitude(), location.getLongitude()));
+                    lastKnowLocationCallback.onLastKnownLocationSuccess(location);
                 } else {
                     lastKnowLocationCallback.onLastKnownLocationFailure(locationFetchErrorMessage);
                 }
@@ -117,8 +116,7 @@ public class LocationProvider implements GoogleApiClient.ConnectionCallbacks,
             Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
             if (location != null) {
-                lastKnowLocationCallback.onLastKnownLocationSuccess(
-                        new LatLng(location.getLatitude(), location.getLongitude()));
+                lastKnowLocationCallback.onLastKnownLocationSuccess(location);
             } else {
                 lastKnowLocationCallback.onLastKnownLocationFailure(locationFetchErrorMessage);
             }
@@ -147,8 +145,7 @@ public class LocationProvider implements GoogleApiClient.ConnectionCallbacks,
     public void onLocationChanged(Location location) {
         if (locationUpdateCallback != null) {
             if (location != null) {
-                locationUpdateCallback.onLocationUpdateSuccess(
-                        new LatLng(location.getLatitude(), location.getLongitude()));
+                locationUpdateCallback.onLocationUpdateSuccess(location);
             } else {
                 locationUpdateCallback.onLocationUpdateFailure(locationFetchErrorMessage);
             }

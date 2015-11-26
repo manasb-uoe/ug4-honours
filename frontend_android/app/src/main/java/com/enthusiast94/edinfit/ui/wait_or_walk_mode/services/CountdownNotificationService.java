@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -229,16 +230,18 @@ public class CountdownNotificationService extends android.app.Service {
             implements LocationProvider.LocationUpdateCallback {
 
         @Override
-        public void onLocationUpdateSuccess(LatLng latLng) {
+        public void onLocationUpdateSuccess(Location location) {
             if (selectedWaitOrWalkSuggestion.getType() !=
                     WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
                 return;
             }
 
+            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
             List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
             LatLng stopLatLng = new LatLng(stopLocation.get(1), stopLocation.get(0));
 
-            if (Helpers.getDistanceBetweenPoints(latLng, stopLatLng) <= 20 /* 20 meters */) {
+            if (Helpers.getDistanceBetweenPoints(userLatLng, stopLatLng) <= 20 /* 20 meters */) {
                 showSuccessNotification();
                 stopSelf();
             }

@@ -2,6 +2,7 @@ package com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -183,7 +184,7 @@ public class SuggestionsFragment extends Fragment
     }
 
     @Override
-    public void onLastKnownLocationSuccess(LatLng userLatLng) {
+    public void onLastKnownLocationSuccess(Location location) {
         if (waitOrWalkSuggestions != null && waitOrWalkSelectedSuggestion != null) {
             resultsAdapter.notifySuggestionsChanged();
 
@@ -201,7 +202,7 @@ public class SuggestionsFragment extends Fragment
                     selectedRoute.getDestination(),
                     selectedService.getName(), selectedOriginStop.getId(),
                     selectedDestinationStop.getId(),
-                    userLatLng,
+                    new LatLng(location.getLatitude(), location.getLongitude()),
                     new BaseService.Callback<List<WaitOrWalkService.WaitOrWalkSuggestion>>() {
 
                         @Override

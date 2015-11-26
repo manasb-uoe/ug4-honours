@@ -2,6 +2,7 @@ package com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -258,8 +259,9 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     }
 
     @Override
-    public void onLastKnownLocationSuccess(LatLng userLatLng) {
+    public void onLastKnownLocationSuccess(Location location) {
         if (getActivity() != null) {
+            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
             loadStops(userLatLng);
         }
     }

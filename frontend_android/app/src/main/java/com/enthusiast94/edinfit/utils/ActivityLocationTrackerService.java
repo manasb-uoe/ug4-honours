@@ -2,6 +2,7 @@ package com.enthusiast94.edinfit.utils;
 
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -80,12 +81,12 @@ public class ActivityLocationTrackerService extends Service
     }
 
     @Override
-    public void onLocationUpdateSuccess(LatLng latLng) {
+    public void onLocationUpdateSuccess(Location location) {
         Log.i(TAG, "LOCATION UPDATE");
 
         if (currentActivity != null) {
-            currentActivity.getPoints().add(new Activity.Point(latLng.latitude, latLng.longitude,
-                    System.currentTimeMillis()));
+            currentActivity.getPoints().add(new Activity.Point(location.getLatitude(),
+                    location.getLongitude(), location.getTime()));
         }
     }
 
