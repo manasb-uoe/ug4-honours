@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/spacing_normal"
     android:clickable="true"
     android:background="?attr/selectableItemBackground"
     >
@@ -12,15 +11,44 @@
         android:id="@+id/indicator_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_alignBottom="@+id/info_container"
         android:layout_alignTop="@+id/info_container"
-        android:gravity="center_vertical"
+        android:gravity="center"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="0dp"
+        android:weightSum="12"
         >
 
         <View
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:background="@drawable/activity_indicator"
+            android:id="@+id/top_indicator_view"
+            android:layout_width="@dimen/divider_height"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:background="@color/divider"
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            >
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/activity_indicator"
+                android:layout_gravity="center"
+                />
+
+        </FrameLayout>
+
+        <View
+            android:id="@+id/bottom_indicator_view"
+            android:layout_width="@dimen/divider_height"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:background="@color/divider"
             />
 
     </LinearLayout>
@@ -34,7 +62,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/indicator_container"
         android:layout_toEndOf="@+id/indicator_container"
-        android:layout_marginLeft="@dimen/spacing_normal"
+        android:padding="@dimen/spacing_normal"
         >
 
 

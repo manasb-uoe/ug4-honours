@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.Triplet;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -153,7 +155,7 @@ public class ActivityFragment extends Fragment {
                 ActivityTimeSpan activityTimeSpan = activityTimeSpansMap.get(timeSpan);
                 ((HeaderViewHolder) holder).bindItem(timeSpan, activityTimeSpan);
             } else if (holder instanceof DetailViewHolder) {
-                ((DetailViewHolder) holder).bindItem((Activity) getItem(position));
+                ((DetailViewHolder) holder).bindItem((Triplet<Integer, Integer, Activity>) getItem(position));
             } else {
                 throw new IllegalArgumentException("Invalid holder instance type: " +
                         holder.getClass().getSimpleName());
@@ -182,7 +184,8 @@ public class ActivityFragment extends Fragment {
                 offset--;
 
                 if (offset < entry.getValue().getActivities().size()) {
-                    return entry.getValue().getActivities().get(offset);
+                    return new Triplet<>(offset, entry.getValue().getActivities().size(),
+                            entry.getValue().getActivities().get(offset));
                 }
 
                 offset -= entry.getValue().getActivities().size();
@@ -281,6 +284,8 @@ public class ActivityFragment extends Fragment {
 
             private TextView infoTextView;
             private TextView descriptionTextView;
+            private View topIndicatorView;
+            private View bottomIndicatorView;
 
             private SimpleDateFormat sdf;
 
@@ -292,25 +297,45 @@ public class ActivityFragment extends Fragment {
                 // find views
                 descriptionTextView = (TextView) itemView.findViewById(R.id.description_textview);
                 infoTextView = (TextView) itemView.findViewById(R.id.info_textview);
+                topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
+                bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
             }
 
-            public void bindItem(Activity activity) {
+            public void bindItem(Triplet<Integer, Integer, Activity> offsetNumActivitiesActivityTriplet) {
                 String activityType;
 
-                switch (activity.getType()) {
+                switch (offsetNumActivitiesActivityTriplet.c.getType()) {
                     case WAIT_OR_WALK:
                         activityType = context.getString(R.string.action_wait_or_walk);
                         break;
 
                     default:
                         throw new IllegalArgumentException("Invalid activity type: " +
-                                activity.getType().getValue());
+                                offsetNumActivitiesActivityTriplet.c.getType().getValue());
                 }
 
                 infoTextView.setText(String.format(context.getString(R.string.label_activity_info),
-                        activityType, sdf.format(activity.getStart())));
+                        activityType, sdf.format(offsetNumActivitiesActivityTriplet.c.getStart())));
 
-                descriptionTextView.setText(activity.getDescription());
+                descriptionTextView.setText(offsetNumActivitiesActivityTriplet.c.getDescription());
+
+                if (offsetNumActivitiesActivityTriplet.b == 1) {
+                    topIndicatorView.setVisibility(View.INVISIBLE);
+                    bottomIndicatorView.setVisibility(View.INVISIBLE);
+                } else {
+                    if (offsetNumActivitiesActivityTriplet.a == 0) {
+                        topIndicatorView.setVisibility(View.INVISIBLE);
+                        bottomIndicatorView.setVisibility(View.VISIBLE);
+                    } else if (offsetNumActivitiesActivityTriplet.a ==
+                            offsetNumActivitiesActivityTriplet.b - 1) {
+
+                        topIndicatorView.setVisibility(View.VISIBLE);
+                        bottomIndicatorView.setVisibility(View.INVISIBLE);
+                    } else {
+                        topIndicatorView.setVisibility(View.VISIBLE);
+                        bottomIndicatorView.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         }
     }
