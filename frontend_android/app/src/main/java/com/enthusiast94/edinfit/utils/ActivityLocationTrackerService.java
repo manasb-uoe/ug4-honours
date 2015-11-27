@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.BaseService;
@@ -23,11 +24,12 @@ public class ActivityLocationTrackerService extends Service
     private static final String TAG = ActivityLocationTrackerService.class.getSimpleName();
     public static final String EXTRA_ACTIVITY_TYPE = "activityType";
     private static final int UPDATE_INTERVAL = 2000;
-    private static final long MINIMUM_ACTIVITY_DURATION = 60 * 2 * 1000;
+    private static final long MINIMUM_ACTIVITY_DURATION = 60 * 2;
 
     private LocationProvider locationProvider;
     private ActivityService activityService;
     private Activity currentActivity;
+    private ReverseGeocoder reverseGeocoder;
     private double totalDistance;
     private double speedSum;
 
@@ -45,6 +47,8 @@ public class ActivityLocationTrackerService extends Service
 
         locationProvider = new LocationProvider(this, this, UPDATE_INTERVAL);
         locationProvider.connect();
+
+        reverseGeocoder = new ReverseGeocoder(this);
     }
 
     @Override
@@ -53,22 +57,55 @@ public class ActivityLocationTrackerService extends Service
         locationProvider.disconnect();
 
         currentActivity.setEnd(System.currentTimeMillis());
-        currentActivity.setAverageSpeed(speedSum / Float.valueOf(currentActivity.getPoints().size()));
-        currentActivity.setDistance(totalDistance);
 
-        if ((currentActivity.getEnd() - currentActivity.getStart()) > MINIMUM_ACTIVITY_DURATION) {
-            activityService.addNewActivity(currentActivity, new BaseService.Callback<Void>() {
+        if ((currentActivity.getEnd() - currentActivity.getStart()) > MINIMUM_ACTIVITY_DURATION &&
+                currentActivity.getPoints().size() > 1) {
 
-                @Override
-                public void onSuccess(Void data) {
-                    Log.i(TAG, "New activity successfully sent to server");
-                }
+            currentActivity.setAverageSpeed(speedSum / Float.valueOf(currentActivity.getPoints().size()));
+            currentActivity.setDistance(totalDistance);
 
-                @Override
-                public void onFailure(String message) {
-                    Log.e(TAG, message);
-                }
-            });
+            // fetch place names for start and end points in order to set activity description
+            Activity.Point startPoint = currentActivity.getPoints().get(0);
+            reverseGeocoder.getPlaceName(startPoint.getLatitude(), startPoint.getLongitude(),
+                    new ReverseGeocoder.ReverseGeocodeCallback() {
+
+                        @Override
+                        public void onSuccess(final String startPlaceName) {
+                            Activity.Point endPoint =
+                                    currentActivity.getPoints().get(currentActivity.getPoints().size() - 1);
+                            reverseGeocoder.getPlaceName(endPoint.getLatitude(), endPoint.getLongitude(),
+
+                                    new ReverseGeocoder.ReverseGeocodeCallback() {
+                                        @Override
+                                        public void onSuccess(String endPlaceName) {
+                                            currentActivity.setDescription(String.format(getString(
+                                                    R.string.label_activity_description_format), startPlaceName, endPlaceName));
+                                            activityService.addNewActivity(currentActivity, new BaseService.Callback<Void>() {
+
+                                                @Override
+                                                public void onSuccess(Void data) {
+                                                    Log.i(TAG, "New activity successfully sent to server");
+                                                }
+
+                                                @Override
+                                                public void onFailure(String message) {
+                                                    Log.e(TAG, message);
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onFailure(String error) {
+                                            Log.e(TAG, error);
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void onFailure(String error) {
+                            Log.e(TAG, error);
+                        }
+                    });
         }
 
         super.onDestroy();
@@ -78,7 +115,7 @@ public class ActivityLocationTrackerService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
         String type = intent.getStringExtra(EXTRA_ACTIVITY_TYPE);
 
-        currentActivity = new Activity(Activity.Type.getTypeByValue(type),
+        currentActivity = new Activity(null, Activity.Type.getTypeByValue(type),
                 System.currentTimeMillis(), 0, new ArrayList<Activity.Point>(), 0, 0);
 
         return super.onStartCommand(intent, flags, startId);
@@ -86,8 +123,6 @@ public class ActivityLocationTrackerService extends Service
 
     @Override
     public void onLocationUpdateSuccess(Location location) {
-        Log.i(TAG, "LOCATION UPDATE");
-
         if (currentActivity != null) {
             // add new point to list of points, compute distance covered so far and the total speed
             // so far (which will be later converted into an average).
@@ -104,6 +139,8 @@ public class ActivityLocationTrackerService extends Service
             }
 
             speedSum += point.getSpeed();
+
+            Log.i(TAG, "Distance covered so far: " + totalDistance);
         }
     }
 

@@ -6,6 +6,7 @@ var mongoose = require("mongoose");
 var _ = require("underscore");
 
 var activitySchema = new mongoose.Schema({
+    description: String,
     type: String,
     start: Number, /* unix timestamp in millis */
     end: Number, /* unix timestamp in millis */

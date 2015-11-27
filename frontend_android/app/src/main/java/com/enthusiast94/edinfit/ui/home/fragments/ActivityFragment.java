@@ -309,6 +309,8 @@ public class ActivityFragment extends Fragment {
 
                 infoTextView.setText(String.format(context.getString(R.string.label_activity_info),
                         activityType, sdf.format(activity.getStart())));
+
+                descriptionTextView.setText(activity.getDescription());
             }
         }
     }

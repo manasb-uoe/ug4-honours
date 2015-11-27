@@ -102,6 +102,7 @@ public class Activity implements Parcelable {
         }
     }
 
+    private String description;
     private Type type;
     private long start;
     private long end;
@@ -109,14 +110,19 @@ public class Activity implements Parcelable {
     private double distance;
     private double averageSpeed;
 
-    public Activity(Type type, long start, long end, List<Point> points, double distance,
-                    double averageSpeed) {
+    public Activity(String description, Type type, long start, long end, List<Point> points,
+                    double distance, double averageSpeed) {
+        this.description = description;
         this.type = type;
         this.start = start;
         this.end = end;
         this.points = points;
         this.distance = distance;
         this.averageSpeed = averageSpeed;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public Type getType() {
@@ -143,6 +149,10 @@ public class Activity implements Parcelable {
         return distance;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public void setEnd(long end) {
         this.end = end;
     }
@@ -160,6 +170,7 @@ public class Activity implements Parcelable {
      */
 
     protected Activity(Parcel in) {
+        description = in.readString();
         type = Type.getTypeByValue(in.readString());
         start = in.readLong();
         end = in.readLong();
@@ -187,6 +198,7 @@ public class Activity implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(description);
         dest.writeString(type.getValue());
         dest.writeLong(start);
         dest.writeLong(end);
