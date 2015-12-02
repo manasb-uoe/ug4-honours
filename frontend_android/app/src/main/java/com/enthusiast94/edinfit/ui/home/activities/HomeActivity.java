@@ -78,9 +78,9 @@ public class HomeActivity extends AppCompatActivity {
             NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
-            View navHeaderContainer = findViewById(R.id.nav_header_container);
-            navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
-            navEmailTextView = (TextView) findViewById(R.id.email_textview);
+            View navHeaderContainer = navView.getHeaderView(0);
+            navNameTextVeiew = (TextView) navHeaderContainer.findViewById(R.id.name_textview);
+            navEmailTextView = (TextView) navHeaderContainer.findViewById(R.id.email_textview);
             ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
             fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
             waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
