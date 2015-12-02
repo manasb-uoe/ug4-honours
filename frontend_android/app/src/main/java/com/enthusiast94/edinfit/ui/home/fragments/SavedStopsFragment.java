@@ -144,9 +144,7 @@ public class SavedStopsFragment extends Fragment {
 
             private Stop stop;
             private TextView stopNameTextView;
-            private TextView serviceNameTextView;
-            private TextView destinationTextView;
-            private TextView timeTextView;
+            private TextView upcomingTextView;
             private ImageButton unsaveButton;
 
             public SavedStopViewHolder(View itemView) {
@@ -154,13 +152,8 @@ public class SavedStopsFragment extends Fragment {
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                serviceNameTextView =
-                        (TextView) itemView.findViewById(R.id.service_name_textview);
-                destinationTextView =
-                        (TextView) itemView.findViewById(R.id.destination_textview);
-                timeTextView =
-                        (TextView) itemView.findViewById(R.id.time_textview);
-                unsaveButton = (ImageButton) itemView.findViewById(R.id.unsave_stop_button);
+                upcomingTextView = (TextView) itemView.findViewById(R.id.upcoming_textview);
+                unsaveButton = (ImageButton) itemView.findViewById(R.id.unsave_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
@@ -175,14 +168,12 @@ public class SavedStopsFragment extends Fragment {
 
                 if (stop.getDepartures().size() > 0) {
                     Departure departure = stop.getDepartures().get(0);
-
-                    serviceNameTextView.setText(departure.getServiceName());
-                    destinationTextView.setText(departure.getDestination());
-                    timeTextView.setText(departure.getTime());
+                    upcomingTextView.setText(String.format(
+                            getString(R.string.label_upcoming_departure_info),
+                            departure.getServiceName(), departure.getDestination(),
+                            departure.getTime()));
                 } else {
-                    serviceNameTextView.setText(getString(R.string.label_no_upcoming_departure));
-                    destinationTextView.setText("");
-                    timeTextView.setText("");
+                    upcomingTextView.setText(getString(R.string.label_no_upcoming_departure));
                 }
             }
 

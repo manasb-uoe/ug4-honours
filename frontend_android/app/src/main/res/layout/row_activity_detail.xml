@@ -25,7 +25,7 @@
             android:layout_width="@dimen/divider_height"
             android:layout_height="0dp"
             android:layout_weight="4"
-            android:background="@color/divider"
+            android:background="@color/divider_darker"
             />
 
         <FrameLayout
@@ -48,7 +48,7 @@
             android:layout_width="@dimen/divider_height"
             android:layout_height="0dp"
             android:layout_weight="4"
-            android:background="@color/divider"
+            android:background="@color/divider_darker"
             />
 
     </LinearLayout>
@@ -62,7 +62,10 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/indicator_container"
         android:layout_toEndOf="@+id/indicator_container"
-        android:padding="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
         >
 
 

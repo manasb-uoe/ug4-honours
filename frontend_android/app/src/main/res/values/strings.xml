@@ -98,6 +98,7 @@
     <string name="label_stop_name_with_direction">%1$s (%2$s)</string>
     <string name="label_please_waitt">Please wait…</string>
     <string name="label_activity_info">%1$s • %2$s</string>
+    <string name="label_upcoming_departure_info">%1$s • %2$s • %3$s</string>
     <string name="label_activity_description_format">%1$s to %2$s</string>
     <string name="label_calories">Calories</string>
     <string name="label_time">Time</string>

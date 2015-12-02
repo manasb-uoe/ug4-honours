@@ -7,35 +7,47 @@
     android:clickable="true"
     android:paddingLeft="@dimen/spacing_normal"
     android:paddingRight="@dimen/spacing_normal"
-    android:paddingTop="@dimen/spacing_tiny"
-    android:paddingBottom="@dimen/spacing_tiny"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingBottom="@dimen/spacing_small"
     >
+
+    <FrameLayout
+        android:id="@+id/indicator_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignBottom="@+id/stop_name_textview"
+        android:layout_alignTop="@+id/stop_name_textview"
+        android:gravity="center"
+        android:paddingRight="@dimen/spacing_normal"
+        >
+
+        <ImageView
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:src="@drawable/ic_action_maps_directions_bus"
+            android:layout_gravity="center"
+            />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/stop_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        style="@style/TextAppearance.AppCompat.Body1"
-        android:textSize="@dimen/font_normal_large"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBottom="@+id/more_options_button"
-        android:layout_toLeftOf="@+id/more_options_button"
-        android:layout_toStartOf="@+id/more_options_button"
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:layout_toRightOf="@id/indicator_container"
         android:text="Title"
         />
 
-    <ImageButton
-        android:layout_width="@dimen/nearby_stop_more_options_button_width"
-        android:layout_height="@dimen/nearby_stop_more_options_button_height"
-        android:src="@drawable/ic_action_navigation_more_vert"
-        android:layout_alignParentTop="true"
+    <TextView
+        android:id="@+id/distance_away_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="15 m"
+        android:visibility="gone"
         android:layout_alignParentRight="true"
-        android:background="?attr/selectableItemBackground"
-        android:layout_alignParentEnd="true"
-        android:contentDescription="@string/label_more_options"
-        android:id="@+id/more_options_button"
         />
 
 </RelativeLayout>
