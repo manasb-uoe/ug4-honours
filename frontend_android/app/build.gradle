@@ -32,4 +32,5 @@ dependencies {
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.sothree.slidinguppanel:library:3.1.1'
+    compile 'fr.avianey.com.viewpagerindicator:library:2.4.1@aar'
 }

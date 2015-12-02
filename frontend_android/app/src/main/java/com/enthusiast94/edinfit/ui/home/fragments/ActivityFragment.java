@@ -21,6 +21,7 @@ import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.Triplet;
+import com.viewpagerindicator.CirclePageIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -433,13 +434,23 @@ public class ActivityFragment extends Fragment {
 
             private ViewPager viewPager;
             private SummaryPagerAdapter adapter;
+            private CirclePageIndicator circlePageIndicator;
 
             public SummaryViewHolder(Context context, View itemView) {
                 super(itemView);
 
+                // find views
                 viewPager = (ViewPager) itemView.findViewById(R.id.viewpager);
+                circlePageIndicator =
+                        (CirclePageIndicator) itemView.findViewById(R.id.circle_pager_indicator);
+
+                // bind pager adapter
                 adapter = new SummaryPagerAdapter(context, null);
                 viewPager.setAdapter(adapter);
+
+                // bind pager indicator
+                circlePageIndicator.setViewPager(viewPager);
+
             }
 
             public void bindItem(StatisticsSummary summary) {
