@@ -22,4 +22,5 @@
     <color name="tab_indicator">#FFFFFF</color>
     <color name="drop_shadow_end_color">#40000000</color>
     <color name="green_selection">#dff0d8</color>
+    <color name="white_opaque_70">#B3FFFFFF</color>
 </resources>

@@ -31,6 +31,8 @@ import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.user_profile.activities.UserProfileActivity;
 import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 
 import de.greenrobot.event.EventBus;
 
@@ -41,6 +43,9 @@ public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private TextView navNameTextVeiew;
     private TextView navEmailTextView;
+    private FloatingActionMenu fabMenu;
+    private FloatingActionButton waitOrWalkFab;
+    private FloatingActionButton journeyPlannerFab;
 
     private Handler handler;
     private ActionBarDrawerToggle actionBarDrawerToggle;
@@ -77,6 +82,9 @@ public class HomeActivity extends AppCompatActivity {
             navNameTextVeiew = (TextView) findViewById(R.id.name_textview);
             navEmailTextView = (TextView) findViewById(R.id.email_textview);
             ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+            fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
+            waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
+            journeyPlannerFab = (FloatingActionButton) findViewById(R.id.journey_planner_fab);
 
             /**
              * Setup AppBar
@@ -99,6 +107,37 @@ public class HomeActivity extends AppCompatActivity {
                     R.string.label_nav_close
             );
             actionBarDrawerToggle.syncState();
+
+            /**
+             * Setup floating action menu item clicks
+             */
+
+            waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final Intent startActivityIntent =
+                            new Intent(HomeActivity.this, NewActivityActivity.class);
+
+                    fabMenu.close(true);
+
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startActivity(startActivityIntent);
+                        }
+                    }, 300);
+
+                }
+            });
+
+            journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    // TODO
+                }
+            });
 
             /**
              * Populate nav view header with user details and bind event listeners
@@ -173,6 +212,12 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onPageSelected(int position) {
                     selectedPageIndex = position;
+
+                    if (position == 0) {
+                        fabMenu.showMenuButton(true);
+                    } else {
+                        fabMenu.hideMenuButton(true);
+                    }
                 }
 
                 @Override
@@ -188,7 +233,7 @@ public class HomeActivity extends AppCompatActivity {
              */
 
             if (savedInstanceState == null) {
-                selectedPageIndex = 1; /* default = Activity fragment */
+                selectedPageIndex = 0; /* default = Activity fragment */
             } else {
                 selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
             }
