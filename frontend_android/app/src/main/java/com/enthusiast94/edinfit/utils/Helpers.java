@@ -125,8 +125,7 @@ public class Helpers {
 
     public static String humanizeDistance(Double distanceInKm) {
         if (distanceInKm < 1) {
-            Log.d("UTIL", distanceInKm + "");
-            return String.format("%.0f", distanceInKm*1000) + " m";
+            return String.format("%.1f", distanceInKm*1000) + " m";
         } else {
             return String.format("%.1f", distanceInKm) + " km";
         }
@@ -153,13 +152,9 @@ public class Helpers {
     }
 
     public static String humanizeDurationInMillisToMinutes(long millis) {
-        int minutes = (int) ((millis / (1000 * 60)));
-
-        if (minutes == 1) {
-            return minutes + " min";
-        } else {
-            return minutes + " mins";
-        }
+        double minutes = ((millis / (1000.0 * 60.0)));
+        Log.d("ActivityFragment", millis + " --> " + minutes);
+        return String.format("%.1f", minutes) + " min";
     }
 
     // time must be in 24h form14 (eg. 08:55)
@@ -214,6 +209,10 @@ public class Helpers {
         }
 
         return false;
+    }
+
+    public static int getStepsFromDistance(double distanceInM) {
+        return (int) (distanceInM * 1.3123359580052494);
     }
 }
 

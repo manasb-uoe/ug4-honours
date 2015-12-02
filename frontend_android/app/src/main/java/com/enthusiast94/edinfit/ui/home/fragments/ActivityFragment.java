@@ -4,10 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,8 @@ import java.util.Map;
  * Created by manas on 01-10-2015.
  */
 public class ActivityFragment extends Fragment {
+
+    private static final String TAG = ActivityFragment.class.getSimpleName();
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -125,9 +128,11 @@ public class ActivityFragment extends Fragment {
         private Context context;
         private LayoutInflater inflater;
         private Map<String, ActivityTimeSpan> activityTimeSpansMap;
+        private StatisticsSummary todaySummary;
 
-        private static final int HEADER_VIEW = 0;
-        private static final int DETAIL_VIEW = 1;
+        private static final int TODAY_SUMMARY_VIEW = 0;
+        private static final int HEADER_VIEW = 1;
+        private static final int DETAIL_VIEW = 2;
 
         public ActivityAdapter(Context context) {
             this.context = context;
@@ -137,11 +142,15 @@ public class ActivityFragment extends Fragment {
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == TODAY_SUMMARY_VIEW) {
+                return new SummaryViewHolder(
+                        context, inflater.inflate(R.layout.row_activity_summary, parent, false));
+            }
             if (viewType == HEADER_VIEW) {
                 return new HeaderViewHolder(
                         inflater.inflate(R.layout.row_activity_header, parent, false));
             } else if (viewType == DETAIL_VIEW) {
-                return new DetailViewHolder(
+                return new DetailViewHolder(context,
                         inflater.inflate(R.layout.row_activity_detail, parent, false));
             } else {
                 throw new IllegalArgumentException("Invalid view type: " + viewType);
@@ -150,10 +159,14 @@ public class ActivityFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (holder instanceof HeaderViewHolder) {
+            if (holder instanceof SummaryViewHolder) {
+                ((SummaryViewHolder) holder).bindItem(todaySummary);
+
+            } else if (holder instanceof HeaderViewHolder) {
                 String timeSpan = (String) getItem(position);
                 ActivityTimeSpan activityTimeSpan = activityTimeSpansMap.get(timeSpan);
                 ((HeaderViewHolder) holder).bindItem(timeSpan, activityTimeSpan);
+
             } else if (holder instanceof DetailViewHolder) {
                 ((DetailViewHolder) holder).bindItem((Triplet<Integer, Integer, Activity>) getItem(position));
             } else {
@@ -170,11 +183,20 @@ public class ActivityFragment extends Fragment {
                 size += 1 + entry.getValue().getActivities().size();
             }
 
+            // only show today's summary if user has at least 1 activity
+            if (size > 0) {
+                size += 1;
+            }
+
             return size;
         }
 
         private Object getItem(int position) {
-            int offset = position;
+            if (position == 0) {
+                return null;
+            }
+
+            int offset = position - 1;
 
             for (Map.Entry<String, ActivityTimeSpan> entry : activityTimeSpansMap.entrySet()) {
                 if (offset == 0) {
@@ -196,7 +218,11 @@ public class ActivityFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if (getItem(position) instanceof String) {
+            Object item = getItem(position);
+
+            if (item == null) {
+                return TODAY_SUMMARY_VIEW;
+            } else if (item instanceof String) {
                 return HEADER_VIEW;
             } else {
                 return DETAIL_VIEW;
@@ -206,12 +232,13 @@ public class ActivityFragment extends Fragment {
         private void notifyActivitiesChanged(List<Activity> activities) {
             activityTimeSpansMap.clear();
 
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+
             // iterate in reverse order since the dates must appear in descending order
             for (int i=activities.size()-1; i>=0; i--) {
                 Activity activity = activities.get(i);
 
                 Date date = new Date(activity.getStart());
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
                 String timeSpanText = sdf.format(date);
 
                 if (activityTimeSpansMap.containsKey(timeSpanText)) {
@@ -224,15 +251,27 @@ public class ActivityFragment extends Fragment {
                 }
             }
 
-            // compute statistic for each time span
+            // compute statistics for each time span
             for (Map.Entry<String, ActivityTimeSpan> entry : activityTimeSpansMap.entrySet()) {
                 double totalDistance = 0;
+                long totalTime = 0;
 
                 for (Activity activity : entry.getValue().getActivities()) {
                     totalDistance += activity.getDistance();
+                    totalTime += activity.getEnd() - activity.getStart();
                 }
 
-                entry.getValue().setStatistic(Helpers.humanizeDistance(totalDistance/1000d));
+                entry.getValue().setSummary(new StatisticsSummary(totalDistance, totalTime, 0,
+                        Helpers.getStepsFromDistance(totalDistance)));
+            }
+
+            // compute today's summary
+            String todayKey = sdf.format(new Date());
+            if (activityTimeSpansMap.containsKey(todayKey)) {
+                todaySummary = activityTimeSpansMap.get(todayKey).getSummary();
+            } else {
+                // TODO
+                todaySummary = new StatisticsSummary(0, 0, 0, 0);
             }
 
             notifyDataSetChanged();
@@ -240,20 +279,20 @@ public class ActivityFragment extends Fragment {
 
         private static class ActivityTimeSpan {
 
-            private String statistic;
+            private StatisticsSummary summary;
             private List<Activity> activities;
 
-            public ActivityTimeSpan(String statistic, List<Activity> activities) {
-                this.statistic = statistic;
+            public ActivityTimeSpan(StatisticsSummary summary, List<Activity> activities) {
+                this.summary = summary;
                 this.activities = activities;
             }
 
-            public String getStatistic() {
-                return statistic;
+            public StatisticsSummary getSummary() {
+                return summary;
             }
 
-            public void setStatistic(String statistic) {
-                this.statistic = statistic;
+            public void setSummary(StatisticsSummary summary) {
+                this.summary = summary;
             }
 
             public List<Activity> getActivities() {
@@ -261,7 +300,154 @@ public class ActivityFragment extends Fragment {
             }
         }
 
-        private class HeaderViewHolder extends RecyclerView.ViewHolder {
+        private static class StatisticsSummary {
+
+            private double distance;
+            private long time;
+            private int calories;
+            private int steps;
+
+            public StatisticsSummary(double distance, long time, int calories, int steps) {
+                this.distance = distance;
+                this.time = time;
+                this.calories = calories;
+                this.steps = steps;
+            }
+
+            public double getDistance() {
+                return distance;
+            }
+
+            public long getTime() {
+                return time;
+            }
+
+            public int getCalories() {
+                return calories;
+            }
+
+            public int getSteps() {
+                return steps;
+            }
+        }
+
+        private static class SummaryPagerAdapter extends PagerAdapter {
+
+            private static final int NUM_PAGES = 4;
+            private Context context;
+            private StatisticsSummary summary;
+            private LayoutInflater inflater;
+
+            public SummaryPagerAdapter(Context context, StatisticsSummary summary) {
+                this.context = context;
+                this.summary = summary;
+
+                inflater = LayoutInflater.from(context);
+
+                if (this.summary == null) {
+                    this.summary = new StatisticsSummary(0, 0, 0, 0);
+                }
+            }
+
+            public void updateSummary(StatisticsSummary newSummary) {
+                summary = newSummary;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public Object instantiateItem(ViewGroup container, int position) {
+                View view = inflater.inflate(R.layout.row_activity_summary_item, container, false);
+                TextView statisticTextView = (TextView) view.findViewById(R.id.statistic_textview);
+                TextView averageStatTextView =
+                        (TextView) view.findViewById(R.id.average_statistic_textview);
+
+                String statisticText = null;
+
+                switch (position) {
+                    case 0:
+                        statisticText = String.format(
+                                context.getString(R.string.label_stat_today_format),
+                                Helpers.humanizeDistance(summary.getDistance() / 1000)
+                        );
+                        break;
+                    case 1:
+                        statisticText = String.format(
+                                context.getString(R.string.label_stat_today_format),
+                                Helpers.humanizeDurationInMillisToMinutes(summary.getTime())
+                        );
+                        break;
+                    case 2:
+                        statisticText = String.format(
+                                context.getString(R.string.label_steps_today_format),
+                                summary.getSteps()
+                        );
+                        break;
+                    case 3:
+                        statisticText = String.format(
+                                context.getString(R.string.label_calories_burned_format),
+                                summary.getCalories()
+                        );
+                        break;
+                }
+
+                statisticTextView.setText(statisticText);
+
+                container.addView(view);
+
+                return view;
+            }
+
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object view) {
+                container.removeView((View) view);
+            }
+
+            /**
+             * Return POSITION_NONE so that when notifyDataSetChanged() is called, the view pager
+             * will remove all views and reload them all.
+             */
+
+            @Override
+            public int getItemPosition(Object object) {
+                return POSITION_NONE;
+            }
+
+            @Override
+            public int getCount() {
+                return NUM_PAGES;
+            }
+
+            /**
+             * This method checks whether a particular object belongs to a given position. The
+             * second parameter is of type Object and is the same as the return value from the
+             * instantiateItem method.
+             */
+
+            @Override
+            public boolean isViewFromObject(View view, Object object) {
+                return object == view;
+            }
+        }
+
+        private static class SummaryViewHolder extends RecyclerView.ViewHolder {
+
+            private ViewPager viewPager;
+            private SummaryPagerAdapter adapter;
+
+            public SummaryViewHolder(Context context, View itemView) {
+                super(itemView);
+
+                viewPager = (ViewPager) itemView.findViewById(R.id.viewpager);
+                adapter = new SummaryPagerAdapter(context, null);
+                viewPager.setAdapter(adapter);
+            }
+
+            public void bindItem(StatisticsSummary summary) {
+                adapter.updateSummary(summary);
+            }
+        }
+
+        private static class HeaderViewHolder extends RecyclerView.ViewHolder {
 
             private TextView timeSpanTextView;
             private TextView statisticTextView;
@@ -276,12 +462,14 @@ public class ActivityFragment extends Fragment {
 
             public void bindItem(String timeSpanText, ActivityTimeSpan timeSpan) {
                 timeSpanTextView.setText(timeSpanText);
-                statisticTextView.setText(timeSpan.getStatistic());
+                statisticTextView.setText(
+                        Helpers.humanizeDistance(timeSpan.getSummary().getDistance() / 1000));
             }
         }
 
-        private class DetailViewHolder extends RecyclerView.ViewHolder {
+        private static class DetailViewHolder extends RecyclerView.ViewHolder {
 
+            private Context context;
             private TextView infoTextView;
             private TextView descriptionTextView;
             private View topIndicatorView;
@@ -289,8 +477,10 @@ public class ActivityFragment extends Fragment {
 
             private SimpleDateFormat sdf;
 
-            public DetailViewHolder(View itemView) {
+            public DetailViewHolder(Context context, View itemView) {
                 super(itemView);
+
+                this.context = context;
 
                 sdf = new SimpleDateFormat("HH:mm", Locale.UK);
 
