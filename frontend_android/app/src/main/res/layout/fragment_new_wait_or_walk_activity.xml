@@ -1,222 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    xmlns:fab="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/background_light">
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        >
 
-        <android.support.design.widget.AppBarLayout
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
+            android:background="@color/background_light">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
                 >
 
+                <include layout="@layout/toolbar" />
+
+            </android.support.design.widget.AppBarLayout>
+
+            <LinearLayout
+                android:id="@+id/select_origin_stop_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/spacing_7dp"
+                android:paddingBottom="@dimen/spacing_7dp"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
+                >
+
+                <ImageView
+                    android:id="@+id/step1_imageview"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/ic_image_looks_one"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    />
+
                 <LinearLayout
-                    android:id="@+id/action_start"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_gravity="right"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:clickable="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:orientation="vertical"
                     >
 
-                    <ImageView
-                        android:layout_width="@dimen/app_bar_icon_width_with_text"
+                    <TextView
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_action_av_play_arrow"
+                        android:text="@string/label_where_are_you_waiting"
+                        android:textSize="@dimen/font_normal_large"
+                        style="@style/TextAppearance.AppCompat.Body2"
                         />
 
                     <TextView
+                        android:id="@+id/origin_stop_name_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_start"
-                        android:textAllCaps="true"
-                        android:textColor="@android:color/white"
+                        android:text="@string/label_click_here_to_select"
+                        android:textAllCaps="false"
                         android:textSize="@dimen/font_small"
-                        style="@style/TextAppearance.AppCompat.Body2"
                         />
 
                 </LinearLayout>
 
-            </android.support.v7.widget.Toolbar>
+            </LinearLayout>
 
-        </android.support.design.widget.AppBarLayout>
-
-        <LinearLayout
-            android:id="@+id/select_origin_stop_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/spacing_7dp"
-            android:paddingBottom="@dimen/spacing_7dp"
-            android:clickable="true"
-            android:background="?attr/selectableItemBackground"
-            >
-
-            <ImageView
-                android:id="@+id/step1_imageview"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_image_looks_one"
-                android:layout_marginRight="@dimen/spacing_normal"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/divider"
                 />
 
             <LinearLayout
+                android:id="@+id/select_service_button"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/spacing_7dp"
+                android:paddingBottom="@dimen/spacing_7dp"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
                 >
 
-                <TextView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_where_are_you_waiting"
-                    android:layout_marginBottom="@dimen/spacing_tiny"
-                    style="@style/TextAppearance.AppCompat.Body2"
+                <ImageView
+                    android:id="@+id/step2_imageview"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/ic_image_looks_two_grey"
+                    android:layout_marginRight="@dimen/spacing_normal"
                     />
 
-                <TextView
-                    android:id="@+id/origin_stop_name_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_click_here_to_select"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/font_small"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_which_service_are_you_going_to_use"
+                        android:textSize="@dimen/font_normal_large"
+                        style="@style/TextAppearance.AppCompat.Body2"
+                        />
+
+                    <TextView
+                        android:id="@+id/service_name_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_click_here_to_select"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/font_small"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/divider"
+                />
+
+            <LinearLayout
+                android:id="@+id/select_destination_stop_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/spacing_7dp"
+                android:paddingBottom="@dimen/spacing_7dp"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
+                >
+
+                <ImageView
+                    android:id="@+id/step3_imageview"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/ic_image_looks_3_grey"
+                    android:layout_marginRight="@dimen/spacing_normal"
                     />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    >
+
+                    <TextView
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_where_will_you_get_off"
+                        android:textSize="@dimen/font_normal_large"
+                        style="@style/TextAppearance.AppCompat.Body2"
+                        />
+
+                    <TextView
+                        android:id="@+id/destination_stop_name_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_click_here_to_select"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/font_small"
+                        />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:background="@color/divider"
-            />
+    </ScrollView>
 
-        <LinearLayout
-            android:id="@+id/select_service_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/spacing_7dp"
-            android:paddingBottom="@dimen/spacing_7dp"
-            android:clickable="true"
-            android:background="?attr/selectableItemBackground"
-            >
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/start_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_av_play_arrow"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        fab:fab_size="normal"
+        fab:fab_label="@string/action_wait_or_walk"
+        fab:menu_colorNormal="@color/primary"
+        fab:menu_showShadow="true"
+        />
 
-            <ImageView
-                android:id="@+id/step2_imageview"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_image_looks_two_grey"
-                android:layout_marginRight="@dimen/spacing_normal"
-                />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                >
-
-                <TextView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_which_service_are_you_going_to_use"
-                    android:layout_marginBottom="@dimen/spacing_tiny"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    />
-
-                <TextView
-                    android:id="@+id/service_name_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_click_here_to_select"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/font_small"
-                    />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:background="@color/divider"
-            />
-
-        <LinearLayout
-            android:id="@+id/select_destination_stop_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/spacing_7dp"
-            android:paddingBottom="@dimen/spacing_7dp"
-            android:clickable="true"
-            android:background="?attr/selectableItemBackground"
-            >
-
-            <ImageView
-                android:id="@+id/step3_imageview"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_image_looks_3_grey"
-                android:layout_marginRight="@dimen/spacing_normal"
-                />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                >
-
-                <TextView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_where_will_you_get_off"
-                    android:layout_marginBottom="@dimen/spacing_tiny"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    />
-
-                <TextView
-                    android:id="@+id/destination_stop_name_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_click_here_to_select"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/font_small"
-                    />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</ScrollView>
+</FrameLayout>

@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import com.github.clans.fab.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -42,6 +43,7 @@ public class NewActivityFragment extends Fragment {
     private TextView destinationStopNameTextView;
     private ImageView step2ImageVIew;
     private ImageView step3ImageView;
+    private FloatingActionButton startFab;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +61,7 @@ public class NewActivityFragment extends Fragment {
          */
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        final View actionStart = toolbar.findViewById(R.id.action_start);
+        startFab = (FloatingActionButton) view.findViewById(R.id.start_fab);
         final View selectOriginStopButton = view.findViewById(R.id.select_origin_stop_button);
         final View selectServiceButton = view.findViewById(R.id.select_service_button);
         final View selectDestinationStopButton = view.findViewById(R.id.select_destination_stop_button);
@@ -73,7 +75,7 @@ public class NewActivityFragment extends Fragment {
          * Setup toolbar title and back button icon
          */
 
-        toolbar.setTitle(getString(R.string.label_new_activity));
+        toolbar.setTitle(getString(R.string.label_new_wait_or_walk_activity));
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
 
         /**
@@ -94,7 +96,7 @@ public class NewActivityFragment extends Fragment {
             public void onClick(View v) {
                 int id = v.getId();
 
-                if (id == actionStart.getId()) {
+                if (id == startFab.getId()) {
                     if (selectedOriginStop != null && selectedService != null &&
                             selectedDestinationStop != null && selectedRoute != null) {
                         Intent startActivityIntent = new Intent(getActivity(), SuggestionsActivity.class);
@@ -120,7 +122,7 @@ public class NewActivityFragment extends Fragment {
             }
         };
 
-        actionStart.setOnClickListener(onClickListener);
+        startFab.setOnClickListener(onClickListener);
         selectOriginStopButton.setOnClickListener(onClickListener);
         selectServiceButton.setOnClickListener(onClickListener);
         selectDestinationStopButton.setOnClickListener(onClickListener);
@@ -129,9 +131,7 @@ public class NewActivityFragment extends Fragment {
          * Retain UI back to pre configuration change state
          */
 
-        if (savedInstanceState != null) {
-            updateUi();
-        }
+        updateUi();
 
         return view;
     }
@@ -174,6 +174,13 @@ public class NewActivityFragment extends Fragment {
         if (selectedDestinationStop != null && selectedRoute != null) {
             destinationStopNameTextView.setText(String.format(getString(R.string.label_destination_stop_and_route),
                     selectedDestinationStop.getName(), selectedRoute.getDestination()));
+        }
+
+        if (selectedOriginStop != null && selectedService != null &&
+                selectedDestinationStop != null && selectedRoute != null) {
+            startFab.setEnabled(true);
+        } else {
+            startFab.setEnabled(false);
         }
     }
 
