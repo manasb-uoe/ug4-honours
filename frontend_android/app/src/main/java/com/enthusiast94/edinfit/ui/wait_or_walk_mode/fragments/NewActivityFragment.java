@@ -3,12 +3,12 @@ package com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import com.github.clans.fab.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,10 +16,10 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Route;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnDestinationStopSelectedEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnOriginStopSelectedEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnServiceSelectedEvent;
-import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.ShowDestinationStopSelectionEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.ShowOriginStopSelectionFragmentEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.ShowServiceSelectionFragmentEvent;
@@ -41,9 +41,11 @@ public class NewActivityFragment extends Fragment {
     private TextView originStopNameTextView;
     private TextView serviceNameTextView;
     private TextView destinationStopNameTextView;
+    private ImageView step1ImageView;
     private ImageView step2ImageVIew;
     private ImageView step3ImageView;
-    private FloatingActionButton startFab;
+    private Button startButton;
+    private Button resetButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,13 +63,15 @@ public class NewActivityFragment extends Fragment {
          */
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        startFab = (FloatingActionButton) view.findViewById(R.id.start_fab);
+        startButton = (Button) view.findViewById(R.id.start_button);
+        resetButton = (Button) view.findViewById(R.id.reset_button);
         final View selectOriginStopButton = view.findViewById(R.id.select_origin_stop_button);
         final View selectServiceButton = view.findViewById(R.id.select_service_button);
         final View selectDestinationStopButton = view.findViewById(R.id.select_destination_stop_button);
         originStopNameTextView = (TextView) view.findViewById(R.id.origin_stop_name_textview);
         serviceNameTextView = (TextView) view.findViewById(R.id.service_name_textview);
         destinationStopNameTextView = (TextView) view.findViewById(R.id.destination_stop_name_textview);
+        step1ImageView = (ImageView) view.findViewById(R.id.step1_imageview);
         step2ImageVIew = (ImageView) view.findViewById(R.id.step2_imageview);
         step3ImageView = (ImageView) view.findViewById(R.id.step3_imageview);
 
@@ -96,7 +100,7 @@ public class NewActivityFragment extends Fragment {
             public void onClick(View v) {
                 int id = v.getId();
 
-                if (id == startFab.getId()) {
+                if (id == startButton.getId()) {
                     if (selectedOriginStop != null && selectedService != null &&
                             selectedDestinationStop != null && selectedRoute != null) {
                         Intent startActivityIntent = new Intent(getActivity(), SuggestionsActivity.class);
@@ -106,6 +110,13 @@ public class NewActivityFragment extends Fragment {
                         startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ROUTE, selectedRoute);
                         startActivity(startActivityIntent);
                     }
+                } else if (id == resetButton.getId()) {
+                    selectedOriginStop = null;
+                    selectedService = null;
+                    selectedDestinationStop = null;
+                    selectedRoute = null;
+
+                    updateUi();
                 } else if (id == selectOriginStopButton.getId()) {
                     EventBus.getDefault().post(new ShowOriginStopSelectionFragmentEvent());
                 } else if (id == selectServiceButton.getId()) {
@@ -122,7 +133,8 @@ public class NewActivityFragment extends Fragment {
             }
         };
 
-        startFab.setOnClickListener(onClickListener);
+        startButton.setOnClickListener(onClickListener);
+        resetButton.setOnClickListener(onClickListener);
         selectOriginStopButton.setOnClickListener(onClickListener);
         selectServiceButton.setOnClickListener(onClickListener);
         selectDestinationStopButton.setOnClickListener(onClickListener);
@@ -151,36 +163,37 @@ public class NewActivityFragment extends Fragment {
 
     private void updateUi() {
         if (selectedOriginStop != null) {
+            step1ImageView.setBackgroundResource(R.drawable.ic_image_looks_one);
             originStopNameTextView.setText(selectedOriginStop.getName());
-
-            step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two);
         } else {
-            step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two_grey);
+            step1ImageView.setBackgroundResource(R.drawable.ic_image_looks_one_grey);
+            originStopNameTextView.setText(getString(R.string.label_click_here_to_select));
         }
 
         if (selectedService != null) {
+            step2ImageVIew.setBackgroundResource(R.drawable.ic_image_looks_two);
             serviceNameTextView.setText(String.format(getString(R.string.label_service_name_and_description),
                     selectedService.getName(), selectedService.getDescription()));
-
-            destinationStopNameTextView.setText(getString(R.string.label_click_here_to_select));
-            step3ImageView.setImageResource(R.drawable.ic_image_looks_3);
         } else {
+            step2ImageVIew.setImageResource(R.drawable.ic_image_looks_two_grey);
             serviceNameTextView.setText(getString(R.string.label_click_here_to_select));
-
-            destinationStopNameTextView.setText(getString(R.string.label_click_here_to_select));
-            step3ImageView.setImageResource(R.drawable.ic_image_looks_3_grey);
         }
 
         if (selectedDestinationStop != null && selectedRoute != null) {
+            step3ImageView.setBackgroundResource(R.drawable.ic_image_looks_3);
             destinationStopNameTextView.setText(String.format(getString(R.string.label_destination_stop_and_route),
                     selectedDestinationStop.getName(), selectedRoute.getDestination()));
+        } else {
+            step3ImageView.setBackgroundResource(R.drawable.ic_image_looks_3_grey);
+            destinationStopNameTextView.setText(getString(R.string.label_click_here_to_select));
+
         }
 
         if (selectedOriginStop != null && selectedService != null &&
                 selectedDestinationStop != null && selectedRoute != null) {
-            startFab.setEnabled(true);
+            startButton.setEnabled(true);
         } else {
-            startFab.setEnabled(false);
+            startButton.setEnabled(false);
         }
     }
 

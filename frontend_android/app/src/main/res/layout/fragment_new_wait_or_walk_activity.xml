@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:fab="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -40,7 +39,7 @@
                     android:id="@+id/step1_imageview"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/ic_image_looks_one"
+                    android:src="@drawable/ic_image_looks_one_grey"
                     android:layout_marginRight="@dimen/spacing_normal"
                     />
 
@@ -56,7 +55,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_where_are_you_waiting"
-                        android:textSize="@dimen/font_normal_large"
+                        android:textSize="@dimen/font_normal"
                         style="@style/TextAppearance.AppCompat.Body2"
                         />
 
@@ -66,6 +65,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/label_click_here_to_select"
                         android:textAllCaps="false"
+                        android:layout_marginTop="@dimen/spacing_tiny"
                         android:textSize="@dimen/font_small"
                         />
 
@@ -110,7 +110,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_which_service_are_you_going_to_use"
-                        android:textSize="@dimen/font_normal_large"
+                        android:textSize="@dimen/font_normal"
                         style="@style/TextAppearance.AppCompat.Body2"
                         />
 
@@ -120,6 +120,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/label_click_here_to_select"
                         android:textAllCaps="false"
+                        android:layout_marginTop="@dimen/spacing_tiny"
                         android:textSize="@dimen/font_small"
                         />
 
@@ -164,7 +165,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_where_will_you_get_off"
-                        android:textSize="@dimen/font_normal_large"
+                        android:textSize="@dimen/font_normal"
                         style="@style/TextAppearance.AppCompat.Body2"
                         />
 
@@ -174,6 +175,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/label_click_here_to_select"
                         android:textAllCaps="false"
+                        android:layout_marginTop="@dimen/spacing_tiny"
                         android:textSize="@dimen/font_small"
                         />
 
@@ -185,18 +187,41 @@
 
     </ScrollView>
 
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/start_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_av_play_arrow"
-        android:layout_gravity="bottom|right"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        fab:fab_size="normal"
-        fab:fab_label="@string/action_wait_or_walk"
-        fab:menu_colorNormal="@color/primary"
-        fab:menu_showShadow="true"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider_darker"
+        android:layout_gravity="bottom"
+        android:layout_alignTop="@+id/buttons_container"
         />
 
-</FrameLayout>
+    <LinearLayout
+        android:id="@+id/buttons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:weightSum="2"
+        >
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:text="@string/label_reset"
+            />
+
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:text="@string/label_start"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -6,17 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/primary"
+    android:fitsSystemWindows="true"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
-    >
-
-    <ProgressBar
-        android:id="@+id/toolbar_circular_progress"
-        android:layout_width="@dimen/toolbar_circular_progress_width"
-        android:layout_height="@dimen/toolbar_circular_progress_height"
-        android:indeterminate="true"
-        android:layout_gravity="end"
-        android:visibility="gone"
-        />
-
-</android.support.v7.widget.Toolbar>
+    />

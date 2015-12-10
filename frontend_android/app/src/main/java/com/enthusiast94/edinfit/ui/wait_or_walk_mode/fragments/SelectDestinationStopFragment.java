@@ -535,7 +535,7 @@ public class SelectDestinationStopFragment extends Fragment {
                             ContextCompat.getColor(getActivity(), R.color.secondary_text_light_2)
                     );
 
-                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary_opaque_40);
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.accent_opaque_40);
                     topIndicatorView.setBackgroundColor(indicatorColor);
                     middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);
@@ -544,7 +544,7 @@ public class SelectDestinationStopFragment extends Fragment {
                             ContextCompat.getColor(getActivity(), R.color.primary_text_light)
                     );
 
-                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary);
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.accent);
                     topIndicatorView.setBackgroundColor(indicatorColor);
                     middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);

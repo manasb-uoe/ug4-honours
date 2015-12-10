@@ -39,14 +39,14 @@
             android:layout_width="@dimen/route_indicator_width"
             android:layout_height="0dp"
             android:layout_weight="3"
-            android:background="@color/red"
+            android:background="@color/accent"
             />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/red"
+            android:background="@color/accent"
             android:layout_gravity="center_vertical"
             />
 
@@ -55,7 +55,7 @@
             android:layout_width="@dimen/route_indicator_width"
             android:layout_height="0dp"
             android:layout_weight="3"
-            android:background="@color/red"
+            android:background="@color/accent"
             />
 
     </LinearLayout>

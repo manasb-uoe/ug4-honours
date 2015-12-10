@@ -6,6 +6,6 @@
     android:layout_height="wrap_content"
     android:text="@string/label_hint_long_click_stop_fpr_more_info"
     android:gravity="center_vertical"
-    android:background="@color/primary_2"
+    android:background="@color/light_grey"
     android:padding="@dimen/spacing_normal"
     />
