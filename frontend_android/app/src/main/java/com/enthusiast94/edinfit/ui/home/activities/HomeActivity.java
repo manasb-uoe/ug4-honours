@@ -5,7 +5,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -38,10 +37,13 @@ import de.greenrobot.event.EventBus;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
 
+    private ViewPager viewPager;
+    private NavigationView navView;
     private DrawerLayout drawerLayout;
-    private TextView navNameTextVeiew;
+    private TextView navNameTextView;
     private TextView navEmailTextView;
     private FloatingActionMenu fabMenu;
     private FloatingActionButton waitOrWalkFab;
@@ -75,13 +77,12 @@ public class HomeActivity extends AppCompatActivity {
              */
 
             drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            NavigationView navView = (NavigationView) findViewById(R.id.navigation_view);
+            navView = (NavigationView) findViewById(R.id.navigation_view);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.tablayout);
             View navHeaderContainer = navView.getHeaderView(0);
-            navNameTextVeiew = (TextView) navHeaderContainer.findViewById(R.id.name_textview);
+            navNameTextView = (TextView) navHeaderContainer.findViewById(R.id.name_textview);
             navEmailTextView = (TextView) navHeaderContainer.findViewById(R.id.email_textview);
-            ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+            viewPager = (ViewPager) findViewById(R.id.viewpager);
             fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
             waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
             journeyPlannerFab = (FloatingActionButton) findViewById(R.id.journey_planner_fab);
@@ -94,7 +95,6 @@ public class HomeActivity extends AppCompatActivity {
 
             ActionBar appBar = getSupportActionBar();
             if (appBar != null) {
-                appBar.setTitle(getString(R.string.app_name));
                 appBar.setHomeButtonEnabled(true);
                 appBar.setDisplayHomeAsUpEnabled(true);
             }
@@ -163,43 +163,39 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public boolean onNavigationItemSelected(MenuItem menuItem) {
-                    Intent startActivityIntent = null;
-
                     switch (menuItem.getItemId()) {
-                        case R.id.action_wait_or_walk:
-                            startActivityIntent =
-                                    new Intent(HomeActivity.this, NewActivityActivity.class);
-                            break;
-
                         case R.id.action_user_profile:
-                            startActivityIntent =
+                            final Intent startActivityIntent =
                                     new Intent(HomeActivity.this, UserProfileActivity.class);
-                            break;
 
-                        case R.id.action_get_to_somewhere:
-                            // TODO
-                            break;
+                            drawerLayout.closeDrawers();
+
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    startActivity(startActivityIntent);
+                                }
+                            }, 300);
+
+                            return true;
+
+                        case R.id.action_activity:
+                            navigateToPage(0);
+                            return true;
+                        case R.id.action_near_me:
+                            navigateToPage(1);
+                            return true;
+                        case R.id.action_saved_stops:
+                            navigateToPage(2);
+                            return true;
+                        default:
+                            return false;
                     }
-
-                    drawerLayout.closeDrawers();
-
-                    // delay activity start by a short duration to prevent UI lag
-                    final Intent finalStartActivityIntent = startActivityIntent;
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (finalStartActivityIntent != null) {
-                                startActivity(finalStartActivityIntent);
-                            }
-                        }
-                    }, 300);
-
-                    return false;
                 }
             });
 
             /**
-             * Setup view pager and tabs
+             * Setup view pager
              */
 
             viewPager.setAdapter(new MainPagerAdapter());
@@ -211,21 +207,13 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    selectedPageIndex = position;
-
-                    if (position == 0) {
-                        fabMenu.showMenuButton(true);
-                    } else {
-                        fabMenu.hideMenuButton(true);
-                    }
+                    HomeActivity.this.onPageSelected(position);
                 }
 
                 @Override
                 public void onPageScrollStateChanged(int state) {
                 }
             });
-
-            tabLayout.setupWithViewPager(viewPager);
 
             /**
              * Navigate to viewpager page based on the page index in saved instance state, ensuring that
@@ -239,6 +227,7 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             viewPager.setCurrentItem(selectedPageIndex);
+            navigateToPage(selectedPageIndex);
         }
     }
 
@@ -246,7 +235,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        Log.i("DESTROY", "destroyed");
     }
 
     @Override
@@ -256,10 +244,32 @@ public class HomeActivity extends AppCompatActivity {
         savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
     }
 
+    private void navigateToPage(int position) {
+        viewPager.setCurrentItem(position);
+        onPageSelected(position);
+    }
+
+    private void onPageSelected(int position) {
+        selectedPageIndex = position;
+
+        MenuItem menuItem = navView.getMenu().getItem(position + 1 /*exclude 'User Profile' item */);
+        menuItem.setChecked(true);
+
+        setTitle(menuItem.getTitle());
+        drawerLayout.closeDrawers();
+
+        // only show fab on ActivityFragment
+        if (position == 0) {
+            fabMenu.showMenuButton(true);
+        } else {
+            fabMenu.hideMenuButton(true);
+        }
+    }
+
     private void populateNavViewHeader() {
         User user = UserService.getInstance().getAuthenticatedUser();
         if (user != null) {
-            navNameTextVeiew.setText(user.getName());
+            navNameTextView.setText(user.getName());
             navEmailTextView.setText(user.getEmail());
         }
     }
