@@ -25,9 +25,10 @@ router.route("/authenticate")
 
                 if (!match) return res.sendError(401, "Incorrect email or password.");
 
-                authTokenService.issueToken(user, function (err, token) {
+                // issue token using user's id as the payload
+                authTokenService.issueToken({"id": user.id}, function (err, token) {
                     if (err) return res.sendError(err.message);
-
+    
                     return res.sendOk({token: token});
                 });
             });

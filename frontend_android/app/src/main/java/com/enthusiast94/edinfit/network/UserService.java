@@ -91,7 +91,7 @@ public class UserService extends BaseService {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    // Decode JWT token's payload in order to retrieve user data as json
+                    // Decode JWT token's payload in order to retrieve user id as json
                     String token = response.getJSONObject("data").getString("token");
                     String decodedPayload = new String(Base64.decode(token.split("\\.")[1].getBytes(),
                             Base64.DEFAULT));
@@ -104,7 +104,20 @@ public class UserService extends BaseService {
                     // persist user object in shared preferences as json string
                     Helpers.writeToPrefs(context, USER_PREFS_KEY, gson.toJson(user));
 
-                    if (callback != null) callback.onSuccess(user);
+                    // now update the cached user with other user details by sending another request
+                    updateCachedUser(new Callback<Void>() {
+
+                        @Override
+                        public void onSuccess(Void data) {
+                            if (callback != null) callback.onSuccess(getAuthenticatedUser());
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            if (callback != null)
+                                callback.onFailure(message);
+                        }
+                    });
                 } catch (JSONException e) {
                     if (callback != null)
                         callback.onFailure(parsingErrorMessage);
