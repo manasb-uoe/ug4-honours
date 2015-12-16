@@ -96,8 +96,6 @@ router.get("/stops/saved", authenticationMiddleware, function (req, res) {
     User.findById(req.decodedPayload.id, function (err, user) {
         if (err) return res.sendError(500, err.message);
 
-        console.log(user);
-
         Stop
             .where("stopId")
             .in(user.savedStops)
@@ -202,7 +200,6 @@ function saveOrUnsave(req, res, shouldSave) {
 
         if (err) return res.sendError(500, err.message);
 
-        console.log(req.decodedPayload.id);
         User.findById(req.decodedPayload.id, function (err, user) {
             if (err) return res.sendError(500, err.message);
 
