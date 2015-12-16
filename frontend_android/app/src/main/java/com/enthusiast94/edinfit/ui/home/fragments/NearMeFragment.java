@@ -26,6 +26,7 @@ import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
+import com.enthusiast94.edinfit.utils.ReverseGeocoder;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -62,6 +63,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private List<Stop> stops = new ArrayList<>();
     private List<Marker> stopMarkers = new ArrayList<>();
     private LocationProvider locationProvider;
+    private ReverseGeocoder reverseGeocoder;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 25;
@@ -105,10 +107,11 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 12));
 
         /**
-         * Setup location provider
+         * Setup location provider and reverse geocoder
          */
 
         locationProvider = new LocationProvider(getActivity(), this);
+        reverseGeocoder = new ReverseGeocoder(getActivity());
 
         /**
          * Setup swipe refresh layout
@@ -260,8 +263,26 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     @Override
     public void onLastKnownLocationSuccess(Location location) {
         if (getActivity() != null) {
-            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            loadStops(userLatLng, "Fake Place");
+            final LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+            reverseGeocoder.getPlaceName(userLatLng.latitude, userLatLng.longitude,
+                    new ReverseGeocoder.ReverseGeocodeCallback() {
+
+                        @Override
+                        public void onSuccess(String placeName) {
+                            if (getActivity() != null) {
+                                loadStops(userLatLng, placeName);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String error) {
+                            if (getActivity() != null) {
+                                setRefreshIndicatorVisiblity(false);
+                                Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
         }
     }
 
