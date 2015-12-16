@@ -223,24 +223,28 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
                     @Override
                     public void onSuccess(Void data) {
-                        if (shouldSave) {
-                            Toast.makeText(getActivity(), String.format(
-                                    getActivity().getString(R.string.success_stop_saved),
-                                    stop.getName()), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), String.format(
-                                    getActivity().getString(R.string.success_stop_unsaved),
-                                    stop.getName()), Toast.LENGTH_SHORT).show();
-                        }
+                        if (getActivity() != null) {
+                            if (shouldSave) {
+                                Toast.makeText(getActivity(), String.format(
+                                        getActivity().getString(R.string.success_stop_saved),
+                                        stop.getName()), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getActivity(), String.format(
+                                        getActivity().getString(R.string.success_stop_unsaved),
+                                        stop.getName()), Toast.LENGTH_SHORT).show();
+                            }
 
-                        // invalidate options menu so that it can be redrawn and therefore change
-                        // save/unsave button icon accordingly
-                        getActivity().invalidateOptionsMenu();
+                            // invalidate options menu so that it can be redrawn and therefore change
+                            // save/unsave button icon accordingly
+                            getActivity().invalidateOptionsMenu();
+                        }
                     }
 
                     @Override
                     public void onFailure(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        if (getActivity() != null) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 return true;
