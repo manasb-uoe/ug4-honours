@@ -57,6 +57,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
     private String stopId;
     private Stop stop;
+    private LatLng userLatLng;
     private RecyclerView departuresRecyclerView;
     private DeparturesAdapter departuresAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -256,30 +257,38 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
+        if (stop == null) {
+            StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
 
-            @Override
-            public void onSuccess(Stop data) {
-                stop = data;
+                @Override
+                public void onSuccess(Stop data) {
+                    stop = data;
 
-                if (getActivity() != null) {
-                    setRefreshIndicatorVisiblity(false);
+                    if (getActivity() != null) {
+                        setRefreshIndicatorVisiblity(false);
 
-                    departuresAdapter.notifyDeparturesChanged();
+                        departuresAdapter.notifyDeparturesChanged();
 
-                    updateMapSlidingPanel(userLocationLatLng);
+                        updateMapSlidingPanel(userLocationLatLng);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(String message) {
-                if (getActivity() != null) {
-                    setRefreshIndicatorVisiblity(false);
+                @Override
+                public void onFailure(String message) {
+                    if (getActivity() != null) {
+                        setRefreshIndicatorVisiblity(false);
 
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            setRefreshIndicatorVisiblity(false);
+
+            departuresAdapter.notifyDeparturesChanged();
+
+            updateMapSlidingPanel(userLocationLatLng);
+        }
     }
 
     private void showTimePickerDialog() {
@@ -391,7 +400,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public void onLastKnownLocationSuccess(Location location) {
         if (getActivity() != null) {
-            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            this.userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
             loadStop(userLatLng);
         }
     }
