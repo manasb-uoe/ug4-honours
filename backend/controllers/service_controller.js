@@ -7,7 +7,6 @@ var async = require("async");
 var Service = require("../models/service");
 var Stop = require("../models/stop");
 var authenticationMiddleware = require("../middleware/authentication");
-var async = require("async");
 var helpers = require("../utils/helpers");
 
 var router = express.Router();
@@ -34,23 +33,27 @@ router.get("/services/:service_name", authenticationMiddleware, function (req, r
  * All services are returned if no service names are provided. 
  */
 
-router.get("/services/", function (req, res) {
+router.get("/services/", authenticationMiddleware, function (req, res) {
     var serviceNames = req.query.services || [];
 
     async.waterfall([
         function (callback) {
             if (serviceNames.length == 0) {
-                Service.find({}, function (err, services) {
-                    if (err != null) {
-                        return helpers.createFailureMessage(500, err.message);
-                    }
+                Service
+                    .find({})
+                    .select("name description")
+                    .exec(function (err, services) {
+                        if (err != null) {
+                            return helpers.createFailureMessage(500, err.message);
+                        }
 
-                    return callback(null, services);
-                });
+                        return callback(null, services);
+                    });
             } else {
                 Service
                     .where("name")
                     .in(serviceNames)
+                    .select("name description")
                     .exec(function (err, services) {
                         if (err != null) {
                             return helpers.createFailureMessage(500, err.message);
