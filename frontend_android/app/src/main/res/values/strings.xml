@@ -109,6 +109,12 @@
     <string name="label_saved_stops">Saved Stops</string>
     <string name="label_home_navigation">Home Navigation</string>
     <string name="label_reset">Reset</string>
+    <string name="label_services">Services</string>
+    <string name="label_num_results_singular">%1$s result</string>
+    <string name="label_num_results_plural">%1$s results</string>
+    <string name="label_enter_search_keyword">Enter search keyword</string>
+    <string name="label_search_hint">Search for stops by name and services by name or description</string>
+    <string name="label_no_results">No results</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

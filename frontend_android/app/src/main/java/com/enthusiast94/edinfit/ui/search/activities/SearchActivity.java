@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.find_a_bus.activities;
+package com.enthusiast94.edinfit.ui.search.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -13,8 +13,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.find_a_bus.fragments.FindABusFragment;
-import com.enthusiast94.edinfit.ui.find_a_bus.events.OnSearchEvent;
+import com.enthusiast94.edinfit.ui.search.fragments.SearchFragment;
+import com.enthusiast94.edinfit.ui.search.events.OnSearchEvent;
 import com.enthusiast94.edinfit.ui.user_profile.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.utils.Helpers;
 
@@ -23,13 +23,13 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by manas on 18-11-2015.
  */
-public class FindABusActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_find_a_bus);
+        setContentView(R.layout.activity_search);
 
         /**
          * FInd views
@@ -73,7 +73,7 @@ public class FindABusActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    Helpers.hideSoftKeyboard(FindABusActivity.this, v.getWindowToken());
+                    Helpers.hideSoftKeyboard(SearchActivity.this, v.getWindowToken());
                     return true;
                 }
 
@@ -87,7 +87,7 @@ public class FindABusActivity extends AppCompatActivity {
 
         if (getSupportFragmentManager().findFragmentByTag(UserProfileFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new FindABusFragment(), UserProfileFragment.TAG)
+                    .add(R.id.fragment_container, new SearchFragment(), UserProfileFragment.TAG)
                     .commit();
         }
     }

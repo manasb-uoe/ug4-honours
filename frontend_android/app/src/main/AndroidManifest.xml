@@ -54,7 +54,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ui.find_a_bus.activities.FindABusActivity"
+            android:name=".ui.search.activities.SearchActivity"
             android:label="@string/app_name" >
         </activity>
 

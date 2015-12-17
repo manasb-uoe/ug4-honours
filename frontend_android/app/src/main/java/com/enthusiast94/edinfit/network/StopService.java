@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
+import android.telecom.Call;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
@@ -46,6 +47,34 @@ public class StopService extends BaseService {
         }
 
         return instance;
+    }
+
+    public void getAllStops(final Callback<List<Stop>> callback) {
+        AsyncHttpClient client = getAsyncHttpClient(true);
+        client.get(API_BASE + "/stops", new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    Gson gson = new Gson();
+                    Stop[] stopsArray = gson.fromJson(
+                            response.getJSONArray("data").toString(), Stop[].class
+                    );
+                    List<Stop> stopsList = Arrays.asList(stopsArray);
+
+                    if (callback != null) callback.onSuccess(stopsList);
+
+                } catch (JSONException e) {
+                    if (callback != null)
+                        callback.onFailure(parsingErrorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                onFailureCommon(statusCode, errorResponse, callback);
+            }
+        });
     }
 
     public void getStop(String stopId, Integer dayCode, String time,  final Callback<Stop> callback) {

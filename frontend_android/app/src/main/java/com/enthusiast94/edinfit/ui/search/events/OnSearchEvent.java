@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.find_a_bus.events;
+package com.enthusiast94.edinfit.ui.search.events;
 
 /**
  * Created by manas on 19-11-2015.

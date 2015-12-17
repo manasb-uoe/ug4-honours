@@ -42,7 +42,7 @@
                     android:id="@+id/search_edittext"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="@string/label_search_by_number_or_description"
+                    android:hint="@string/label_enter_search_keyword"
                     android:imeOptions="actionSearch"
                     android:singleLine="true"
                     android:background="@android:color/transparent"

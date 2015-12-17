@@ -13,7 +13,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +21,7 @@ import android.widget.TextView;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.UserService;
-import com.enthusiast94.edinfit.ui.find_a_bus.activities.FindABusActivity;
+import com.enthusiast94.edinfit.ui.search.activities.SearchActivity;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
@@ -303,7 +302,7 @@ public class HomeActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.action_search:
-                Intent startActivityIntent = new Intent(this, FindABusActivity.class);
+                Intent startActivityIntent = new Intent(this, SearchActivity.class);
                 startActivity(startActivityIntent);
                 return true;
             default:
