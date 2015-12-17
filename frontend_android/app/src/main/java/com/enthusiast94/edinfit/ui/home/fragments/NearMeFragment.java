@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +65,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private List<Marker> stopMarkers = new ArrayList<>();
     private LocationProvider locationProvider;
     private ReverseGeocoder reverseGeocoder;
+    private LatLng userLocationLatLng;
+    private String userLocationName;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 25;
@@ -262,16 +265,26 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
     @Override
     public void onLastKnownLocationSuccess(Location location) {
-        if (getActivity() != null) {
-            final LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-            reverseGeocoder.getPlaceName(userLatLng.latitude, userLatLng.longitude,
+        if (getActivity() != null) {
+            // simply reuse previously loaded nearby stops if user did not perform a manual refresh
+            if (!swipeRefreshLayout.isRefreshing() && stops.size() != 0) {
+                nearbyStopsAdapter.notifyStopsChanged();
+                updateSlidingMapPanel(userLocationLatLng, userLocationName);
+
+                return;
+            }
+
+            reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
                     new ReverseGeocoder.ReverseGeocodeCallback() {
 
                         @Override
                         public void onSuccess(String placeName) {
+                            userLocationName = placeName;
+
                             if (getActivity() != null) {
-                                loadStops(userLatLng, placeName);
+                                loadStops(userLocationLatLng, userLocationName);
                             }
                         }
 

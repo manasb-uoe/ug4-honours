@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,7 +83,11 @@ public class ActivityFragment extends Fragment {
         activityAdapter = new ActivityAdapter(getActivity());
         activityRecyclerView.setAdapter(activityAdapter);
 
-        loadActivities();
+        if (activities == null) {
+            loadActivities();
+        } else {
+            activityAdapter.notifyActivitiesChanged(activities);
+        }
 
         return view;
     }

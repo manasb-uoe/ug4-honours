@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -33,7 +34,7 @@ public class SavedStopsFragment extends Fragment {
     private RecyclerView savedStopsRecyclerView;
     private SavedStopsAdapter savedStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private List<Stop> savedStops = new ArrayList<>();
+    private List<Stop> savedStops;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,16 +47,8 @@ public class SavedStopsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_saved_stops, container, false);
 
-        /**
-         * Find views
-         */
-
         savedStopsRecyclerView = (RecyclerView) view.findViewById(R.id.saved_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-
-        /**
-         * Setup swipe refresh layout
-         */
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -66,15 +59,15 @@ public class SavedStopsFragment extends Fragment {
             }
         });
 
-        /**
-         * Setup saved stops recycler view
-         */
-
         savedStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        savedStopsAdapter = new SavedStopsAdapter();
+        savedStopsAdapter = new SavedStopsAdapter(getActivity());
         savedStopsRecyclerView.setAdapter(savedStopsAdapter);
 
-        loadSavedStops();
+        if (savedStops == null) {
+            loadSavedStops();
+        } else {
+            savedStopsAdapter.notifyStopsChanged(savedStops);
+        }
 
         return view;
     }
@@ -91,7 +84,7 @@ public class SavedStopsFragment extends Fragment {
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
 
-                    savedStopsAdapter.notifyDataSetChanged();
+                    savedStopsAdapter.notifyStopsChanged(savedStops);
                 }
             }
 
@@ -116,16 +109,20 @@ public class SavedStopsFragment extends Fragment {
         });
     }
 
-    private class SavedStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static class SavedStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+        private Context context;
         private LayoutInflater inflater;
+        private List<Stop> savedStops;
+
+        public SavedStopsAdapter(Context context) {
+            this.context = context;
+            inflater = LayoutInflater.from(context);
+            savedStops = new ArrayList<>();
+        }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if (inflater == null) {
-                inflater = LayoutInflater.from(getActivity());
-            }
-
             return new SavedStopViewHolder(inflater.inflate(R.layout.row_saved_stop, parent, false));
         }
 
@@ -137,6 +134,11 @@ public class SavedStopsFragment extends Fragment {
         @Override
         public int getItemCount() {
             return savedStops.size();
+        }
+
+        public void notifyStopsChanged(List<Stop> stops) {
+            this.savedStops = stops;
+            notifyDataSetChanged();
         }
 
         private class SavedStopViewHolder extends RecyclerView.ViewHolder
@@ -163,17 +165,17 @@ public class SavedStopsFragment extends Fragment {
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(getString(
+                stopNameTextView.setText(String.format(context.getString(
                         R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
 
                 if (stop.getDepartures().size() > 0) {
                     Departure departure = stop.getDepartures().get(0);
                     upcomingTextView.setText(String.format(
-                            getString(R.string.label_upcoming_departure_info),
+                            context.getString(R.string.label_upcoming_departure_info),
                             departure.getServiceName(), departure.getDestination(),
                             departure.getTime()));
                 } else {
-                    upcomingTextView.setText(getString(R.string.label_no_upcoming_departure));
+                    upcomingTextView.setText(context.getString(R.string.label_no_upcoming_departure));
                 }
             }
 
@@ -188,7 +190,7 @@ public class SavedStopsFragment extends Fragment {
 
                         @Override
                         public void onSuccess(Void data) {
-                            if (getActivity() != null) {
+                            if (context != null) {
                                 // remove unsaved stop from saved stops list
                                 for (int i=0; i<savedStops.size(); i++) {
                                     if (savedStops.get(i).equals(stop)) {
@@ -198,15 +200,15 @@ public class SavedStopsFragment extends Fragment {
                                     }
                                 }
 
-                                Toast.makeText(getActivity(), String.format(
-                                        getActivity().getString(R.string.success_stop_unsaved),
+                                Toast.makeText(context, String.format(
+                                        context.getString(R.string.success_stop_unsaved),
                                         stop.getName()), Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(String message) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -214,10 +216,10 @@ public class SavedStopsFragment extends Fragment {
         }
 
         private void startStopActivity(Stop stop) {
-            Intent startActivityIntent = new Intent(getActivity(), StopActivity.class);
+            Intent startActivityIntent = new Intent(context, StopActivity.class);
             startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
             startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
-            startActivity(startActivityIntent);
+            context.startActivity(startActivityIntent);
         }
     }
 
