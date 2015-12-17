@@ -38,7 +38,8 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
         return res.sendError(400, "Latitude and longitude query params are required.");
 
     var coords = [req.query.longitude, req.query.latitude];
-    var limit = req.query.limit || 25;
+    var stops_limit = req.query.stops_limit || 25;
+    var departures_limit = req.query.departures_limit;
     var time = req.query.time;
     var maxDistance = req.query.max_distance || 3; // km
     // we need to convert the distance to radians the radius of Earth is approximately 6371 kilometers
@@ -46,13 +47,13 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
     var nearDistance = req.query.near_distance || 0.3; // km
 
     Stop
-        .where("location")
-        .near({
+        .where("location").near({
             center: coords,
             maxDistance: maxDistance,
             spherical: true
         })
-        .limit(limit)
+        .select("-destinations -service_type")
+        .limit(stops_limit)
         .exec(function (err, stops) {
             if (err) return res.sendError(500, err.message);
 
@@ -83,7 +84,7 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
 
                             // filter out departures that do not belong to provided day and limit them using
                             // the provided limit
-                            stop.filterDepartures(helpers.getDayCode(), time, function () {
+                            stop.filterDepartures(helpers.getDayCode(), time, departures_limit, function () {
 
                                 return callback();
                             });
@@ -109,7 +110,8 @@ router.get("/stops/nearby", authenticationMiddleware, function (req, res) {
  */
 
 router.get("/stops/saved", authenticationMiddleware, function (req, res) {
-    var time = req.query.time; 
+    var time = req.query.time;
+    var departures_limit = req.query.departures_limit;
 
     User.findById(req.decodedPayload.id, function (err, user) {
         if (err) return res.sendError(500, err.message);
@@ -131,12 +133,12 @@ router.get("/stops/saved", authenticationMiddleware, function (req, res) {
 
                                 stop.departures = departures;
 
-                                stop.filterDepartures(helpers.getDayCode(), time, function () {
+                                stop.filterDepartures(helpers.getDayCode(), time, departures_limit, function () {
                                     return callback();
                                 });
                             });     
                         } else {
-                            stop.filterDepartures(helpers.getDayCode(), time, function () {
+                            stop.filterDepartures(helpers.getDayCode(), time, departures_limit, function () {
                                 return callback();
                             });
                         }
@@ -160,6 +162,7 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
     var stopId = req.params.stop_id;
     var day = req.query.day;
     var time = req.query.time;
+    var departures_limit = req.query.departures_limit;
 
     Stop.findOne({stopId: stopId}, function (err, stop) {
         if (!stop) return res.sendError(404, "No stop with id '" + stopId +"'");
@@ -175,12 +178,12 @@ router.get("/stops/:stop_id", authenticationMiddleware, function (req, res) {
 
                 stop.departures = departures;
 
-                stop.filterDepartures(day, time, function () {
+                stop.filterDepartures(day, time, departures_limit, function () {
                     return res.sendOk(stop);
                 });
             });     
         } else {
-            stop.filterDepartures(day, time, function () {
+            stop.filterDepartures(day, time, departures_limit, function () {
                 return res.sendOk(stop);
             });
         }

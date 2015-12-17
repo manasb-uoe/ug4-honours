@@ -72,6 +72,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private static final int NEARBY_STOPS_LIMIT = 25;
     private static final int MAX_DISTANCE = 3;
     private static final double NEAR_DISTANCE = 0.3;
+    private static final int DEPARTURES_LIMIT = 5;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -187,7 +188,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
         StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
                 userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE,
-                Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT,
+                Helpers.getCurrentTime24h(), NEARBY_STOPS_LIMIT, DEPARTURES_LIMIT,
                 new BaseService.Callback<List<Stop>>() {
 
                     @Override

@@ -130,12 +130,12 @@ stopSchema.statics.findByIdWithDepartures = function (stopIds, day, time, callba
 
                             stop.departures = departures;
 
-                            stop.filterDepartures(day, time, function () {
+                            stop.filterDepartures(day, time, null, function () {
                                 return callbackA(null);
                             });
                         });
                     } else {
-                        stop.filterDepartures(day, time, function () {
+                        stop.filterDepartures(day, time, null, function () {
                             return callbackA(null);
                         });
                     }
@@ -206,7 +206,7 @@ stopSchema.methods.updateDepartures = function (callback) {
     });
 };
 
-stopSchema.methods.filterDepartures = function (day, time, callback) {
+stopSchema.methods.filterDepartures = function (day, time, limit, callback) {
     time = time ? moment(time, "HH:mm").tz(timeZone) : undefined;
 
     this.departures = this.departures.filter(function (departure) {
@@ -224,6 +224,10 @@ stopSchema.methods.filterDepartures = function (day, time, callback) {
 
         return doesDayMatch && isUpcoming;
     });
+
+    if (limit != null) {
+        this.departures = this.departures.slice(0, limit);
+    }
 
     return callback();
 };
