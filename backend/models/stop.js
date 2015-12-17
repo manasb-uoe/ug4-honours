@@ -164,9 +164,11 @@ stopSchema.methods.toJSON = function() {
     delete obj.__v;
 
     // delete departure id
-    obj.departures.forEach(function (departure) {
-        delete departure._id;
-    });
+    if (obj.departures) {
+        obj.departures.forEach(function (departure) {
+            delete departure._id;
+        });
+    }
 
     return obj;
 };

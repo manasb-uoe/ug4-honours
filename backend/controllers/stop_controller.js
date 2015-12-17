@@ -12,6 +12,24 @@ var authenticationMiddleware = require("../middleware/authentication");
 var router = express.Router();
 
 /**
+ * Get all stops
+ */
+
+router.get("/stops", function (req, res) {
+    Stop
+        .find({})
+        .select("stopId name direction")
+        .exec(function (err, stops) {
+            if (err) {
+                return res.sendError(500, err.message);
+            }
+
+            return res.sendOk(stops);
+        });
+});
+
+
+/**
  * Get nearby stops based on the provided geographical coordinates.
  */
 
