@@ -1,65 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:clickable="true"
-    android:background="?attr/selectableItemBackground"
+    android:foreground="?attr/selectableItemBackground"
+    android:layout_marginLeft="@dimen/spacing_small"
+    android:layout_marginRight="@dimen/spacing_small"
+    android:layout_marginBottom="@dimen/spacing_small"
+    android:background="@drawable/nearby_stop_border"
     >
 
-    <FrameLayout
-        android:id="@+id/indicator_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignBottom="@+id/info_container"
-        android:layout_alignTop="@+id/info_container"
-        android:gravity="center"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="0dp"
-        android:weightSum="12"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:paddingTop="@dimen/spacing_tiny"
+        android:paddingBottom="@dimen/spacing_tiny"
         >
 
-        <ImageView
-            android:layout_width="27dp"
-            android:layout_height="27dp"
-            android:src="@drawable/ic_action_maps_directions_bus"
+        <TextView
+            android:id="@+id/direction_textview"
+            android:layout_width="35dp"
+            android:layout_height="30dp"
+            android:gravity="center"
             android:layout_gravity="center"
+            android:text="NE"
+            android:textColor="@color/accent"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:layout_marginLeft="@dimen/spacing_tiny"
+            style="@style/TextAppearance.AppCompat.Body2"
             />
-
-    </FrameLayout>
-
-    <LinearLayout
-        android:id="@+id/info_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/indicator_container"
-        android:layout_toEndOf="@+id/indicator_container"
-        android:paddingTop="@dimen/spacing_small"
-        android:paddingBottom="@dimen/spacing_small"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_normal"
-        >
-
 
         <TextView
             android:id="@+id/stop_name_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Brougham Place to Chalmers Street"
+            android:text="Chalmers Street"
+            android:layout_toRightOf="@id/direction_textview"
+            android:layout_alignTop="@id/direction_textview"
+            android:layout_alignBottom="@id/direction_textview"
+            android:gravity="center"
             style="@style/TextAppearance.AppCompat.Body2"
-            android:textStyle="normal"
             />
+
+        <ImageButton
+            android:id="@+id/more_options_button"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:src="@drawable/ic_action_navigation_more_vert"
+            android:background="?attr/selectableItemBackground"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/spacing_small"
+            />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/divider"
+        />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
 
         <TextView
-            android:id="@+id/upcoming_textview"
-            android:layout_width="wrap_content"
+            android:id="@+id/no_upcoming_departures_textview"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Service 14 • Greendykes • 15:06"
+            android:text="@string/label_no_upcoming_departures"
+            android:paddingLeft="@dimen/spacing_normal"
+            android:paddingTop="@dimen/spacing_tiny"
+            android:paddingRight="@dimen/spacing_normal"
+            android:paddingBottom="@dimen/spacing_tiny"
+            android:visibility="gone"
             />
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/upcoming_departures_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
 
-</RelativeLayout>
+            <LinearLayout
+
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/spacing_tiny"
+                android:paddingBottom="@dimen/spacing_tiny"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_normal"
+                android:weightSum="10"
+                >
+
+                <TextView
+                    android:id="@+id/service_name_1_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="top|left"
+                    android:layout_marginRight="@dimen/spacing_small"
+                    android:text="45"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+                <TextView
+                    android:id="@+id/destination_1_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
+                    android:layout_height="match_parent"
+                    android:text="Princes Street - Brougham Place"
+                    android:gravity="top"
+                    />
+
+                <TextView
+                    android:id="@+id/time_1_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:text="15:56"
+                    android:gravity="right"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/spacing_tiny"
+                android:paddingBottom="@dimen/spacing_tiny"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_normal"
+                android:weightSum="10"
+                >
+
+                <TextView
+                    android:id="@+id/service_name_2_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="top|left"
+                    android:layout_marginRight="@dimen/spacing_small"
+                    android:text="45"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+                <TextView
+                    android:id="@+id/destination_2_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
+                    android:layout_height="match_parent"
+                    android:text="Princes Street - Brougham Place"
+                    android:gravity="top"
+                    />
+
+                <TextView
+                    android:id="@+id/time_2_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:text="15:56"
+                    android:gravity="right"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/spacing_tiny"
+                android:paddingBottom="@dimen/spacing_tiny"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_normal"
+                android:weightSum="10"
+                >
+
+                <TextView
+                    android:id="@+id/service_name_3_textview"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="top|left"
+                    android:layout_marginRight="@dimen/spacing_small"
+                    android:text="45"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+                <TextView
+                    android:id="@+id/destination_3_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
+                    android:layout_height="match_parent"
+                    android:text="Princes Street - Brougham Place"
+                    android:gravity="top"
+                    />
+
+                <TextView
+                    android:id="@+id/time_3_textview"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:text="15:56"
+                    android:gravity="right"
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

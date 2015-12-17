@@ -20,8 +20,7 @@
             android:id="@+id/nearby_stops_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
+            android:scrollbars="none"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>

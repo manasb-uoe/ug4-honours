@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +27,7 @@ import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.enthusiast94.edinfit.utils.ReverseGeocoder;
+import com.enthusiast94.edinfit.utils.Triplet;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -69,7 +69,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private String userLocationName;
 
     // nearby stops api endpoint params
-    private static final int NEARBY_STOPS_LIMIT = 25;
+    private static final int NEARBY_STOPS_LIMIT = 20;
     private static final int MAX_DISTANCE = 3;
     private static final double NEAR_DISTANCE = 0.3;
     private static final int DEPARTURES_LIMIT = 5;
@@ -401,38 +401,72 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         }
 
         private class NearestStopViewHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener, View.OnLongClickListener {
+                implements View.OnClickListener {
 
             private Stop stop;
             private TextView stopNameTextView;
-            private TextView upcomingTextView;
+            private TextView directionTextView;
+            private ImageButton moreOptionsButton;
+            private Triplet<TextView, TextView, TextView>[] departureViews;
+            private View upcomingDeparturesContainer;
+            private View noUpcomingDeparturesView;
 
             public NearestStopViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                upcomingTextView = (TextView) itemView.findViewById(R.id.upcoming_textview);
+                directionTextView = (TextView) itemView.findViewById(R.id.direction_textview);
+                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
+                upcomingDeparturesContainer = itemView.findViewById(R.id.upcoming_departures_container);
+                noUpcomingDeparturesView = itemView.findViewById(R.id.no_upcoming_departures_textview);
+                departureViews = new Triplet[]{
+                        new Triplet(
+                                itemView.findViewById(R.id.service_name_1_textview),
+                                itemView.findViewById(R.id.destination_1_textview),
+                                itemView.findViewById(R.id.time_1_textview)),
+                        new Triplet(
+                                itemView.findViewById(R.id.service_name_2_textview),
+                                itemView.findViewById(R.id.destination_2_textview),
+                                itemView.findViewById(R.id.time_2_textview)),
+                        new Triplet(
+                                itemView.findViewById(R.id.service_name_3_textview),
+                                itemView.findViewById(R.id.destination_3_textview),
+                                itemView.findViewById(R.id.time_3_textview))
+                };
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                itemView.setOnLongClickListener(this);
+                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(getString(
-                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
+                stopNameTextView.setText(stop.getName());
+                directionTextView.setText(stop.getDirection());
 
-                if (stop.getDepartures().size() > 0) {
-                    Departure departure = stop.getDepartures().get(0);
-                    upcomingTextView.setText(String.format(
-                            getString(R.string.label_upcoming_departure_info),
-                            departure.getServiceName(), departure.getDestination(),
-                            departure.getTime()));
+                List<Departure> departures = stop.getDepartures();
+
+                if (departures.size() > 0) {
+                    upcomingDeparturesContainer.setVisibility(View.VISIBLE);
+                    noUpcomingDeparturesView.setVisibility(View.GONE);
+
+                    for (int i=0; i < departureViews.length; i++) {
+                        Triplet<TextView, TextView, TextView> departureView = departureViews[i];
+
+                        if (i < departures.size()) {
+                            Departure departure = departures.get(i);
+                            departureView.a.setText(departure.getServiceName());
+                            departureView.b.setText(departure.getDestination());
+                            departureView.c.setText(departure.getTime());
+                        } else {
+                            ((ViewGroup) departureView.a.getParent()).setVisibility(View.GONE);
+                        }
+                    }
                 } else {
-                    upcomingTextView.setText(getString(R.string.label_no_upcoming_departure));
+                    upcomingDeparturesContainer.setVisibility(View.GONE);
+                    noUpcomingDeparturesView.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -442,14 +476,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                 if (id == itemView.getId()) {
                     startStopActivity(stop);
-                }
-            }
-
-            @Override
-            public boolean onLongClick(View v) {
-                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-
-                if (v.getId() == itemView.getId()) {
+                } else if (id == moreOptionsButton.getId()) {
                     MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
                             getActivity(), stop, new MoreStopOptionsDialog.ResponseListener() {
 
@@ -470,36 +497,36 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                     });
 
                     moreStopOptionsDialog.show();
-
-                    return true;
                 }
-
-                return false;
             }
         }
 
         private class FartherStopViewHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener, View.OnLongClickListener {
+                implements View.OnClickListener {
 
             private Stop stop;
             private TextView stopNameTextView;
+            private TextView directionTextView;
+            private ImageButton moreOptionsImageButton;
 
             public FartherStopViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                directionTextView = (TextView) itemView.findViewById(R.id.direction_textview);
+                moreOptionsImageButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                itemView.setOnLongClickListener(this);
+                moreOptionsImageButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(getString(
-                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
+                stopNameTextView.setText(stop.getName());
+                directionTextView.setText(stop.getDirection());
             }
 
             @Override
@@ -508,14 +535,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                 if (id == itemView.getId()) {
                     startStopActivity(stop);
-                }
-            }
-
-            @Override
-            public boolean onLongClick(View v) {
-                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-
-                if (v.getId() == itemView.getId()) {
+                } else if (id == moreOptionsImageButton.getId()) {
                     MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
                             getActivity(), stop, new MoreStopOptionsDialog.ResponseListener() {
 
@@ -537,7 +557,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                     moreStopOptionsDialog.show();
                 }
-                return false;
             }
         }
 

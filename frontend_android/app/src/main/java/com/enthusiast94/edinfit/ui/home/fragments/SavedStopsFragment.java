@@ -175,7 +175,7 @@ public class SavedStopsFragment extends Fragment {
                             departure.getServiceName(), departure.getDestination(),
                             departure.getTime()));
                 } else {
-                    upcomingTextView.setText(context.getString(R.string.label_no_upcoming_departure));
+                    upcomingTextView.setText(context.getString(R.string.label_no_upcoming_departures));
                 }
             }
 
