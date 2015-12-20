@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,16 +34,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by manas on 01-10-2015.
@@ -56,12 +55,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private RecyclerView nearbyStopsRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView currentLocationTextView;
-    private TextView lastUpdatedAtTextView;
     private MapView mapView;
+    private ProgressBar mapProgressBar;
+    private ImageView mapImageView;
 
     private NearbyStopsAdapter nearbyStopsAdapter;
     private GoogleMap map;
-    private Date lastUpdatedAt;
     private List<Stop> stops = new ArrayList<>();
     private List<Marker> stopMarkers = new ArrayList<>();
     private LocationProvider locationProvider;
@@ -93,8 +92,9 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
-        lastUpdatedAtTextView = (TextView) view.findViewById(R.id.last_updated_textview);
         mapView = (MapView) view.findViewById(R.id.map_view);
+        mapProgressBar = (ProgressBar) view.findViewById(R.id.map_progress_bar);
+        mapImageView = (ImageView) view.findViewById(R.id.map_imageview);
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -109,6 +109,31 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()),
                 12));
+        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+
+            @Override
+            public void onCameraChange(final CameraPosition cameraPosition) {
+                LatLng target = cameraPosition.target;
+                reverseGeocoder.getPlaceName(target.latitude, target.longitude,
+                        new ReverseGeocoder.ReverseGeocodeCallback() {
+
+                            @Override
+                            public void onSuccess(String placeName) {
+                                userLocationLatLng = new LatLng(cameraPosition.target.latitude,
+                                        cameraPosition.target.longitude);
+                                userLocationName = placeName;
+
+                                loadStops(userLocationLatLng, userLocationName);
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                currentLocationTextView.setText(
+                                        getString(R.string.label_unknown));
+                            }
+                        });
+            }
+        });
 
         /**
          * Setup location provider and reverse geocoder
@@ -126,7 +151,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
             @Override
             public void onRefresh() {
-                locationProvider.requestLastKnownLocation();
+                loadStops(userLocationLatLng, userLocationName);
             }
         });
 
@@ -156,22 +181,20 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         };
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
+        locationProvider.connect();
+
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        locationProvider.connect();
         mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -188,7 +211,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        locationProvider.disconnect();
         mapView.onDestroy();
     }
 
@@ -200,9 +223,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     }
 
     private void loadStops(final LatLng userLocationLatLng, final String userLocationName) {
-        if (stops.size() == 0) {
-            setRefreshIndicatorVisiblity(true);
-        }
+        setRefreshIndicatorVisiblity(true);
+        setMapProgressBarEnabled(true);
 
         StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
                 userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE, NEARBY_STOPS_LIMIT,
@@ -211,14 +233,14 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                     @Override
                     public void onSuccess(List<Stop> data) {
                         stops = data;
-                        lastUpdatedAt = new Date();
 
                         if (getActivity() != null) {
                             setRefreshIndicatorVisiblity(false);
+                            setMapProgressBarEnabled(false);
 
                             nearbyStopsAdapter.notifyStopsChanged(stops);
 
-                            updateSlidingMapPanel(userLocationLatLng, userLocationName);
+                            updateSlidingMapPanel(userLocationName);
                         }
                     }
 
@@ -226,6 +248,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                     public void onFailure(String message) {
                         if (getActivity() != null) {
                             setRefreshIndicatorVisiblity(false);
+                            setMapProgressBarEnabled(false);
 
                             Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                         }
@@ -233,16 +256,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 });
     }
 
-    private void updateSlidingMapPanel(LatLng userLocationLatLng, String userLocationName) {
+    private void updateSlidingMapPanel(String userLocationName) {
         // remove all existing markers
         stopMarkers = new ArrayList<>();
         map.clear();
 
-        // update current location and last update timestamp
-
         currentLocationTextView.setText(userLocationName);
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.UK);
-        lastUpdatedAtTextView.setText(sdf.format(lastUpdatedAt));
 
         // add nearby stop markers to map
 
@@ -266,9 +285,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
             stopMarkers.add(stopMarker);
         }
-
-        // move map focus to user's last known location
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 16));
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -286,34 +302,35 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (getActivity() != null) {
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 16));
+
             // simply reuse previously loaded nearby stops if user did not perform a manual refresh
             if (!swipeRefreshLayout.isRefreshing() && stops.size() != 0) {
                 nearbyStopsAdapter.notifyStopsChanged(stops);
-                updateSlidingMapPanel(userLocationLatLng, userLocationName);
+                updateSlidingMapPanel(userLocationName);
+            } else {
+                reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
+                        new ReverseGeocoder.ReverseGeocodeCallback() {
 
-                return;
+                            @Override
+                            public void onSuccess(String placeName) {
+                                userLocationName = placeName;
+
+                                if (getActivity() != null) {
+                                    loadStops(userLocationLatLng, userLocationName);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                if (getActivity() != null) {
+                                    setRefreshIndicatorVisiblity(false);
+                                    setMapProgressBarEnabled(false);
+                                    Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
             }
-
-            reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
-                    new ReverseGeocoder.ReverseGeocodeCallback() {
-
-                        @Override
-                        public void onSuccess(String placeName) {
-                            userLocationName = placeName;
-
-                            if (getActivity() != null) {
-                                loadStops(userLocationLatLng, userLocationName);
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(String error) {
-                            if (getActivity() != null) {
-                                setRefreshIndicatorVisiblity(false);
-                                Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
         }
     }
 
@@ -321,7 +338,18 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     public void onLastKnownLocationFailure(String error) {
         if (getActivity() != null) {
             setRefreshIndicatorVisiblity(false);
+            setMapProgressBarEnabled(false);
             Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setMapProgressBarEnabled(boolean isEnabled) {
+        if (isEnabled) {
+            mapProgressBar.setVisibility(View.VISIBLE);
+            mapImageView.setVisibility(View.INVISIBLE);
+        } else {
+            mapProgressBar.setVisibility(View.INVISIBLE);
+            mapImageView.setVisibility(View.VISIBLE);
         }
     }
 

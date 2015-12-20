@@ -115,6 +115,9 @@
     <string name="label_enter_search_keyword">Enter search keyword</string>
     <string name="label_search_hint">Search for stops by name and services by name or description</string>
     <string name="label_no_results">No results</string>
+    <string name="label_change_location">Change location</string>
+    <string name="label_set_location">Set Location</string>
+    <string name="label_unknown">Unknown</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -130,7 +133,7 @@
     <string name="error_parsing">There was a problem parsing API response.</string>
     <string name="error_request_time_out">The request timed out. Please try again.</string>
     <string name="error_could_not_fetch_location">Error! Could not fetch current user location.</string>
-    <string name="error_could_not_geocode_location">Error! Could not geocode current user location.</string>
+    <string name="error_could_not_geocode_location">Error! Could not geocode current location.</string>
     <string name="error_could_not_fetch_directions">Error! Could not fetch directions.</string>
     <string name="error_unexpected">Un an unexpected error occurred! Please try again.</string>
 

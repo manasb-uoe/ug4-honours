@@ -45,16 +45,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_toLeftOf="@+id/map_imageview"
+                android:layout_toLeftOf="@+id/map_imageview_container"
+                android:layout_alignTop="@id/map_imageview_container"
+                android:layout_alignBottom="@id/map_imageview_container"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
                 >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     >
+
+                    <TextView
+                        android:id="@+id/current_location_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_loading"
+                        android:textColor="@color/primary_text_light"
+                        />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -62,51 +73,34 @@
                         android:text="@string/label_current_location"
                         />
 
-                    <TextView
-                        android:id="@+id/current_location_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="@dimen/spacing_small"
-                        android:text="@string/label_loading"
-                        android:textColor="@color/primary_text_light"
-                        />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_last_updated"
-                        />
-
-                    <TextView
-                        android:id="@+id/last_updated_textview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="@dimen/spacing_small"
-                        android:text="@string/label_loading"
-                        android:textColor="@color/primary_text_light"
-                        />
-
                 </LinearLayout>
 
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/map_imageview"
+            <FrameLayout
+                android:id="@+id/map_imageview_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_maps_map"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                />
+                >
+
+                <ImageView
+                    android:id="@+id/map_imageview"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_action_maps_place"
+                    />
+
+                <ProgressBar
+                    android:id="@+id/map_progress_bar"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    />
+
+            </FrameLayout>
 
         </RelativeLayout>
 
@@ -116,11 +110,25 @@
             android:background="@color/divider"
             />
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/map_view"
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent">
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_action_device_gps_fixed"
+                android:layout_gravity="center"
+                />
+
+        </FrameLayout>
 
     </LinearLayout>
 
