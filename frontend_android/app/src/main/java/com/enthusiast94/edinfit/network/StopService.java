@@ -107,15 +107,13 @@ public class StopService extends BaseService {
     }
 
     public void getNearbyStops(Double latitude, Double longitude, int maxDistance,
-                               Double nearDistance, String time,
-                               int stopsLimit, int departuresLimit, final Callback<List<Stop>> callback) {
+                               Double nearDistance, int stopsLimit,
+                               final Callback<List<Stop>> callback) {
 
         RequestParams requestParams = new RequestParams();
         requestParams.put("latitude", latitude);
         requestParams.put("longitude", longitude);
         requestParams.put("stops_limit", stopsLimit);
-        requestParams.put("departures_limit", departuresLimit);
-        requestParams.put("time", time);
         requestParams.put("max_distance", maxDistance);
         requestParams.put("near_distance", nearDistance);
 

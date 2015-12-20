@@ -336,7 +336,7 @@ public class HomeActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0: return getString(R.string.label_activity);
-                case 1: return getString(R.string.label_near_me);
+                case 1: return getString(R.string.label_nearby_stops);
                 case 2: return getString(R.string.label_saved);
                 default: return null;
             }

@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_toLeftOf="@+id/place_imageview"
+                android:layout_toLeftOf="@+id/map_imageview"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 >
@@ -99,10 +99,10 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/place_imageview"
+                android:id="@+id/map_imageview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_maps_place"
+                android:src="@drawable/ic_action_maps_map"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"

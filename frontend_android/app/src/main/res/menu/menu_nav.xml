@@ -16,7 +16,7 @@
             />
         <item
             android:id="@+id/action_near_me"
-            android:title="@string/label_near_me"
+            android:title="@string/label_nearby_stops"
             android:icon="@drawable/ic_near_me_black_24dp"
             />
         <item

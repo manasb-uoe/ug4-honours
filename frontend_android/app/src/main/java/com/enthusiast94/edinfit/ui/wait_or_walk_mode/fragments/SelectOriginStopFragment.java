@@ -59,7 +59,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     private static final int NEARBY_STOPS_LIMIT = 5;
     private static final int MAX_DISTANCE = 3;
     private static final double NEAR_DISTANCE = 0;
-    private static final int DEPARTURES_LIMIT = 0;
 
     @Nullable
     @Override
@@ -198,8 +197,8 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         setRefreshIndicatorVisiblity(true);
 
         StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
-                userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE, null,
-                NEARBY_STOPS_LIMIT, DEPARTURES_LIMIT, new BaseService.Callback<List<Stop>>() {
+                userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE, NEARBY_STOPS_LIMIT,
+                new BaseService.Callback<List<Stop>>() {
 
                     @Override
                     public void onSuccess(List<Stop> data) {

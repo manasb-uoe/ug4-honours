@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#607D8B</color>
-    <color name="primary_opaque_40">#66607D8B</color>
-    <color name="primary_dark">#455A64</color>
+    <color name="primary">#F44336</color>
+    <color name="primary_opaque_40">#66F44336</color>
+    <color name="primary_dark">#D32F2F</color>
     <color name="primary_light">#E3ECF5</color>
-    <color name="accent">#03A9F4</color>
-    <color name="accent_opaque_40">#6603A9F4</color>
+    <color name="accent">#00BCD4</color>
+    <color name="accent_opaque_40">#6600BCD4</color>
     <color name="primary_text_light">@android:color/primary_text_light</color>
     <color name="secondary_text_light">@android:color/secondary_text_light</color>
     <color name="secondary_text_light_2">#777</color>
