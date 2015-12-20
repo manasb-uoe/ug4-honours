@@ -9,10 +9,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,16 +56,8 @@ public class ActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_activity, container, false);
 
-        /**
-         * Find views
-         */
-
         RecyclerView activityRecyclerView = (RecyclerView) view.findViewById(R.id.activity_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-
-        /**
-         * Setup swipe refresh layout
-         */
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -74,10 +67,6 @@ public class ActivityFragment extends Fragment {
                 loadActivities();
             }
         });
-
-        /**
-         * Setup saved stops recycler view
-         */
 
         activityRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         activityAdapter = new ActivityAdapter(getActivity());
@@ -136,9 +125,13 @@ public class ActivityFragment extends Fragment {
         private Map<String, ActivityTimeSpan> activityTimeSpansMap;
         private StatisticsSummary todaySummary;
 
-        private static final int TODAY_SUMMARY_VIEW = 0;
-        private static final int HEADER_VIEW = 1;
-        private static final int DETAIL_VIEW = 2;
+        private static final int SPINNER_VIEW = 0;
+        private static final int TODAY_SUMMARY_VIEW = 1;
+        private static final int HEADER_VIEW = 2;
+        private static final int DETAIL_VIEW = 3;
+        private static final String TODAY_SUMMARY_ITEM = "todaySummaryItem";
+        private static final String SPINNER_ITEM = "spinnerItem";
+
 
         public ActivityAdapter(Context context) {
             this.context = context;
@@ -151,13 +144,19 @@ public class ActivityFragment extends Fragment {
             if (viewType == TODAY_SUMMARY_VIEW) {
                 return new SummaryViewHolder(
                         context, inflater.inflate(R.layout.row_activity_summary, parent, false));
-            }
-            if (viewType == HEADER_VIEW) {
+
+            } else if (viewType == SPINNER_VIEW) {
+                return new SpinnerViewHolder(context,
+                        inflater.inflate(R.layout.row_activity_spinners, parent, false));
+
+            } else if (viewType == HEADER_VIEW) {
                 return new HeaderViewHolder(
                         inflater.inflate(R.layout.row_activity_header, parent, false));
+
             } else if (viewType == DETAIL_VIEW) {
                 return new DetailViewHolder(context,
                         inflater.inflate(R.layout.row_activity_detail, parent, false));
+
             } else {
                 throw new IllegalArgumentException("Invalid view type: " + viewType);
             }
@@ -168,6 +167,8 @@ public class ActivityFragment extends Fragment {
             if (holder instanceof SummaryViewHolder) {
                 ((SummaryViewHolder) holder).bindItem(todaySummary);
 
+            } else if (holder instanceof SpinnerViewHolder) {
+                // TODO bind current selection
             } else if (holder instanceof HeaderViewHolder) {
                 String timeSpan = (String) getItem(position);
                 ActivityTimeSpan activityTimeSpan = activityTimeSpansMap.get(timeSpan);
@@ -175,6 +176,7 @@ public class ActivityFragment extends Fragment {
 
             } else if (holder instanceof DetailViewHolder) {
                 ((DetailViewHolder) holder).bindItem((Triplet<Integer, Integer, Activity>) getItem(position));
+
             } else {
                 throw new IllegalArgumentException("Invalid holder instance type: " +
                         holder.getClass().getSimpleName());
@@ -189,9 +191,9 @@ public class ActivityFragment extends Fragment {
                 size += 1 + entry.getValue().getActivities().size();
             }
 
-            // only show today's summary if user has at least 1 activity
+            // only show today's summary and spinners if user has at least 1 activity
             if (size > 0) {
-                size += 1;
+                size += 2;
             }
 
             return size;
@@ -199,10 +201,14 @@ public class ActivityFragment extends Fragment {
 
         private Object getItem(int position) {
             if (position == 0) {
-                return null;
+                return TODAY_SUMMARY_ITEM;
             }
 
-            int offset = position - 1;
+            if (position == 1) {
+                return SPINNER_ITEM;
+            }
+
+            int offset = position - 2;
 
             for (Map.Entry<String, ActivityTimeSpan> entry : activityTimeSpansMap.entrySet()) {
                 if (offset == 0) {
@@ -226,8 +232,10 @@ public class ActivityFragment extends Fragment {
         public int getItemViewType(int position) {
             Object item = getItem(position);
 
-            if (item == null) {
+            if (item == TODAY_SUMMARY_ITEM) {
                 return TODAY_SUMMARY_VIEW;
+            } else if (item == SPINNER_ITEM) {
+                return SPINNER_VIEW;
             } else if (item instanceof String) {
                 return HEADER_VIEW;
             } else {
@@ -460,6 +468,38 @@ public class ActivityFragment extends Fragment {
 
             public void bindItem(StatisticsSummary summary) {
                 adapter.updateSummary(summary);
+            }
+        }
+
+        private static class SpinnerViewHolder extends RecyclerView.ViewHolder {
+
+            private Context context;
+            private Spinner timespanSpinner;
+            private Spinner statisticSpinner;
+
+            public SpinnerViewHolder(Context context, View itemView) {
+                super(itemView);
+
+                this.context = context;
+
+                // find views
+                timespanSpinner = (Spinner) itemView.findViewById(R.id.timespan_spinner);
+                statisticSpinner = (Spinner) itemView.findViewById(R.id.statistic_spinner);
+
+                // populate spinners
+                ArrayAdapter<CharSequence> timespanAdapter = ArrayAdapter.createFromResource(context,
+                        R.array.timespans, android.R.layout.simple_spinner_dropdown_item);
+                timespanAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                timespanSpinner.setAdapter(timespanAdapter);
+
+                ArrayAdapter<CharSequence> statisticAdapter = ArrayAdapter.createFromResource(context,
+                        R.array.statistics, android.R.layout.simple_spinner_dropdown_item);
+                statisticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                statisticSpinner.setAdapter(statisticAdapter);
+            }
+
+            public void bindItem() {
+
             }
         }
 

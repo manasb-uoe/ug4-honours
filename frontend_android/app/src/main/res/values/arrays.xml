@@ -9,4 +9,17 @@
         <item>Saturday</item>
         <item>Sunday</item>
     </string-array>
+    
+    <string-array name="timespans">
+        <item>Day view</item>
+        <item>Week view</item>
+        <item>Month view</item>
+    </string-array>
+
+    <string-array name="statistics">
+        <item>Activity time</item>
+        <item>Distance</item>
+        <item>Calories</item>
+        <item>Steps</item>
+    </string-array>
 </resources>
