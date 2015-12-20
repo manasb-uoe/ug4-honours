@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
@@ -328,11 +330,13 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         private Context context;
         private LayoutInflater inflater;
         private List<Stop> nearbyStops;
+        private List<String> savedStopIds;
 
         public NearbyStopsAdapter(Context context) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             nearbyStops = new ArrayList<>();
+            savedStopIds = UserService.getInstance().getAuthenticatedUser().getSavedStops();
         }
 
         @Override
@@ -366,6 +370,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
             private TextView destinationsTextView;
             private TextView idTextView;
             private TextView distanceAwayTextView;
+            private ImageView starImageView;
 
             public StopViewHolder(View itemView) {
                 super(itemView);
@@ -378,6 +383,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
                 idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
                 distanceAwayTextView = (TextView) itemView.findViewById(R.id.distance_away_textview);
+                starImageView = (ImageView) itemView.findViewById(R.id.star_imageview);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
@@ -416,6 +422,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                 idTextView.setText(stop.getId());
                 distanceAwayTextView.setText(Helpers.humanizeDistance(stop.getDistanceAway()));
+
+                if (savedStopIds.contains(stop.getId())) {
+                    starImageView.setVisibility(View.VISIBLE);
+                } else {
+                    starImageView.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override
@@ -435,12 +447,36 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                         @Override
                         public void onStopSaved(String error) {
-                            NearbyStopsAdapter.this.onStopSaved(error, stop);
+                            savedStopIds.add(stop.getId());
+
+                            notifyItemChanged(getAdapterPosition());
+
+                            if (context != null) {
+                                if (error == null) {
+                                    Toast.makeText(context, String.format(
+                                            context.getString(R.string.success_stop_saved),
+                                            stop.getName()), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                                }
+                            }
                         }
 
                         @Override
                         public void onStopUnsaved(String error) {
-                            NearbyStopsAdapter.this.onStopUnsaved(error, stop);
+                            savedStopIds.remove(stop.getId());
+
+                            notifyItemChanged(getAdapterPosition());
+
+                            if (context != null) {
+                                if (error == null) {
+                                    Toast.makeText(context, String.format(
+                                            context.getString(R.string.success_stop_unsaved),
+                                            stop.getName()), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                                }
+                            }
                         }
                     });
 
@@ -457,29 +493,5 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         }
 
         public abstract void onShowStopOnMapOptionSelected(Stop stop);
-
-        private void onStopSaved(String error, Stop stop) {
-            if (context != null) {
-                if (error == null) {
-                    Toast.makeText(context, String.format(
-                            context.getString(R.string.success_stop_saved),
-                            stop.getName()), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        private void onStopUnsaved(String error, Stop stop) {
-            if (context != null) {
-                if (error == null) {
-                    Toast.makeText(context, String.format(
-                            context.getString(R.string.success_stop_unsaved),
-                            stop.getName()), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
     }
 }

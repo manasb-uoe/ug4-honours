@@ -139,14 +139,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="@dimen/spacing_small"
         >
+
+        <ImageView
+            android:id="@+id/star_imageview"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_toggle_star_yellow"
+            android:visibility="invisible"
+            />
 
         <ImageView
             android:id="@+id/distance_away_imageview"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_action_maps_directions_walk_accent"
+            android:layout_alignTop="@id/star_imageview"
+            android:layout_alignBottom="@id/star_imageview"
             android:layout_toLeftOf="@+id/distance_away_textview"
             />
 
@@ -160,7 +169,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/distance_away_imageview"
             android:layout_alignBottom="@id/distance_away_imageview"
-            style="@style/TextAppearance.AppCompat.Body2"
+            android:textStyle="bold"
             />
 
     </RelativeLayout>
