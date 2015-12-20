@@ -49,13 +49,23 @@ public class ReverseGeocoder  {
                 }
 
                 if (list != null && list.size() > 0) {
-                    final List<Address> finalList = list;
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onSuccess(finalList.get(0).getThoroughfare());
-                        }
-                    });
+                    final String placeName = list.get(0).getThoroughfare();
+
+                    if (placeName != null) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(placeName);
+                            }
+                        });
+                    } else {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onFailure(errorMessage);
+                            }
+                        });
+                    }
 
                     return;
                 }
