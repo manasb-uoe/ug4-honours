@@ -13,12 +13,14 @@
 
     <TextView
         android:id="@+id/stop_direction_textview"
-        android:layout_width="35dp"
-        android:layout_height="30dp"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="NE"
-        android:background="@color/light_grey"
+        android:text="NEE"
+        android:textSize="@dimen/font_small"
+        android:textColor="@android:color/white"
+        android:background="@drawable/stop_direction_background"
         android:layout_marginRight="@dimen/spacing_normal"
         style="@style/TextAppearance.AppCompat.Body2"
         />
@@ -30,6 +32,7 @@
         android:text="Princes Street"
         android:gravity="center_vertical"
         android:layout_gravity="center_vertical"
+        style="@style/TextAppearance.AppCompat.Body1"
         />
 
 </LinearLayout>

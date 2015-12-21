@@ -16,6 +16,7 @@ import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
+import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
 import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.user_profile.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
@@ -38,10 +39,10 @@ public class HomeActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private int selectedPageIndex;
     private final int[] tabIconsUnselected = new int[]{R.drawable.ic_directions_run_unselected,
-            R.drawable.ic_near_me_unselected, R.drawable.ic_toggle_star_unselected,
+            R.drawable.ic_near_me_unselected, R.drawable.ic_search_unselected, R.drawable.ic_toggle_star_unselected,
             R.drawable.ic_social_person_unselected};
     private final int[] tabIconsSelected = new int[]{R.drawable.ic_directions_run_selected,
-            R.drawable.ic_near_me_selected, R.drawable.ic_toggle_star_selected,
+            R.drawable.ic_near_me_selected, R.drawable.ic_search_selected, R.drawable.ic_toggle_star_selected,
             R.drawable.ic_social_person_selected};
 
     @Override
@@ -201,7 +202,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 4;
+        private static final int FRAGMENT_COUNT = 5;
 
         public MainPagerAdapter() {
             super(getSupportFragmentManager());
@@ -212,8 +213,9 @@ public class HomeActivity extends AppCompatActivity {
             switch (position) {
                 case 0: return new ActivityFragment();
                 case 1: return new NearMeFragment();
-                case 2: return new SavedStopsFragment();
-                case 3: return new UserProfileFragment();
+                case 2: return new SearchFragment();
+                case 3: return new SavedStopsFragment();
+                case 4: return new UserProfileFragment();
                 default: return null;
             }
         }

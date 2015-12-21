@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.search.fragments;
+package com.enthusiast94.edinfit.ui.home.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,10 +6,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,14 +25,12 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
-import com.enthusiast94.edinfit.ui.search.events.OnSearchEvent;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
+import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 18-11-2015.
@@ -41,6 +44,7 @@ public class SearchFragment extends Fragment {
     private TextView noResultsTextView;
     private RecyclerView searchResultsRecyclerView;
     private SearchAdapter searchAdapter;
+    private EditText searchEditText;
 
     private List<Service> services;
     private List<Stop> stops;
@@ -58,6 +62,7 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
+        searchEditText = (EditText) view.findViewById(R.id.search_edittext);
         progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         hintView = view.findViewById(R.id.hint_view);
         noResultsTextView = (TextView) view.findViewById(R.id.no_results_textview);
@@ -66,6 +71,35 @@ public class SearchFragment extends Fragment {
         searchAdapter = new SearchAdapter();
         searchResultsRecyclerView.setAdapter(searchAdapter);
         searchResultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Setup a text changed listener on search edit text to filter service search results.
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                onSearch(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Also ensure that the keyboard is hidden if search button on keyboard is pressed.
+        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    Helpers.hideSoftKeyboard(getActivity(), v.getWindowToken());
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
 
         if (services == null && stops == null) {
             loadAllStopsAndServices();
@@ -76,22 +110,8 @@ public class SearchFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        EventBus.getDefault().unregister(this);
-    }
-
-    public void onEventMainThread(OnSearchEvent event) {
-        filter = event.getFilter();
+    private void onSearch(String filter) {
+        this.filter = filter;
         searchAdapter.notifyFilterChanged(filter);
     }
 

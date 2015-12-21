@@ -1,62 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        />
-
     <LinearLayout
-        android:id="@+id/hint_view"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:visibility="gone"
+        android:background="@drawable/service_search_edittext_background"
+        android:layout_margin="@dimen/spacing_small"
+        android:padding="@dimen/spacing_7dp"
+        android:focusableInTouchMode="true"
         >
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@drawable/ic_action_search_75dp"
-            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_action_search_grey"
+            android:layout_marginRight="@dimen/spacing_tiny"
             />
 
-        <TextView
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="@color/primary"
+        <EditText
+            android:id="@+id/search_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/label_enter_search_keyword"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/dark_grey"
             android:textSize="@dimen/font_normal_large"
-            android:text="@string/label_search_hint"
+            android:inputType="text"
             />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/no_results_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:textSize="@dimen/font_large"
-        android:text="@string/label_no_results"
-        android:textColor="@color/primary"
-        android:visibility="gone"
-        />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_results_recyclerview"
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        />
+        >
 
-</FrameLayout>
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            />
+
+        <LinearLayout
+            android:id="@+id/hint_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/ic_action_search_100dp"
+                android:layout_gravity="center"
+                />
+
+            <TextView
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/font_normal_large"
+                android:text="@string/label_search_hint"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/no_results_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="@dimen/font_large"
+            android:text="@string/label_no_results"
+            android:textColor="@color/dark_grey"
+            android:visibility="gone"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/search_results_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            />
+
+    </FrameLayout>
+
+</LinearLayout>
