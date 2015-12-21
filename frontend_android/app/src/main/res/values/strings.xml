@@ -118,6 +118,7 @@
     <string name="label_change_location">Change location</string>
     <string name="label_set_location">Set Location</string>
     <string name="label_unknown">Unknown</string>
+    <string name="label_selected_location">Selected location</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

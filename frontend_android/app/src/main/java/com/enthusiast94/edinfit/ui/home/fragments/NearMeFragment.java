@@ -34,7 +34,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -67,6 +66,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private ReverseGeocoder reverseGeocoder;
     private LatLng userLocationLatLng;
     private String userLocationName;
+    private Marker userLocationMarker;
 
     // nearby stops api endpoint params
     private static final int NEARBY_STOPS_LIMIT = 20;
@@ -109,18 +109,18 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()),
                 12));
-        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
             @Override
-            public void onCameraChange(final CameraPosition cameraPosition) {
-                LatLng target = cameraPosition.target;
-                reverseGeocoder.getPlaceName(target.latitude, target.longitude,
+            public void onMapClick(final LatLng latLng) {
+                userLocationMarker.setPosition(latLng);
+
+                reverseGeocoder.getPlaceName(latLng.latitude, latLng.longitude,
                         new ReverseGeocoder.ReverseGeocodeCallback() {
 
                             @Override
                             public void onSuccess(String placeName) {
-                                userLocationLatLng = new LatLng(cameraPosition.target.latitude,
-                                        cameraPosition.target.longitude);
+                                userLocationLatLng = latLng;
                                 userLocationName = placeName;
 
                                 loadStops(userLocationLatLng, userLocationName);
@@ -134,13 +134,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                         });
             }
         });
-
-        /**
-         * Setup location provider and reverse geocoder
-         */
-
-        locationProvider = new LocationProvider(getActivity(), this);
-        reverseGeocoder = new ReverseGeocoder(getActivity());
 
         /**
          * Setup swipe refresh layout
@@ -181,7 +174,22 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         };
         nearbyStopsRecyclerView.setAdapter(nearbyStopsAdapter);
 
-        locationProvider.connect();
+        if (locationProvider == null) {
+            locationProvider = new LocationProvider(getActivity(), this);
+        }
+
+        if (reverseGeocoder == null) {
+            reverseGeocoder = new ReverseGeocoder(getActivity());
+        }
+
+        if (!locationProvider.isConnected()) {
+            locationProvider.connect();
+        } else {
+            // reuse previously loaded nearby stops
+            nearbyStopsAdapter.notifyStopsChanged(stops);
+            userLocationMarker = null; // set to null so that it is redrawn after config change
+            updateSlidingMapPanel(userLocationName);
+        }
 
         return view;
     }
@@ -257,9 +265,11 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     }
 
     private void updateSlidingMapPanel(String userLocationName) {
-        // remove all existing markers
+        // remove all existing stop markers
+        for (Marker marker : stopMarkers) {
+            marker.remove();
+        }
         stopMarkers = new ArrayList<>();
-        map.clear();
 
         currentLocationTextView.setText(userLocationName);
 
@@ -285,6 +295,23 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
             stopMarkers.add(stopMarker);
         }
+
+        // update user location marker
+        if (userLocationMarker == null || !userLocationMarker.isVisible()) {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(userLocationLatLng);
+            userLocationMarker = map.addMarker(markerOptions);
+        }
+
+        userLocationMarker.setTitle(userLocationName);
+        userLocationMarker.setSnippet(
+                getString(R.string.label_selected_location));
+
+        if (map.getCameraPosition().zoom < 13) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
+        } else {
+            map.animateCamera(CameraUpdateFactory.newLatLng(userLocationLatLng));
+        }
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -302,35 +329,29 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (getActivity() != null) {
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 16));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
 
-            // simply reuse previously loaded nearby stops if user did not perform a manual refresh
-            if (!swipeRefreshLayout.isRefreshing() && stops.size() != 0) {
-                nearbyStopsAdapter.notifyStopsChanged(stops);
-                updateSlidingMapPanel(userLocationName);
-            } else {
-                reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
-                        new ReverseGeocoder.ReverseGeocodeCallback() {
+            reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
+                    new ReverseGeocoder.ReverseGeocodeCallback() {
 
-                            @Override
-                            public void onSuccess(String placeName) {
-                                userLocationName = placeName;
+                        @Override
+                        public void onSuccess(String placeName) {
+                            userLocationName = placeName;
 
-                                if (getActivity() != null) {
-                                    loadStops(userLocationLatLng, userLocationName);
-                                }
+                            if (getActivity() != null) {
+                                loadStops(userLocationLatLng, userLocationName);
                             }
+                        }
 
-                            @Override
-                            public void onFailure(String error) {
-                                if (getActivity() != null) {
-                                    setRefreshIndicatorVisiblity(false);
-                                    setMapProgressBarEnabled(false);
-                                    Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
-                                }
+                        @Override
+                        public void onFailure(String error) {
+                            if (getActivity() != null) {
+                                setRefreshIndicatorVisiblity(false);
+                                setMapProgressBarEnabled(false);
+                                Toast.makeText(getActivity(), error, Toast.LENGTH_LONG).show();
                             }
-                        });
-            }
+                        }
+                    });
         }
     }
 
