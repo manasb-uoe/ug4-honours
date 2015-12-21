@@ -1,19 +1,14 @@
 package com.enthusiast94.edinfit.ui.home.activities;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.network.UserService;
@@ -21,7 +16,6 @@ import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
-import com.enthusiast94.edinfit.ui.search.activities.SearchActivity;
 import com.enthusiast94.edinfit.ui.user_profile.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.user_profile.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
@@ -43,6 +37,12 @@ public class HomeActivity extends AppCompatActivity {
     private Handler handler;
     private ViewPager viewPager;
     private int selectedPageIndex;
+    private final int[] tabIconsUnselected = new int[]{R.drawable.ic_directions_run_unselected,
+            R.drawable.ic_near_me_unselected, R.drawable.ic_toggle_star_unselected,
+            R.drawable.ic_social_person_unselected};
+    private final int[] tabIconsSelected = new int[]{R.drawable.ic_directions_run_selected,
+            R.drawable.ic_near_me_selected, R.drawable.ic_toggle_star_selected,
+            R.drawable.ic_social_person_selected};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +163,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void onPageSelected(int position) {
-        selectedPageIndex = position;
+        // only highlight selected tab
+        setTabSelected(selectedPageIndex, false);
+        setTabSelected(position, true);
 
         // only show fab on ActivityFragment
         if (position == 0) {
@@ -171,17 +173,20 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             fabMenu.hideMenuButton(true);
         }
+
+        selectedPageIndex = position;
     }
 
     private void setupTabs() {
-        int[] tabIcons = new int[]{R.drawable.ic_directions_run_black_24dp,
-                R.drawable.ic_near_me_black_24dp, R.drawable.ic_star_black_24dp, R.drawable.ic_person_black_24dp};
-
         tabLayout.setupWithViewPager(viewPager);
 
         for (int i=0; i<tabLayout.getTabCount(); i++) {
-            tabLayout.getTabAt(i).setIcon(tabIcons[i]);
+            tabLayout.getTabAt(i).setIcon(tabIconsUnselected[i]);
         }
+    }
+
+    private void setTabSelected(int pos, boolean shouldSelect) {
+        tabLayout.getTabAt(pos).setIcon(shouldSelect ? tabIconsSelected[pos] : tabIconsUnselected[pos]);
     }
 
     private void goToLogin() {
