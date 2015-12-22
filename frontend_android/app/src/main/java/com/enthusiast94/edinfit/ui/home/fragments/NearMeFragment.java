@@ -29,7 +29,6 @@ import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.enthusiast94.edinfit.utils.ReverseGeocoder;
-import com.enthusiast94.edinfit.utils.SimpleDividerItemDecoration;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -153,7 +152,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
          */
 
         nearbyStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        nearbyStopsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         nearbyStopsAdapter = new NearbyStopsAdapter(getActivity()) {
             @Override
             public void onShowStopOnMapOptionSelected(Stop stop) {

@@ -21,6 +21,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="none"
+            android:background="@color/background_grey"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/spacing_small"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>
