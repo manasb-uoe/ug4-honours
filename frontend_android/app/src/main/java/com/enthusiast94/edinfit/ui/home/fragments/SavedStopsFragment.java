@@ -24,6 +24,7 @@ import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -32,10 +33,15 @@ import java.util.List;
 public class SavedStopsFragment extends Fragment {
 
     public static final String TAG = NearMeFragment.class.getSimpleName();
+    private static final int DEPARTURES_LIMIT = 8;
+
     private RecyclerView savedStopsRecyclerView;
-    private SavedStopsAdapter savedStopsAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView updatedAtTextView;
+
+    private SavedStopsAdapter savedStopsAdapter;
     private List<Stop> savedStops;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +56,7 @@ public class SavedStopsFragment extends Fragment {
 
         savedStopsRecyclerView = (RecyclerView) view.findViewById(R.id.saved_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        updatedAtTextView = (TextView) view.findViewById(R.id.updated_at_textview);
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -64,40 +71,52 @@ public class SavedStopsFragment extends Fragment {
         savedStopsAdapter = new SavedStopsAdapter(getActivity());
         savedStopsRecyclerView.setAdapter(savedStopsAdapter);
 
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         if (savedStops == null) {
             loadSavedStops();
         } else {
             savedStopsAdapter.notifyStopsChanged(savedStops);
+            updatedLastUpdatedTimestamp();
         }
-
-        return view;
     }
 
     private void loadSavedStops() {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getInstance().getSavedStops(new BaseService.Callback<List<Stop>>() {
+        StopService.getInstance().getSavedStops(DEPARTURES_LIMIT,
+                new BaseService.Callback<List<Stop>>() {
 
-            @Override
-            public void onSuccess(List<Stop> data) {
-                savedStops = data;
+                    @Override
+                    public void onSuccess(List<Stop> data) {
+                        savedStops = data;
 
-                if (getActivity() != null) {
-                    setRefreshIndicatorVisiblity(false);
+                        if (getActivity() != null) {
+                            setRefreshIndicatorVisiblity(false);
 
-                    savedStopsAdapter.notifyStopsChanged(savedStops);
-                }
-            }
+                            savedStopsAdapter.notifyStopsChanged(savedStops);
+                            updatedLastUpdatedTimestamp();
+                        }
+                    }
 
-            @Override
-            public void onFailure(String message) {
-                if (getActivity() != null) {
-                    setRefreshIndicatorVisiblity(false);
+                    @Override
+                    public void onFailure(String message) {
+                        if (getActivity() != null) {
+                            setRefreshIndicatorVisiblity(false);
 
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void updatedLastUpdatedTimestamp() {
+        updatedAtTextView.setText(Helpers.getCurrentTime24h());
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -139,6 +158,20 @@ public class SavedStopsFragment extends Fragment {
 
         public void notifyStopsChanged(List<Stop> stops) {
             this.savedStops = stops;
+
+            // remove departures that are not due
+            for (Stop stop : savedStops) {
+                Iterator<Departure> iterator = stop.getDepartures().iterator();
+                while (iterator.hasNext()) {
+                    Departure departure = iterator.next();
+                    if (Helpers.getRemainingTimeMillisFromNow(departure.getTime()) < 0) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
+                }
+            }
+
             notifyDataSetChanged();
         }
 

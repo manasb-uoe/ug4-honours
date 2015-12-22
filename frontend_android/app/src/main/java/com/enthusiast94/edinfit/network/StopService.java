@@ -179,11 +179,12 @@ public class StopService extends BaseService {
         }
     }
 
-    public void getSavedStops(final Callback<List<Stop>> callback) {
+    public void getSavedStops(int departuresLimit, final Callback<List<Stop>> callback) {
         AsyncHttpClient client = getAsyncHttpClient(true);
 
         RequestParams requestParams = new RequestParams();
         requestParams.add("time", Helpers.getCurrentTime24h());
+        requestParams.add("departures_limit", String.valueOf(departuresLimit));
 
         client.get(API_BASE + "/stops/saved", requestParams, new JsonHttpResponseHandler() {
 

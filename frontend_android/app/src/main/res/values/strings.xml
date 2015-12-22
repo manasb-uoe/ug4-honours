@@ -36,7 +36,7 @@
     <string name="label_farther_away">Farther away</string>
     <string name="label_no_upcoming_departures">No upcoming departures</string>
     <string name="label_not_found">Not found</string>
-    <string name="label_last_updated">\u0020\u0020\u0020\u0020\u0020Last updated</string>
+    <string name="label_last_updated">Last updated at: </string>
     <string name="label_current_location">Current location</string>
     <string name="label_member_since">Member since</string>
     <string name="label_departures">Departures</string>
