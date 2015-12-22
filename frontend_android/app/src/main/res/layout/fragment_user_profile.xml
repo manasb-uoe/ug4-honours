@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:columnCount="2"
         android:rowCount="4"
-        android:layout_margin="@dimen/spacing_normal"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
         >
 
     <ImageView
@@ -108,5 +109,15 @@
         </LinearLayout>
 
     </GridLayout>
+
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:text="@string/action_logout"
+        />
 
 </LinearLayout>

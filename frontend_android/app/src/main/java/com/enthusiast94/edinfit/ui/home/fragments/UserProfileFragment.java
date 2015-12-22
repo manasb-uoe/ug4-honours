@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.user_profile.fragments;
+package com.enthusiast94.edinfit.ui.home.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,15 +6,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 03-10-2015.
@@ -25,6 +29,7 @@ public class UserProfileFragment extends Fragment {
     private TextView nameTextView;
     private TextView emailTextView;
     private TextView memberSinceTextView;
+    private Button logoutButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,15 @@ public class UserProfileFragment extends Fragment {
         nameTextView = (TextView) view.findViewById(R.id.name_textview);
         emailTextView = (TextView) view.findViewById(R.id.email_textview);
         memberSinceTextView = (TextView) view.findViewById(R.id.member_since_textview);
+        logoutButton = (Button) view.findViewById(R.id.logout_button);
+
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().post(new OnDeauthenticatedEvent());
+            }
+        });
 
         loadUserData();
 
