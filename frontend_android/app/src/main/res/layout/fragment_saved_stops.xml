@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#EEE"
     >
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -17,6 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/spacing_small"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>

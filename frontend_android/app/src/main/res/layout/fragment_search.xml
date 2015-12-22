@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/service_search_edittext_background"
         android:layout_margin="@dimen/spacing_small"
-        android:padding="@dimen/spacing_7dp"
+        android:padding="@dimen/spacing_smaller"
         android:focusableInTouchMode="true"
         >
 
