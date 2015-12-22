@@ -153,8 +153,20 @@ public class Helpers {
 
     public static String humanizeDurationInMillisToMinutes(long millis) {
         double minutes = ((millis / (1000.0 * 60.0)));
-        Log.d("ActivityFragment", millis + " --> " + minutes);
         return String.format("%.1f", minutes) + " min";
+    }
+
+    public static String humanizeLiveDepartureTime(String time) {
+        long millis = getRemainingTimeMillisFromNow(time);
+        double minutes = ((millis / (1000.0 * 60.0)));
+
+        if (minutes > 60) {
+            return time;
+        } else if (minutes <= 1) {
+            return "due";
+        } else {
+            return String.format("%.0f", minutes) + " min";
+        }
     }
 
     // time must be in 24h form14 (eg. 08:55)

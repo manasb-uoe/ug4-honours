@@ -16,9 +16,6 @@
             android:id="@+id/saved_stops_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="@dimen/spacing_normal"
-            android:paddingBottom="@dimen/spacing_normal"
             android:scrollbars="vertical"
             />
 
