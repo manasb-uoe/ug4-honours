@@ -210,8 +210,7 @@ public class SavedStopsFragment extends Fragment {
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(context.getString(
-                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
+                stopNameTextView.setText(stop.getName());
 
                 List<Departure> departures = stop.getDepartures();
                 if (departures.size() > 0) {
