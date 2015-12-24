@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
@@ -104,12 +103,12 @@ public class Helpers {
         return sdf.format(new Date());
     }
 
-    public static Bitmap getStopMarkerIcon(Context context) {
+    public static Bitmap getMarkerIcon(Context context, int drawableRes) {
         Resources res = context.getResources();
-        int px = res.getDimensionPixelSize(R.dimen.stop_marker_size);
+        int px = res.getDimensionPixelSize(R.dimen.marker_size);
         Bitmap iconBitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(iconBitmap);
-        Drawable shape = ResourcesCompat.getDrawable(res, R.drawable.stop_marker, null);
+        Drawable shape = ResourcesCompat.getDrawable(res, drawableRes, null);
         shape.setBounds(0, 0, iconBitmap.getWidth(), iconBitmap.getHeight());
         shape.draw(canvas);
 

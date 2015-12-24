@@ -276,7 +276,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         for (int i=0; i< stops.size(); i++) {
             Stop stop = stops.get(i);
 
-            Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
+            Bitmap stopMarkerIcon = Helpers.getMarkerIcon(getActivity(), R.drawable.stop_marker);
 
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(new LatLng(stop.getLocation().get(1), stop.getLocation().get(0)))
@@ -298,6 +298,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         if (userLocationMarker == null || !userLocationMarker.isVisible()) {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(userLocationLatLng);
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
+                    R.drawable.user_location_marker)));
             userLocationMarker = map.addMarker(markerOptions);
         }
 

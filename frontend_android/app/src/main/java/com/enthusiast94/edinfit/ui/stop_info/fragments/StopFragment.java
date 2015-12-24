@@ -348,7 +348,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         // add stop marker with info window containing stop name
         map.addMarker(new MarkerOptions()
                 .position(stopLatLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
+                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
+                        R.drawable.stop_marker)))
                 .title(stop.getName())).showInfoWindow();
 
         // move map focus to user's last known location

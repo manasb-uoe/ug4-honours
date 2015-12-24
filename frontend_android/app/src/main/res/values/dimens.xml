@@ -30,7 +30,7 @@
     <dimen name="saved_stop_unsave_button_height">35dp</dimen>
     <dimen name="saved_stop_unsave_button_width">35dp</dimen>
     <dimen name="divider_height">1dp</dimen>
-    <dimen name="stop_marker_size">12dp</dimen>
+    <dimen name="marker_size">12dp</dimen>
     <dimen name="polyline_width">3dp</dimen>
     <dimen name="route_indicators_container_width">15dp</dimen>
     <dimen name="route_indicator_width">4dp</dimen>

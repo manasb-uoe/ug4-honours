@@ -205,7 +205,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             for (int i=0; i< stops.size(); i++) {
                 Stop stop = stops.get(i);
 
-                Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
+                Bitmap stopMarkerIcon = Helpers.getMarkerIcon(getActivity(), R.drawable.stop_marker);
 
                 LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
 

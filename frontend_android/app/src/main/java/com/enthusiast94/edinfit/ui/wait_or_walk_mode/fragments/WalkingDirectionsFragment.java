@@ -186,7 +186,8 @@ public class WalkingDirectionsFragment extends Fragment {
 
         Marker marker= map.addMarker(new MarkerOptions()
                 .position(stopLatLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getStopMarkerIcon(getActivity())))
+                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
+                        R.drawable.stop_marker)))
                 .title(waitOrWalkSuggestion.getStop().getName()));
 
         // move map focus to stop marker

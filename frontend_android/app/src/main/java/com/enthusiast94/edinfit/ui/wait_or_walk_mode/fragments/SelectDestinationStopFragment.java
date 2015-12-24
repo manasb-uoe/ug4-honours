@@ -315,7 +315,7 @@ public class SelectDestinationStopFragment extends Fragment {
 
         List<Stop> stops = selectedRoute.getStops();
 
-        Bitmap stopMarkerIcon = Helpers.getStopMarkerIcon(getActivity());
+        Bitmap stopMarkerIcon = Helpers.getMarkerIcon(getActivity(), R.drawable.stop_marker);
 
         for (int i=0; i<stops.size(); i++) {
             Stop stop = stops.get(i);
