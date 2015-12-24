@@ -10,7 +10,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
-import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnDestinationStopSelectedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,8 +40,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 22-10-2015.
@@ -94,28 +90,12 @@ public class SelectDestinationStopFragment extends Fragment {
          * Find views
          */
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        final View actionDone = toolbar.findViewById(R.id.action_done);
         RecyclerView routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
         routeTextView = (TextView) view.findViewById(R.id.route_textview);
         slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
         changeRouteButton = (TextView) view.findViewById(R.id.change_route_button);
-
-        /**
-         * Setup toolbar
-         */
-
-        toolbar.setTitle(getString(R.string.action_select_final_stop));
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -172,11 +152,7 @@ public class SelectDestinationStopFragment extends Fragment {
             public void onClick(View v) {
                 int id = v.getId();
 
-                if (id == actionDone.getId()) {
-                    EventBus.getDefault().post(new OnDestinationStopSelectedEvent(
-                            selectedRoute.getStops().get(currentlySelectedStopIndex), selectedRoute));
-                    getActivity().onBackPressed();
-                } else if (id == changeRouteButton.getId()) {
+                if (id == changeRouteButton.getId()) {
                     if (service != null) {
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                                 .setSingleChoiceItems(destinationsWithOriginStop.toArray(new String[destinationsWithOriginStop.size()]),
@@ -201,7 +177,6 @@ public class SelectDestinationStopFragment extends Fragment {
             }
         };
 
-        actionDone.setOnClickListener(onClickListener);
         changeRouteButton.setOnClickListener(onClickListener);
 
         /**
@@ -264,7 +239,7 @@ public class SelectDestinationStopFragment extends Fragment {
                 // or if they contain origin stop as their last stop
                 destinationsWithOriginStop = new ArrayList<>();
                 for (Route route : service.getRoutes()) {
-                    for (int i=0; i<route.getStops().size(); i++) {
+                    for (int i = 0; i < route.getStops().size(); i++) {
                         Stop stop = route.getStops().get(i);
                         if (stop.getId().equals(originStopId) && i != route.getStops().size() - 1) {
                             destinationsWithOriginStop.add(route.getDestination());
@@ -294,6 +269,18 @@ public class SelectDestinationStopFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public Stop getSelectedDestinationStop() {
+        if (currentlySelectedStopIndex == -1) {
+            return null;
+        } else {
+            return selectedRoute.getStops().get(currentlySelectedStopIndex);
+        }
+    }
+
+    public Route getSelectedRoute() {
+        return selectedRoute;
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {

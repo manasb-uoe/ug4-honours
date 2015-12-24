@@ -15,14 +15,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background_light">
 
-            <android.support.design.widget.AppBarLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
-
-                <include layout="@layout/toolbar" />
-
-            </android.support.design.widget.AppBarLayout>
+            <include layout="@layout/toolbar" />
 
             <LinearLayout
                 android:id="@+id/select_origin_stop_button"
@@ -186,42 +179,5 @@
         </LinearLayout>
 
     </ScrollView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/divider_darker"
-        android:layout_gravity="bottom"
-        android:layout_alignTop="@+id/buttons_container"
-        />
-
-    <LinearLayout
-        android:id="@+id/buttons_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:weightSum="2"
-        >
-
-        <Button
-            android:id="@+id/reset_button"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:text="@string/label_reset"
-            />
-
-        <Button
-            android:id="@+id/start_button"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:text="@string/label_start"
-            />
-
-    </LinearLayout>
 
 </RelativeLayout>

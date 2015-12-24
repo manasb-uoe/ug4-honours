@@ -8,34 +8,37 @@
     >
 
     <LinearLayout
-        android:orientation="horizontal"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/spacing_small"
-        android:paddingBottom="@dimen/spacing_small"
         android:paddingLeft="@dimen/spacing_normal"
         android:paddingRight="@dimen/spacing_normal"
-        android:weightSum="10"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
         >
 
         <TextView
             android:id="@+id/service_name_textview"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="top"
-            android:layout_marginRight="@dimen/spacing_small"
-            android:text="45"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="56"
+            android:textSize="@dimen/font_small"
+            android:textColor="@android:color/white"
+            android:background="@drawable/stop_direction_background"
+            android:layout_marginRight="@dimen/spacing_normal"
             style="@style/TextAppearance.AppCompat.Body2"
             />
 
         <TextView
             android:id="@+id/destination_textview"
-            android:layout_width="0dp"
-            android:layout_weight="9"
-            android:layout_height="match_parent"
-            android:text="Princes Street - Brougham Place Princes Street - Brougham Place"
-            android:gravity="top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Princes Street - Brougham Place Princes Street"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            style="@style/TextAppearance.AppCompat.Body1"
             />
 
     </LinearLayout>

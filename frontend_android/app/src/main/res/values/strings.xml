@@ -51,6 +51,7 @@
     <string name="label_set">Set</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_start">Start</string>
+    <string name="label_next">Next</string>
     <string name="label_end">End</string>
     <string name="label_walk_duration_base">Walk (%1$s)</string>
     <string name="label_walk_duration">Walk Duration</string>
@@ -67,7 +68,7 @@
     <string name="label_which_service_are_you_going_to_use">Which service are you going to use?</string>
     <string name="label_hint_long_click_service_for_more_info">Hint: Long click on a service to view more info.</string>
     <string name="label_where_will_you_get_off">Where will you get off?</string>
-    <string name="label_new_wait_or_walk_activity">New Wait or Walk Activity</string>
+    <string name="label_wait_or_walk_activity">Wait or Walk Activity</string>
     <string name="label_click_here_to_select">Click here to select</string>
     <string name="label_service_name_and_description">%1$s (%2$s)</string>
     <string name="label_destination_stop_and_route">%1$s (towards %2$s)</string>
@@ -109,6 +110,7 @@
     <string name="label_saved_stops">Saved Stops</string>
     <string name="label_home_navigation">Home Navigation</string>
     <string name="label_reset">Reset</string>
+    <string name="label_previous">Previous</string>
     <string name="label_services">Services</string>
     <string name="label_num_results_singular">%1$s result</string>
     <string name="label_num_results_plural">%1$s results</string>
@@ -119,6 +121,9 @@
     <string name="label_set_location">Set Location</string>
     <string name="label_unknown">Unknown</string>
     <string name="label_selected_location">Selected location</string>
+    <string name="label_step_1">Step 1</string>
+    <string name="label_step_2">Step 2</string>
+    <string name="label_step_3">Step 3</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

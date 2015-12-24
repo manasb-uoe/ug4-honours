@@ -8,8 +8,6 @@
     >
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/spacing_normal"
@@ -18,23 +16,60 @@
         android:paddingBottom="@dimen/spacing_small"
         >
 
+        <FrameLayout
+            android:id="@+id/direction_textview_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/spacing_normal"
+            >
+
+            <TextView
+                android:id="@+id/direction_textview"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="NE"
+                android:textSize="@dimen/font_small"
+                android:textColor="@android:color/white"
+                android:background="@drawable/stop_direction_background"
+                android:textStyle="bold"
+                />
+
+        </FrameLayout>
+
         <TextView
             android:id="@+id/stop_name_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Test"
-            android:layout_toLeftOf="@+id/distance_away_textview"
-            android:layout_alignParentLeft="true"
-            android:layout_marginRight="@dimen/spacing_small"
+            android:text="Chalmers Street"
+            android:layout_toRightOf="@id/direction_textview_container"
+            android:layout_alignTop="@id/direction_textview_container"
+            android:layout_alignBottom="@id/direction_textview_container"
+            android:gravity="center"
             style="@style/TextAppearance.AppCompat.Body1"
+            />
+
+        <ImageView
+            android:id="@+id/distance_away_imageview"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_action_maps_directions_walk_accent"
+            android:layout_alignTop="@id/star_imageview"
+            android:layout_alignBottom="@id/star_imageview"
+            android:layout_toLeftOf="@+id/distance_away_textview"
             />
 
         <TextView
             android:id="@+id/distance_away_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="12.3 m"
+            android:textColor="@color/accent"
+            android:text="150 m"
+            android:gravity="center_vertical"
             android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/distance_away_imageview"
+            android:layout_alignBottom="@id/distance_away_imageview"
             style="@style/TextAppearance.AppCompat.Body2"
             />
 

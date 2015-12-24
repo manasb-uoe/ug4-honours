@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +21,6 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
-import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnOriginStopSelectedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -35,8 +33,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 18-10-2015.
@@ -64,32 +60,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_select_origin_stop, container, false);
-
-        /**
-         * Setup toolbar
-         */
-
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.action_select_origin));
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
-
-        View actionDone = toolbar.findViewById(R.id.action_done);
-        actionDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault()
-                        .post(new OnOriginStopSelectedEvent(stops.get(currentlySelectedStopIndex)));
-                getActivity().onBackPressed();
-
-            }
-        });
 
         /**
          * Find views
@@ -181,6 +151,14 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         super.onLowMemory();
 
         mapView.onLowMemory();
+    }
+
+    public Stop getSelectedOriginStop() {
+        if (currentlySelectedStopIndex == -1) {
+            return null;
+        } else {
+            return stops.get(currentlySelectedStopIndex);
+        }
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {
@@ -278,9 +256,8 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
         private LayoutInflater inflater;
         private int previouslySelectedStopIndex;
-        private static final int HINT_VIEW_TYPE = 0;
-        private static final int HEADING_VIEW_TYPE = 1;
-        private static final int STOP_VIEW_TYPE = 2;
+        private static final int HEADING_VIEW_TYPE = 0;
+        private static final int STOP_VIEW_TYPE = 1;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -288,10 +265,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
                 inflater = LayoutInflater.from(getActivity());
             }
 
-            if (viewType == HINT_VIEW_TYPE) {
-                return new HintViewHolder(inflater.inflate(R.layout.row_hint,
-                        parent, false));
-            } else if (viewType == HEADING_VIEW_TYPE) {
+            if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else {
                 return new SelectionStopViewHolder(inflater.inflate(R.layout.row_selection_stop,
@@ -313,15 +287,13 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             if (stops.size() == 0) {
                 return 0;
             } else {
-                return stops.size() + 2 /* 1 hint + 1 heading */;
+                return stops.size() + 1 /* 1 heading */;
             }
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                return HINT_VIEW_TYPE;
-            } else if (position == 1) {
                 return HEADING_VIEW_TYPE;
             } else {
                 return STOP_VIEW_TYPE;
@@ -331,10 +303,10 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         private Object getItem(int position) {
             int viewType = getItemViewType(position);
 
-            if (viewType == HINT_VIEW_TYPE || viewType == HEADING_VIEW_TYPE) {
+            if (viewType == HEADING_VIEW_TYPE) {
                 return null;
             } else {
-                return stops.get(position - 2);
+                return stops.get(position - 1);
             }
         }
 
@@ -371,7 +343,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
                         R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
                 distanceAwayTextView.setText(Helpers.humanizeDistance(stop.getDistanceAway()));
 
-                if (getAdapterPosition() - 2 == currentlySelectedStopIndex) {
+                if (getAdapterPosition() - 1 == currentlySelectedStopIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);
                 } else {
                     itemView.setBackgroundResource(android.R.color.transparent);
@@ -380,10 +352,10 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
             @Override
             public void onClick(View v) {
-                currentlySelectedStopIndex = getAdapterPosition() - 2;
+                currentlySelectedStopIndex = getAdapterPosition() - 1;
 
-                notifyItemChanged(currentlySelectedStopIndex + 2);
-                notifyItemChanged(previouslySelectedStopIndex + 2);
+                notifyItemChanged(currentlySelectedStopIndex + 1);
+                notifyItemChanged(previouslySelectedStopIndex + 1);
 
                 updateSlidingMapPanel();
 
@@ -415,21 +387,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
 
                 // set heading
                 headingTextView.setText(getString(R.string.label_where_are_you_waiting));
-            }
-        }
-
-        private class HintViewHolder extends RecyclerView.ViewHolder {
-
-            private TextView hintTextView;
-
-            public HintViewHolder(View itemView) {
-                super(itemView);
-
-                // find views
-                hintTextView = (TextView) itemView.findViewById(R.id.hint_textview);
-
-                // set hint
-                hintTextView.setText(getString(R.string.label_hint_long_click_stop_fpr_more_info));
             }
         }
     }

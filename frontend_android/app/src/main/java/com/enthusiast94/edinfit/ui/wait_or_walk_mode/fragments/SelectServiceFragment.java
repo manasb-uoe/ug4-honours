@@ -32,7 +32,7 @@ import de.greenrobot.event.EventBus;
  */
 public class SelectServiceFragment extends Fragment {
 
-    public static final String TAG = SelectOriginStopFragment.class.getSimpleName();
+    public static final String TAG = SelectServiceFragment.class.getSimpleName();
     private static final String BUNDLE_SERVICE_NAMES = "bundleServiceNames";
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView servicesRecyclerView;
@@ -61,31 +61,6 @@ public class SelectServiceFragment extends Fragment {
 
         servicesRecyclerView = (RecyclerView) view.findViewById(R.id.services_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        View actionDone = toolbar.findViewById(R.id.action_done);
-
-        /**
-         * Setup toolbar
-         */
-
-        toolbar.setTitle(getString(R.string.action_select_service));
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
-
-        actionDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault().post(new OnServiceSelectedEvent(
-                        services.get(currentlySelectedServiceIndex)));
-                getActivity().onBackPressed();
-            }
-        });
 
         /**
          * Get service names from arguments so that the corresponding services can be fetched
@@ -161,13 +136,20 @@ public class SelectServiceFragment extends Fragment {
         });
     }
 
+    public Service getSelectedService() {
+        if (currentlySelectedServiceIndex == -1) {
+            return null;
+        } else {
+            return services.get(currentlySelectedServiceIndex);
+        }
+    }
+
     private class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private LayoutInflater inflater;
         private int previouslySelectedServiceIndex;
-        private static final int HINT_VIEW_TYPE = 0;
-        private static final int HEADING_VIEW_TYPE = 1;
-        private static final int SERVICE_VIEW_TYPE = 2;
+        private static final int HEADING_VIEW_TYPE = 0;
+        private static final int SERVICE_VIEW_TYPE = 1;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -175,10 +157,7 @@ public class SelectServiceFragment extends Fragment {
                 inflater = LayoutInflater.from(getActivity());
             }
 
-            if (viewType == HINT_VIEW_TYPE) {
-                return new HintViewHolder(inflater.inflate(R.layout.row_hint,
-                        parent, false));
-            } else if (viewType == HEADING_VIEW_TYPE) {
+            if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else {
                 return new SelectionServiceViewHolder(inflater.inflate(R.layout.row_selection_service,
@@ -198,15 +177,13 @@ public class SelectServiceFragment extends Fragment {
             if (services.size() == 0) {
                 return 0;
             } else {
-                return services.size() + 2 /* 1 hint + 1 heading */;
+                return services.size() + 1 /* 1 heading */;
             }
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                return HINT_VIEW_TYPE;
-            } else if (position == 1) {
                 return HEADING_VIEW_TYPE;
             } else {
                 return SERVICE_VIEW_TYPE;
@@ -216,10 +193,10 @@ public class SelectServiceFragment extends Fragment {
         private Object getItem(int position) {
             int viewType = getItemViewType(position);
 
-            if (viewType == HINT_VIEW_TYPE || viewType == HEADING_VIEW_TYPE) {
+            if (viewType == HEADING_VIEW_TYPE) {
                 return null;
             } else {
-                return services.get(position - 2);
+                return services.get(position - 1);
             }
         }
 
@@ -255,7 +232,7 @@ public class SelectServiceFragment extends Fragment {
                 serviceNameTextView.setText(service.getName());
                 destinationTextView.setText(service.getDescription());
 
-                if (getAdapterPosition() - 2 == currentlySelectedServiceIndex) {
+                if (getAdapterPosition() - 1 == currentlySelectedServiceIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);
                 } else {
                     itemView.setBackgroundResource(android.R.color.transparent);
@@ -264,10 +241,10 @@ public class SelectServiceFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                currentlySelectedServiceIndex = getAdapterPosition() - 2;
+                currentlySelectedServiceIndex = getAdapterPosition() - 1;
 
-                notifyItemChanged(currentlySelectedServiceIndex + 2);
-                notifyItemChanged(previouslySelectedServiceIndex + 2);
+                notifyItemChanged(currentlySelectedServiceIndex + 1);
+                notifyItemChanged(previouslySelectedServiceIndex + 1);
 
                 previouslySelectedServiceIndex = currentlySelectedServiceIndex;
             }
@@ -296,21 +273,6 @@ public class SelectServiceFragment extends Fragment {
 
                 // set heading
                 headingTextView.setText(getString(R.string.label_which_service_are_you_going_to_use));
-            }
-        }
-
-        private class HintViewHolder extends RecyclerView.ViewHolder {
-
-            private TextView hintTextView;
-
-            public HintViewHolder(View itemView) {
-                super(itemView);
-
-                // find views
-                hintTextView = (TextView) itemView.findViewById(R.id.hint_textview);
-
-                // set hint
-                hintTextView.setText(getString(R.string.label_hint_long_click_service_for_more_info));
             }
         }
     }
