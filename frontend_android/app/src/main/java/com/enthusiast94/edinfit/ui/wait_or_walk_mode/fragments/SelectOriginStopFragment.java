@@ -56,23 +56,23 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     private static final int MAX_DISTANCE = 3;
     private static final double NEAR_DISTANCE = 0;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
+        locationProvider = new LocationProvider(getActivity(), this);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_select_origin_stop, container, false);
 
-        /**
-         * Find views
-         */
-
         stopsRecyclerView = (RecyclerView) view.findViewById(R.id.stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
         selectedStopTextView = (TextView) view.findViewById(R.id.selected_stop_textview);
-
-        /**
-         * Create MapView, get GoogleMap from it and then configure the GoogleMap
-         */
 
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
                 savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
@@ -83,16 +83,6 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
-        /**
-         * Setup location provider
-         */
-
-        locationProvider = new LocationProvider(getActivity(), this);
-
-        /**
-         * Setup swipe refresh layout
-         */
-
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
@@ -102,13 +92,16 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             }
         });
 
-        /**
-         * Setup stops recycler view
-         */
-
         stopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         stopsAdapter = new StopsAdapter();
         stopsRecyclerView.setAdapter(stopsAdapter);
+
+        if (!locationProvider.isConnected()) {
+            locationProvider.connect();
+        } else {
+            stopsAdapter.notifyStopsChanged();
+            updateSlidingMapPanel();
+        }
 
         return view;
     }
@@ -116,16 +109,12 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     @Override
     public void onResume() {
         super.onResume();
-
-        locationProvider.connect();
         mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -142,14 +131,13 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        locationProvider.disconnect();
         mapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-
         mapView.onLowMemory();
     }
 
@@ -185,8 +173,9 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
                         if (getActivity() != null) {
                             setRefreshIndicatorVisiblity(false);
 
-                            stopsAdapter.notifyStopsChanged();
+                            currentlySelectedStopIndex = 0;
 
+                            stopsAdapter.notifyStopsChanged();
                             updateSlidingMapPanel();
                         }
                     }
@@ -311,8 +300,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         }
 
         public void notifyStopsChanged() {
-            currentlySelectedStopIndex = 0;
-            previouslySelectedStopIndex = 0;
+            previouslySelectedStopIndex = currentlySelectedStopIndex;
 
             notifyDataSetChanged();
         }

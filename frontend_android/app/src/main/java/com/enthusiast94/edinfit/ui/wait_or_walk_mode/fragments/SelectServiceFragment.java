@@ -49,29 +49,22 @@ public class SelectServiceFragment extends Fragment {
         return instance;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_select_service, container, false);
         setHasOptionsMenu(true);
 
-        /**
-         * Find views
-         */
-
         servicesRecyclerView = (RecyclerView) view.findViewById(R.id.services_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
 
-        /**
-         * Get service names from arguments so that the corresponding services can be fetched
-         * from the server
-         */
-
         final List<String> serviceNames = getArguments().getStringArrayList(BUNDLE_SERVICE_NAMES);
-
-        /**
-         * Setup swipe refresh layout
-         */
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -82,19 +75,15 @@ public class SelectServiceFragment extends Fragment {
             }
         });
 
-        /**
-         * Setup services recycler view
-         */
-
         servicesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         servicesAdapter = new ServicesAdapter();
         servicesRecyclerView.setAdapter(servicesAdapter);
 
-        /**
-         * Load services from network
-         */
-
-        loadServices(serviceNames);
+        if (services.size() == 0) {
+            loadServices(serviceNames);
+        } else {
+            servicesAdapter.notifyServicesChanged();
+        }
 
         return view;
     }
@@ -121,6 +110,7 @@ public class SelectServiceFragment extends Fragment {
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
 
+                    currentlySelectedServiceIndex = 0;
                     servicesAdapter.notifyServicesChanged();
                 }
             }
@@ -201,8 +191,7 @@ public class SelectServiceFragment extends Fragment {
         }
 
         public void notifyServicesChanged() {
-            currentlySelectedServiceIndex = 0;
-            previouslySelectedServiceIndex = 0;
+            previouslySelectedServiceIndex = currentlySelectedServiceIndex;
 
             notifyDataSetChanged();
         }

@@ -7,9 +7,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Route;
@@ -67,6 +70,19 @@ public class NewActivityActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.label_step_2));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.label_step_3));
 
+        // disable tab clicks
+        for (int i=0; i<tabLayout.getChildCount(); i++) {
+            LinearLayout tabStrip = ((LinearLayout) tabLayout.getChildAt(i));
+            for(int j = 0; j < tabStrip.getChildCount(); j++) {
+                tabStrip.getChildAt(j).setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return true;
+                    }
+                });
+            }
+        }
+
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,11 +129,7 @@ public class NewActivityActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if (currentFragmentTag.equals(SelectServiceFragment.TAG)) {
-                    addFragment(SelectOriginStopFragment.TAG);
-                } else if (currentFragmentTag.equals(SelectDestinationStopFragment.TAG)) {
-                    addFragment(SelectServiceFragment.TAG);
-                }
+                removeFragment(currentFragmentTag);
             }
         });
 
@@ -126,6 +138,7 @@ public class NewActivityActivity extends AppCompatActivity {
             selectedService = savedInstanceState.getParcelable(EXTRA_SELECTED_SERVICE);
             selectedDestinationStop = savedInstanceState.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
             selectedRoute = savedInstanceState.getParcelable(EXTRA_SELECTED_ROUTE);
+
 
             addFragment(savedInstanceState.getString(EXTRA_CURRENT_FRAGMENT_TAG));
         } else {
@@ -179,15 +192,15 @@ public class NewActivityActivity extends AppCompatActivity {
             fragmentTransaction.setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out);
 
             if (tag.equals(SelectOriginStopFragment.TAG)) {
-                fragmentTransaction.replace(R.id.fragment_container, new SelectOriginStopFragment(),
+                fragmentTransaction.add(R.id.fragment_container, new SelectOriginStopFragment(),
                         SelectOriginStopFragment.TAG);
 
             } else if (tag.equals(SelectServiceFragment.TAG)) {
-                fragmentTransaction.replace(R.id.fragment_container, SelectServiceFragment.getInstance(
+                fragmentTransaction.add(R.id.fragment_container, SelectServiceFragment.getInstance(
                         selectedOriginStop.getServices()), SelectServiceFragment.TAG);
 
             } else if (tag.equals(SelectDestinationStopFragment.TAG)) {
-                fragmentTransaction.replace(R.id.fragment_container, SelectDestinationStopFragment.newInstance(
+                fragmentTransaction.add(R.id.fragment_container, SelectDestinationStopFragment.newInstance(
                                 selectedOriginStop.getId(), selectedService.getName()),
                         SelectDestinationStopFragment.TAG);
 
@@ -198,9 +211,27 @@ public class NewActivityActivity extends AppCompatActivity {
             fragmentTransaction.commit();
         }
 
-        updateUi(tag);
-
         currentFragmentTag = tag;
+
+        updateUi(tag);
+    }
+
+    private void removeFragment(String tag) {
+        if (getSupportFragmentManager().findFragmentByTag(tag) != null) {
+            Log.d(TAG, "Removing: " + getSupportFragmentManager().findFragmentByTag(tag).getClass().getSimpleName());
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                    .remove(getSupportFragmentManager().findFragmentByTag(tag))
+                    .commit();
+        }
+
+        if (tag.equals(SelectServiceFragment.TAG)) {
+            currentFragmentTag = SelectOriginStopFragment.TAG;
+            updateUi(currentFragmentTag);
+        } else if (tag.equals(SelectDestinationStopFragment.TAG)) {
+            currentFragmentTag = SelectServiceFragment.TAG;
+            updateUi(currentFragmentTag);
+        }
     }
 
     private void updateUi(String tag) {

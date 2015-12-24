@@ -81,14 +81,16 @@ public class SelectDestinationStopFragment extends Fragment {
         return instance;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_select_destination_stop, container, false);
-
-        /**
-         * Find views
-         */
 
         RecyclerView routeStopsRecyclerView = (RecyclerView) view.findViewById(R.id.route_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
@@ -96,10 +98,6 @@ public class SelectDestinationStopFragment extends Fragment {
         routeTextView = (TextView) view.findViewById(R.id.route_textview);
         slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
         changeRouteButton = (TextView) view.findViewById(R.id.change_route_button);
-
-        /**
-         * Create MapView, get GoogleMap from it and then configure the GoogleMap
-         */
 
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
                 savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
@@ -110,19 +108,12 @@ public class SelectDestinationStopFragment extends Fragment {
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
-        /**
-         * Retrieve service name from arguments so that the data corresponding to its service
-         * can be loaded. Also retrieve origin stop id so that only those stops can be made
-         * available for selection that come AFTER the origin stop.
-         */
-
+         // Retrieve service name from arguments so that the data corresponding to its service
+         // can be loaded. Also retrieve origin stop id so that only those stops can be made
+         // available for selection that come AFTER the origin stop.
         Bundle bundle = getArguments();
         serviceName = bundle.getString(EXTRA_SERVICE_NAME);
         originStopId = bundle.getString(EXTRA_ORIGIN_STOP_ID);
-
-        /**
-         * Setup swipe refresh layout
-         */
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -133,18 +124,10 @@ public class SelectDestinationStopFragment extends Fragment {
             }
         });
 
-        /**
-         * Setup route stops recycler view
-         */
-
         linearLayoutManager = new LinearLayoutManager(getActivity());
         routeStopsRecyclerView.setLayoutManager(linearLayoutManager);
         routeStopsAdapter = new RouteStopsAdapter();
         routeStopsRecyclerView.setAdapter(routeStopsAdapter);
-
-        /**
-         * Bind event listeners
-         */
 
         View.OnClickListener onClickListener = new View.OnClickListener() {
 
@@ -179,11 +162,11 @@ public class SelectDestinationStopFragment extends Fragment {
 
         changeRouteButton.setOnClickListener(onClickListener);
 
-        /**
-         * Load service from network
-         */
-
-        loadService();
+        if (service == null) {
+            loadService();
+        } else {
+            updateRoute(selectedRouteDestination);
+        }
 
         return view;
     }
@@ -191,14 +174,12 @@ public class SelectDestinationStopFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         mapView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         mapView.onPause();
     }
 
@@ -215,14 +196,12 @@ public class SelectDestinationStopFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         mapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-
         mapView.onLowMemory();
     }
 
@@ -256,6 +235,7 @@ public class SelectDestinationStopFragment extends Fragment {
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
 
+                    currentlySelectedStopIndex = -1;
                     updateRoute(selectedRouteDestination);
                 }
             }
@@ -441,8 +421,7 @@ public class SelectDestinationStopFragment extends Fragment {
         public void notifyRouteChanged() {
             stops = new ArrayList<>(selectedRoute.getStops());
 
-            currentlySelectedStopIndex = -1;
-            previouslySelectedStopIndex = -1;
+            previouslySelectedStopIndex = currentlySelectedStopIndex;
 
             // find index of origin stop so that all stops that come before it can be made not
             // available for selection
@@ -453,14 +432,19 @@ public class SelectDestinationStopFragment extends Fragment {
                 }
             }
 
-            // set currently selected stop as the stop right after origin stop
-            if (originStopIndex != stops.size() - 1) {
-                currentlySelectedStopIndex = originStopIndex + 1;
-                previouslySelectedStopIndex = originStopIndex + 1;
-            }
+            if (currentlySelectedStopIndex == -1) {
+                // set currently selected stop as the stop right after origin stop
+                if (originStopIndex != stops.size() - 1) {
+                    currentlySelectedStopIndex = originStopIndex + 1;
+                    previouslySelectedStopIndex = currentlySelectedStopIndex;
+                }
 
-            // scroll to the origin stop since stops before origin stop cannot be selected
-            linearLayoutManager.scrollToPositionWithOffset(originStopIndex, 50);
+                // scroll to the origin stop since stops before origin stop cannot be selected
+                linearLayoutManager.scrollToPositionWithOffset(originStopIndex, 50);
+            } else {
+                previouslySelectedStopIndex = currentlySelectedStopIndex;
+                linearLayoutManager.scrollToPositionWithOffset(currentlySelectedStopIndex, 50);
+            }
 
             notifyDataSetChanged();
         }
