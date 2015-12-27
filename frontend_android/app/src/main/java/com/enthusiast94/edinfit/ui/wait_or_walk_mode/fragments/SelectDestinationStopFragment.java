@@ -108,9 +108,9 @@ public class SelectDestinationStopFragment extends Fragment {
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
-         // Retrieve service name from arguments so that the data corresponding to its service
-         // can be loaded. Also retrieve origin stop id so that only those stops can be made
-         // available for selection that come AFTER the origin stop.
+        // Retrieve service name from arguments so that the data corresponding to its service
+        // can be loaded. Also retrieve origin stop id so that only those stops can be made
+        // available for selection that come AFTER the origin stop.
         Bundle bundle = getArguments();
         serviceName = bundle.getString(EXTRA_SERVICE_NAME);
         originStopId = bundle.getString(EXTRA_ORIGIN_STOP_ID);
@@ -365,7 +365,6 @@ public class SelectDestinationStopFragment extends Fragment {
         private static final int HEADING_VIEW_TYPE = 0;
         private static final int STOP_VIEW_TYPE = 1;
         private int previouslySelectedStopIndex;
-        private int originStopIndex;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -376,7 +375,7 @@ public class SelectDestinationStopFragment extends Fragment {
             if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else {
-                return new RouteStopViewHolder(inflater.inflate(R.layout.row_service_route_stop_2,
+                return new RouteStopViewHolder(inflater.inflate(R.layout.row_selection_destination_stop,
                         parent, false));
             }
         }
@@ -423,8 +422,9 @@ public class SelectDestinationStopFragment extends Fragment {
 
             previouslySelectedStopIndex = currentlySelectedStopIndex;
 
-            // find index of origin stop so that all stops that come before it can be made not
-            // available for selection
+            int originStopIndex = 0;
+
+            // find index of origin stop so that all stops that come before it can be removed
             for (int i=0; i<stops.size(); i++) {
                 if (stops.get(i).getId().equals(originStopId)) {
                     originStopIndex = i;
@@ -432,19 +432,14 @@ public class SelectDestinationStopFragment extends Fragment {
                 }
             }
 
+            stops = stops.subList(originStopIndex, stops.size());
+
             if (currentlySelectedStopIndex == -1) {
                 // set currently selected stop as the stop right after origin stop
-                if (originStopIndex != stops.size() - 1) {
-                    currentlySelectedStopIndex = originStopIndex + 1;
-                    previouslySelectedStopIndex = currentlySelectedStopIndex;
-                }
-
-                // scroll to the origin stop since stops before origin stop cannot be selected
-                linearLayoutManager.scrollToPositionWithOffset(originStopIndex, 50);
-            } else {
-                previouslySelectedStopIndex = currentlySelectedStopIndex;
-                linearLayoutManager.scrollToPositionWithOffset(currentlySelectedStopIndex, 50);
+                currentlySelectedStopIndex = 1;
             }
+
+            previouslySelectedStopIndex = currentlySelectedStopIndex;
 
             notifyDataSetChanged();
         }
@@ -499,14 +494,13 @@ public class SelectDestinationStopFragment extends Fragment {
                     downArrowImageView.setVisibility(View.INVISIBLE);
                 }
 
-                // fade out stops all stops until origin stop since they are not available
-                // for selection
-                if (adapterPosition <= originStopIndex) {
+                // fade out origin stop since it is not available for selection
+                if (adapterPosition == 0) {
                     stopNameTextView.setTextColor(
                             ContextCompat.getColor(getActivity(), R.color.secondary_text_light_2)
                     );
 
-                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.accent_opaque_40);
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary_opaque_40);
                     topIndicatorView.setBackgroundColor(indicatorColor);
                     middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);
@@ -515,7 +509,7 @@ public class SelectDestinationStopFragment extends Fragment {
                             ContextCompat.getColor(getActivity(), R.color.primary_text_light)
                     );
 
-                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.accent);
+                    int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary);
                     topIndicatorView.setBackgroundColor(indicatorColor);
                     middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);
@@ -534,7 +528,7 @@ public class SelectDestinationStopFragment extends Fragment {
                 int id = v.getId();
                 if (id == itemView.getId()) {
                     // only allow selection if selected stop comes after origin stop
-                    if (getAdapterPosition() - 1 > originStopIndex) {
+                    if (getAdapterPosition() - 1 > 0) {
                         currentlySelectedStopIndex = getAdapterPosition() - 1;
 
                         notifyItemChanged(currentlySelectedStopIndex + 1);
@@ -547,27 +541,27 @@ public class SelectDestinationStopFragment extends Fragment {
                             .setItems(new String[]{getString(R.string.label_show_on_map)},
                                     new DialogInterface.OnClickListener() {
 
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (which) {
-                                        case 0:
-                                            // lookup marker corresponding to selected stop, then show its info
-                                            // window and move map focus to it
-                                            List<Double> stopLocation = stop.getLocation();
-                                            for (Marker marker : stopMarkers) {
-                                                LatLng latLng = marker.getPosition();
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which) {
+                                                case 0:
+                                                    // lookup marker corresponding to selected stop, then show its info
+                                                    // window and move map focus to it
+                                                    List<Double> stopLocation = stop.getLocation();
+                                                    for (Marker marker : stopMarkers) {
+                                                        LatLng latLng = marker.getPosition();
 
-                                                if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
-                                                    marker.showInfoWindow();
-                                                    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                                                        if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
+                                                            marker.showInfoWindow();
+                                                            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                                            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                                                            break;
+                                                        }
+                                                    }
                                                     break;
-                                                }
                                             }
-                                            break;
-                                    }
-                                }
-                            })
+                                        }
+                                    })
                             .create();
                     showOnMapDialog.show();
                 }
