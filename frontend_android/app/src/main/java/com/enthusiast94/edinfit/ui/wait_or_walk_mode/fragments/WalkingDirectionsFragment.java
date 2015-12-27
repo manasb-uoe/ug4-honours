@@ -47,6 +47,7 @@ public class WalkingDirectionsFragment extends Fragment {
 
     private GoogleMap map;
     private List<Directions.Step> directionSteps;
+    private WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion;
 
     /**
      * The argument is non-null only when the directions action on a countdown
@@ -92,15 +93,11 @@ public class WalkingDirectionsFragment extends Fragment {
          * notification is clicked (or the notification itself is clicked).
          */
 
-        WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSelectedSuggestion = null;
-
         Bundle args = getArguments();
 
         if (args != null) {
             waitOrWalkSelectedSuggestion = args.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
         }
-
-
 
         /**
          * Create MapView, get GoogleMap from it and then configure the GoogleMap
@@ -171,7 +168,8 @@ public class WalkingDirectionsFragment extends Fragment {
     }
 
     public void onEventMainThread(final OnWaitOrWalkSuggestionSelected event) {
-        updateDirections(event.getWaitOrWalkSuggestion());
+        waitOrWalkSelectedSuggestion = event.getWaitOrWalkSuggestion();
+        updateDirections(waitOrWalkSelectedSuggestion);
     }
 
     private void updateDirections(final WaitOrWalkService.WaitOrWalkSuggestion waitOrWalkSuggestion) {

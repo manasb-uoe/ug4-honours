@@ -97,6 +97,8 @@ public class SuggestionsFragment extends Fragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        locationProvider = new LocationProvider(getActivity(), this);
     }
 
     @Nullable
@@ -104,38 +106,28 @@ public class SuggestionsFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wait_or_walk_result, container, false);
 
-        /**
-         * Get bundle arguments.
-         */
-
-        Bundle bundle = getArguments();
-        waitOrWalkSuggestions = bundle.getParcelableArrayList(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS);
-        waitOrWalkSelectedSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
-        selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
-        selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
-        selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
-        selectedRoute = bundle.getParcelable(EXTRA_SELECTED_ROUTE);
-
-        /**
-         * Find views
-         */
-
         resultsRecyclerView = (RecyclerView) view.findViewById(R.id.results_recyclerview);
 
-        /**
-         * Setup results recycler view
-         */
+         if (savedInstanceState == null) {
+             Bundle bundle = getArguments();
+             waitOrWalkSuggestions = bundle.getParcelableArrayList(EXTRA_WAIT_OR_WALK_ALL_SUGGESTIONS);
+             waitOrWalkSelectedSuggestion = bundle.getParcelable(EXTRA_WAIT_OR_WALK_SELECTED_SUGGESTION);
+             selectedOriginStop = bundle.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
+             selectedService = bundle.getParcelable(EXTRA_SELECTED_SERVICE);
+             selectedDestinationStop = bundle.getParcelable(EXTRA_SELECTED_DESTINATION_STOP);
+             selectedRoute = bundle.getParcelable(EXTRA_SELECTED_ROUTE);
+         }
 
         resultsAdapter = new ResultsAdapter();
         resultsRecyclerView.setAdapter(resultsAdapter);
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        /**
-         * Setup location provider
-         */
-
-        locationProvider = new LocationProvider(getActivity(), this);
-        locationProvider.connect();
+        if (!locationProvider.isConnected()) {
+            locationProvider.connect();
+        } else {
+            resultsAdapter.notifySuggestionsChanged();
+            Toast.makeText(getActivity(), "Just notifying", Toast.LENGTH_SHORT).show();
+        }
 
         return view;
     }
@@ -143,21 +135,18 @@ public class SuggestionsFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         EventBus.getDefault().unregister(this);
     }
 
     @Override
     public void onDestroy() {
         locationProvider.disconnect();
-
         super.onDestroy();
     }
 
