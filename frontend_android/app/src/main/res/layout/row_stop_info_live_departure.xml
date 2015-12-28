@@ -18,12 +18,14 @@
 
     <TextView
         android:id="@+id/service_name_textview"
-        android:layout_width="wrap_content"
+        android:layout_width="40dp"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:layout_marginRight="@dimen/spacing_small"
-        android:textSize="@dimen/font_large"
-        style="@style/TextAppearance.AppCompat.Body2"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:gravity="center"
+        android:background="@drawable/stop_direction_background"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:text="45"
         />
 
     <TextView
@@ -32,6 +34,8 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:layout_marginRight="@dimen/spacing_small"
+        android:text="Brougham Place - Chalmers St"
+        style="@style/TextAppearance.AppCompat.Body1"
         />
 
     <TextView
@@ -39,8 +43,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical|right"
-        android:textSize="@dimen/font_large"
         style="@style/TextAppearance.AppCompat.Body2"
+        android:textColor="@color/accent"
+        android:text="5 min"
         />
 
 </LinearLayout>

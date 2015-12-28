@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_normal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        >
+
+        <FrameLayout
+            android:id="@+id/direction_textview_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/spacing_normal"
+            >
+
+            <TextView
+                android:id="@+id/direction_textview"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="NE"
+                android:textSize="@dimen/font_small"
+                android:textColor="@android:color/white"
+                android:background="@drawable/stop_direction_background"
+                android:textStyle="bold"
+                />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/stop_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chalmers Street"
+            android:layout_toRightOf="@id/direction_textview_container"
+            android:layout_alignTop="@id/direction_textview_container"
+            android:layout_alignBottom="@id/direction_textview_container"
+            android:gravity="center"
+            style="@style/TextAppearance.AppCompat.Body2"
+            />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        >
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_action_action_info_outline"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:id="@+id/stop_id_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3265565"
+            android:gravity="center_vertical"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_action_maps_directions_bus"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:id="@+id/services_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="15, 16, 56, 89"
+            android:gravity="center_vertical"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_action_maps_pin_drop"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:id="@+id/destinations_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wilford Spine, Jack Potato"
+            android:gravity="center_vertical"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
+

@@ -9,7 +9,7 @@
     <string name="action_signup">Sign up</string>
     <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
     <string name="action_logout">Log out</string>
-    <string name="action_select_time">Select time</string>
+    <string name="action_filter_departures">Select time</string>
     <string name="action_wait_or_walk">Wait or Walk?</string>
     <string name="action_get_to_somewhere">Get to Somewhere</string>
     <string name="action_select_origin">Select Origin</string>
@@ -124,6 +124,10 @@
     <string name="label_step_1">Step 1</string>
     <string name="label_step_2">Step 2</string>
     <string name="label_step_3">Step 3</string>
+    <string name="label_departure_times">Departure Times</string>
+    <string name="label_live_departures">Live Departures</string>
+    <string name="label_timetable_format">Timetable (%1$s)</string>
+    <string name="label_set_time">Set time</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -12,17 +12,24 @@
     >
 
     <TextView
+        android:id="@+id/selected_time_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/label_showing_departures_for"
+        android:text="@string/label_timetable_format"
+        style="@style/Base.TextAppearance.AppCompat.Body2"
         />
 
     <TextView
-        android:id="@+id/time_textview"
+        android:id="@+id/set_time_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/spacing_small"
-        android:textColor="@color/primary_text_light"
+        android:text="@string/label_set_time"
+        android:layout_alignParentRight="true"
+        android:textAllCaps="true"
+        android:textColor="@color/primary_dark"
+        style="@style/Base.TextAppearance.AppCompat.Body2"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
         />
 
-</LinearLayout>
+</RelativeLayout>

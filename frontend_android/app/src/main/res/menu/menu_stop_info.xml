@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_select_time"
-        android:title="@string/action_select_time"
+        android:id="@+id/action_filter_departures"
+        android:title="@string/action_filter_departures"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_device_access_time"
+        android:icon="@drawable/ic_action_content_filter_list"
         />
     <item
         android:id="@+id/action_save_or_unsave"
         android:title="@string/label_save"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_toggle_star_outline"
+        android:icon="@drawable/ic_toggle_star_unselected"
         />
 </menu>

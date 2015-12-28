@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.ui.stop_info.fragments;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -11,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,17 +55,20 @@ import java.util.Locale;
  */
 public class StopFragment extends Fragment implements LocationProvider.LastKnowLocationCallback {
 
+    private static final String TAG = StopFragment.class.getSimpleName();
     public static final String EXTRA_STOP_ID = "stopId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
-    private String stopId;
-    private Stop stop;
-    private LatLng userLatLng;
+
     private RecyclerView departuresRecyclerView;
-    private DeparturesAdapter departuresAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private MapView mapView;
-    private GoogleMap map;
     private TextView walkDurationTextView;
+
+    private String stopId;
+    private Stop stop;
+    private LatLng userLocationLatLng;
+    private DeparturesAdapter departuresAdapter;
+    private GoogleMap map;
     private LocationProvider locationProvider;
 
     // default values for day and time
@@ -83,6 +88,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        locationProvider = new LocationProvider(getActivity(), this);
     }
 
     @Nullable
@@ -92,24 +99,13 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
         setHasOptionsMenu(true);
 
-        /**
-         * Find views
-         */
-
         departuresRecyclerView = (RecyclerView) view.findViewById(R.id.departures_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
         walkDurationTextView = (TextView) view.findViewById(R.id.walk_duration_textview);
 
-        /**
-         * Retrieve stop id from arguments so that the data corresponding to its stop can be loaded
-         */
-
+        // retrieve stop id from arguments so that the data corresponding to its stop can be loaded
         stopId = getArguments().getString(EXTRA_STOP_ID);
-
-        /**
-         * Create MapView, get GoogleMap from it and then configure the GoogleMap
-         */
 
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
                 savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
@@ -120,16 +116,6 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         map.setMyLocationEnabled(true);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
-        /**
-         * Setup location provider
-         */
-
-        locationProvider = new LocationProvider(getActivity(), this);
-
-        /**
-         * Setup swipe refresh layout
-         */
-
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
@@ -139,13 +125,22 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
             }
         });
 
-        /**
-         * Setup departures recycler view
-         */
-
         departuresRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        departuresAdapter = new DeparturesAdapter();
+        departuresAdapter = new DeparturesAdapter(getActivity()) {
+
+            @Override
+            public void onSetTimeClicked() {
+                showTimePickerDialog();
+            }
+        };
         departuresRecyclerView.setAdapter(departuresAdapter);
+
+        if (!locationProvider.isConnected()) {
+            locationProvider.connect();
+        } else {
+            departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+            updateMapSlidingPanel(userLocationLatLng);
+        }
 
         return view;
     }
@@ -153,16 +148,17 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public void onResume() {
         super.onResume();
-
-        locationProvider.connect();
         mapView.onResume();
+
+        // keep live departures up to date
+        if (stop != null) {
+            departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        locationProvider.disconnect();
         mapView.onPause();
     }
 
@@ -179,20 +175,19 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        locationProvider.disconnect();
         mapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-
         mapView.onLowMemory();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_stop_fragment, menu);
+        inflater.inflate(R.menu.menu_stop_info, menu);
     }
 
     @Override
@@ -212,42 +207,39 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_select_time:
-                showTimePickerDialog();
-                return true;
             case R.id.action_save_or_unsave:
                 final boolean shouldSave = !UserService.getInstance().getAuthenticatedUser().
                         getSavedStops().contains(stopId);
 
                 StopService.getInstance().saveOrUnsaveStop(stopId, shouldSave,
-                       new BaseService.Callback<Void>() {
+                        new BaseService.Callback<Void>() {
 
-                    @Override
-                    public void onSuccess(Void data) {
-                        if (getActivity() != null) {
-                            if (shouldSave) {
-                                Toast.makeText(getActivity(), String.format(
-                                        getActivity().getString(R.string.success_stop_saved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getActivity(), String.format(
-                                        getActivity().getString(R.string.success_stop_unsaved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
+                            @Override
+                            public void onSuccess(Void data) {
+                                if (getActivity() != null) {
+                                    if (shouldSave) {
+                                        Toast.makeText(getActivity(), String.format(
+                                                getActivity().getString(R.string.success_stop_saved),
+                                                stop.getName()), Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(getActivity(), String.format(
+                                                getActivity().getString(R.string.success_stop_unsaved),
+                                                stop.getName()), Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    // invalidate options menu so that it can be redrawn and therefore change
+                                    // save/unsave button icon accordingly
+                                    getActivity().invalidateOptionsMenu();
+                                }
                             }
 
-                            // invalidate options menu so that it can be redrawn and therefore change
-                            // save/unsave button icon accordingly
-                            getActivity().invalidateOptionsMenu();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(String message) {
-                        if (getActivity() != null) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                            @Override
+                            public void onFailure(String message) {
+                                if (getActivity() != null) {
+                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -257,38 +249,30 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
-        if (stop == null) {
-            StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
+        StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
 
-                @Override
-                public void onSuccess(Stop data) {
-                    stop = data;
+            @Override
+            public void onSuccess(Stop data) {
+                stop = data;
 
-                    if (getActivity() != null) {
-                        setRefreshIndicatorVisiblity(false);
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
 
-                        departuresAdapter.notifyDeparturesChanged();
+                    departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
 
-                        updateMapSlidingPanel(userLocationLatLng);
-                    }
+                    updateMapSlidingPanel(userLocationLatLng);
                 }
+            }
 
-                @Override
-                public void onFailure(String message) {
-                    if (getActivity() != null) {
-                        setRefreshIndicatorVisiblity(false);
+            @Override
+            public void onFailure(String message) {
+                if (getActivity() != null) {
+                    setRefreshIndicatorVisiblity(false);
 
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                 }
-            });
-        } else {
-            setRefreshIndicatorVisiblity(false);
-
-            departuresAdapter.notifyDeparturesChanged();
-
-            updateMapSlidingPanel(userLocationLatLng);
-        }
+            }
+        });
     }
 
     private void showTimePickerDialog() {
@@ -331,7 +315,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                         selectedTime = hourPicker.getValue() + ":" +
                                 minutePicker.getValue();
 
-                        departuresAdapter.notifyDeparturesChanged();
+                        departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
 
                         dialog.dismiss();
                     }
@@ -401,8 +385,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public void onLastKnownLocationSuccess(Location location) {
         if (getActivity() != null) {
-            this.userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            loadStop(userLatLng);
+            this.userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            loadStop(userLocationLatLng);
         }
     }
 
@@ -414,41 +398,86 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         }
     }
 
-    private class DeparturesAdapter extends RecyclerView.Adapter {
+    private static abstract class DeparturesAdapter extends RecyclerView.Adapter {
 
+        private Context context;
         private LayoutInflater inflater;
-        private List<Departure> departures = new ArrayList<>();
-        private final int DAY_SELECTOR_TYPE = 0;
-        private final int DEPARTURE_VIEW_TYPE = 1;
+        private Stop stop;
+        private List<Departure> liveDepartures;
+        private List<Departure> departures;
+        private String selectedDay;
+        private String selectedTime;
+
+        private final int STOP_VIEW_TYPE = 0;
+        private final int LIVE_DEPARTURES_HEADING_VIEW_TYPE = 1;
+        private final int LIVE_DEPARTURE_VIEW_TYPE = 2;
+        private final int TIME_SELECTOR_VIEW_TYPE = 3;
+        private final int DEPARTURE_VIEW_TYPE = 4;
+
+        public DeparturesAdapter(Context context) {
+            this.context = context;
+            inflater = LayoutInflater.from(context);
+            departures = new ArrayList<>();
+            liveDepartures = new ArrayList<>();
+        }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if (inflater == null) {
-                inflater = LayoutInflater.from(getActivity());
-            }
+            switch (viewType) {
+                case STOP_VIEW_TYPE:
+                    return new StopViewHolder(inflater.inflate(
+                            R.layout.row_stop_info, parent, false));
 
-            if (viewType == DAY_SELECTOR_TYPE) {
-                return new TimeSelectorViewHolder(inflater.inflate(R.layout.row_time_selector, parent, false));
-            } else {
-                return new DepartureViewHolder(inflater.inflate(R.layout.row_departure, parent, false));
+                case LIVE_DEPARTURES_HEADING_VIEW_TYPE:
+                    return new LiveDepartureHeadingViewHolder(inflater.inflate(
+                            R.layout.row_stop_info_live_departures_heading, parent, false));
+
+                case LIVE_DEPARTURE_VIEW_TYPE:
+                    return new LiveDepartureViewHolder(inflater.inflate(
+                            R.layout.row_stop_info_live_departure, parent, false));
+
+                case TIME_SELECTOR_VIEW_TYPE:
+                    return new TimeSelectorViewHolder(inflater.inflate(
+                            R.layout.row_stop_info_time_selector_heading, parent, false));
+
+                case DEPARTURE_VIEW_TYPE:
+                    return new DepartureViewHolder(inflater.inflate(
+                            R.layout.row_stop_info_departure, parent, false));
+
+                default:
+                    throw new IllegalArgumentException("Invalid view type: " + viewType);
             }
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            int viewType = getItemViewType(position);
-
-            if (viewType == DAY_SELECTOR_TYPE) {
-                ((TimeSelectorViewHolder) holder).bindItem();
-            } else {
+            if (holder instanceof StopViewHolder) {
+                ((StopViewHolder) holder).bindItem((Stop) getItem(position));
+            } else if (holder instanceof TimeSelectorViewHolder) {
+                ((TimeSelectorViewHolder) holder).bindItem((Pair<String, String>) getItem(position));
+            } else if (holder instanceof LiveDepartureViewHolder) {
+                ((LiveDepartureViewHolder) holder).bindItem((Departure) getItem(position));
+            }
+            else if (holder instanceof DepartureViewHolder) {
                 ((DepartureViewHolder) holder).bindItem((Departure) getItem(position));
+            } else {
+                if (!(holder instanceof LiveDepartureHeadingViewHolder)) {
+                    throw new IllegalArgumentException("Invalid holder type: " +
+                            holder.getClass().getSimpleName());
+                }
             }
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                return DAY_SELECTOR_TYPE;
+                return STOP_VIEW_TYPE;
+            } else if (position == 1) {
+                return LIVE_DEPARTURES_HEADING_VIEW_TYPE;
+            } else if (position > 1 && position < 2 + liveDepartures.size()) {
+                return LIVE_DEPARTURE_VIEW_TYPE;
+            } else if (position == 2 + liveDepartures.size()) {
+                return TIME_SELECTOR_VIEW_TYPE;
             } else {
                 return DEPARTURE_VIEW_TYPE;
             }
@@ -456,40 +485,76 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
         @Override
         public int getItemCount() {
-            return departures.size();
-        }
-
-        private Object getItem(int position) {
-            if (position == 0) {
-                return null;
+            if (stop == null) {
+                return 0;
             } else {
-                return departures.get(position - 1);
+                return departures.size() + liveDepartures.size() + 3
+                /* 1 stop info + 1 selected time heading + 1 live departures heading*/;
             }
         }
 
-        private void notifyDeparturesChanged() {
+        private Object getItem(int position) {
+            int viewType = getItemViewType(position);
+
+            switch (viewType) {
+                case STOP_VIEW_TYPE:
+                    return stop;
+
+                case LIVE_DEPARTURES_HEADING_VIEW_TYPE:
+                    return null;
+
+                case LIVE_DEPARTURE_VIEW_TYPE:
+                    return liveDepartures.get(position - 2);
+
+                case TIME_SELECTOR_VIEW_TYPE:
+                    return new Pair<>(selectedDay, selectedTime);
+
+                case DEPARTURE_VIEW_TYPE:
+                    return departures.get(position - 3 - liveDepartures.size());
+
+                default:
+                    throw new IllegalArgumentException("Invalid view type: " + viewType);
+            }
+        }
+
+        public void notifyDeparturesChanged(Stop stop, String selectedDay,
+                                            String selectedTime) {
+            this.stop = stop;
+            this.selectedDay = selectedDay;
+            this.selectedTime = selectedTime;
+
             departures.clear();
+            liveDepartures.clear();
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.UK);
+                Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
 
-            for (Departure departure : stop.getDepartures()) {
-                try {
-                    Date selected = simpleDateFormat.parse(selectedTime);
+                for (Departure departure : stop.getDepartures()) {
                     Date due = simpleDateFormat.parse(departure.getTime());
+
+                    // add live departures
+                    if (departure.getDay() == Helpers.getDayCode(Helpers.getCurrentDay()) &&
+                            due.after(now) && liveDepartures.size() < 5) {
+                        liveDepartures.add(departure);
+                    }
+
+                    // add other departures
+                    Date selected = simpleDateFormat.parse(selectedTime);
 
                     if (departure.getDay() == Helpers.getDayCode(selectedDay) && due.after(selected)) {
                         departures.add(departure);
                     }
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
                 }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
 
             notifyDataSetChanged();
         }
 
         private class DepartureViewHolder extends RecyclerView.ViewHolder
-                implements View.OnClickListener{
+                implements View.OnClickListener {
 
             private Departure departure;
             private TextView serviceNameTextView;
@@ -521,26 +586,137 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             @Override
             public void onClick(View v) {
-                Intent startActivityIntent = new Intent(getActivity(), ServiceActivity.class);
+                Intent startActivityIntent = new Intent(context, ServiceActivity.class);
                 startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
-                startActivity(startActivityIntent);
+                context.startActivity(startActivityIntent);
             }
         }
 
         private class TimeSelectorViewHolder extends RecyclerView.ViewHolder {
 
-            private TextView timeTextView;
+            private TextView selectedTimeTextView;
+            private TextView setTimeTextView;
 
             public TimeSelectorViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
-                timeTextView = (TextView) itemView.findViewById(R.id.time_textview);
+                selectedTimeTextView = (TextView) itemView.findViewById(R.id.selected_time_textview);
+                setTimeTextView = (TextView) itemView.findViewById(R.id.set_time_textview);
+
+                // bind event listeners
+                setTimeTextView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        onSetTimeClicked();
+                    }
+                });
             }
 
-            public void bindItem() {
-                timeTextView.setText(selectedDay + ", " + selectedTime);
+            public void bindItem(Pair<String, String> pair) {
+                selectedTimeTextView.setText(String.format(context.getString(
+                        R.string.label_timetable_format), pair.first + ", " + pair.second));
             }
         }
+
+        private class StopViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView stopNameTextView;
+            private TextView directionTextView;
+            private TextView servicesTextView;
+            private TextView destinationsTextView;
+            private TextView idTextView;
+
+            public StopViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
+                directionTextView = (TextView) itemView.findViewById(R.id.direction_textview);
+                servicesTextView = (TextView) itemView.findViewById(R.id.services_textview);
+                destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
+                idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
+            }
+
+            public void bindItem(Stop stop) {
+                stopNameTextView.setText(stop.getName());
+                directionTextView.setText(stop.getDirection());
+
+                // combine list of services into comma separated string
+                String services = "";
+                if (stop.getServices().size() > 0) {
+                    for (String service : stop.getServices()) {
+                        services += service + ", ";
+                    }
+                    services = services.substring(0, services.length() - 2);
+                } else {
+                    services = context.getString(R.string.label_none);
+                }
+                servicesTextView.setText(services);
+
+                // combine list of destinations into comma separated string
+                String destinations = "";
+                if (stop.getDestinations().size() > 0) {
+                    for (String destination : stop.getDestinations()) {
+                        destinations += destination + ", ";
+                    }
+                    destinations = destinations.substring(0, destinations.length() - 2);
+                } else {
+                    destinations = context.getString(R.string.label_none);
+                }
+                destinationsTextView.setText(destinations);
+
+                idTextView.setText(stop.getId());
+            }
+        }
+
+        private class LiveDepartureHeadingViewHolder extends RecyclerView.ViewHolder {
+
+            public LiveDepartureHeadingViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
+
+        private class LiveDepartureViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener {
+
+            private Departure departure;
+            private TextView serviceNameTextView;
+            private TextView destinationTextView;
+            private TextView timeTextView;
+
+            public LiveDepartureViewHolder(View itemView) {
+                super(itemView);
+
+                // find views
+                serviceNameTextView =
+                        (TextView) itemView.findViewById(R.id.service_name_textview);
+                destinationTextView =
+                        (TextView) itemView.findViewById(R.id.destination_textview);
+                timeTextView =
+                        (TextView) itemView.findViewById(R.id.time_textview);
+
+                // bind event listeners
+                itemView.setOnClickListener(this);
+            }
+
+            public void bindItem(Departure departure) {
+                this.departure = departure;
+
+                serviceNameTextView.setText(departure.getServiceName());
+                destinationTextView.setText(departure.getDestination());
+                timeTextView.setText(Helpers.humanizeLiveDepartureTime(departure.getTime()));
+            }
+
+            @Override
+            public void onClick(View v) {
+                Intent startActivityIntent = new Intent(context, ServiceActivity.class);
+                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
+                context.startActivity(startActivityIntent);
+            }
+        }
+
+        public abstract void onSetTimeClicked();
     }
 }

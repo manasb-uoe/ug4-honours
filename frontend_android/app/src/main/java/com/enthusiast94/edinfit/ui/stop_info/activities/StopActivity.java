@@ -37,7 +37,6 @@ public class StopActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String stopId = intent.getStringExtra(EXTRA_STOP_ID);
-        String stopName = intent.getStringExtra(EXTRA_STOP_NAME);
 
         /**
          * Setup app bar
@@ -48,7 +47,7 @@ public class StopActivity extends AppCompatActivity {
         if (appBar != null) {
             appBar.setHomeButtonEnabled(true);
             appBar.setDisplayHomeAsUpEnabled(true);
-            appBar.setTitle(stopName);
+            appBar.setTitle(getString(R.string.label_departure_times));
         }
 
         /**
