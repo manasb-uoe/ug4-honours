@@ -70,6 +70,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private DeparturesAdapter departuresAdapter;
     private GoogleMap map;
     private LocationProvider locationProvider;
+    private List<String> selectedServices;
 
     // default values for day and time
     private String selectedDay = Helpers.getCurrentDay();
@@ -138,7 +139,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         if (!locationProvider.isConnected()) {
             locationProvider.connect();
         } else {
-            departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+            departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
+                    selectedTime);
             updateMapSlidingPanel(userLocationLatLng);
         }
 
@@ -152,7 +154,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
         // keep live departures up to date
         if (stop != null) {
-            departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+            departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
+                    selectedTime);
         }
     }
 
@@ -207,6 +210,10 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_filter_departures:
+                showServiceSelectorDialog();
+                return true;
+
             case R.id.action_save_or_unsave:
                 final boolean shouldSave = !UserService.getInstance().getAuthenticatedUser().
                         getSavedStops().contains(stopId);
@@ -241,6 +248,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                             }
                         });
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -255,10 +263,15 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
             public void onSuccess(Stop data) {
                 stop = data;
 
+                if (selectedServices == null) {
+                    selectedServices = stop.getServices();
+                }
+
                 if (getActivity() != null) {
                     setRefreshIndicatorVisiblity(false);
 
-                    departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+                    departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
+                            selectedTime);
 
                     updateMapSlidingPanel(userLocationLatLng);
                 }
@@ -315,7 +328,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                         selectedTime = hourPicker.getValue() + ":" +
                                 minutePicker.getValue();
 
-                        departuresAdapter.notifyDeparturesChanged(stop, selectedDay, selectedTime);
+                        departuresAdapter.notifyDeparturesChanged(stop, selectedServices,
+                                selectedDay, selectedTime);
 
                         dialog.dismiss();
                     }
@@ -324,6 +338,48 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                 .create();
 
         dialog.show();
+    }
+
+    private void showServiceSelectorDialog() {
+        final List<String> allServices = stop.getServices();
+        boolean[] checkedItems = new boolean[allServices.size()];
+        for (int i=0; i<checkedItems.length; i++) {
+            if (selectedServices.contains(allServices.get(i))) {
+                checkedItems[i] = true;
+            }
+        }
+
+        final List<String> selectedServicesTemp = new ArrayList<>(selectedServices);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(getString(R.string.label_select_desired_services))
+                .setMultiChoiceItems(allServices.toArray(new String[allServices.size()]),
+                        checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        if (selectedServicesTemp.contains(allServices.get(which))) {
+                            selectedServicesTemp.remove(
+                                    selectedServicesTemp.indexOf(allServices.get(which)));
+                        } else {
+                            selectedServicesTemp.add(allServices.get(which));
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.label_cancel, null)
+                .setPositiveButton(R.string.label_save, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedServices = selectedServicesTemp;
+
+                        departuresAdapter.notifyDeparturesChanged(stop, selectedServices,
+                                selectedDay, selectedTime);
+                    }
+                })
+                .create();
+
+        alertDialog.show();
     }
 
     private void updateMapSlidingPanel(LatLng userLocationLatLng) {
@@ -517,8 +573,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
             }
         }
 
-        public void notifyDeparturesChanged(Stop stop, String selectedDay,
-                                            String selectedTime) {
+        public void notifyDeparturesChanged(Stop stop, List<String> selectedServices,
+                                            String selectedDay, String selectedTime) {
             this.stop = stop;
             this.selectedDay = selectedDay;
             this.selectedTime = selectedTime;
@@ -531,19 +587,21 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                 Date now = simpleDateFormat.parse(Helpers.getCurrentTime24h());
 
                 for (Departure departure : stop.getDepartures()) {
-                    Date due = simpleDateFormat.parse(departure.getTime());
+                    if (selectedServices.contains(departure.getServiceName())) {
+                        Date due = simpleDateFormat.parse(departure.getTime());
 
-                    // add live departures
-                    if (departure.getDay() == Helpers.getDayCode(Helpers.getCurrentDay()) &&
-                            due.after(now) && liveDepartures.size() < 5) {
-                        liveDepartures.add(departure);
-                    }
+                        // add live departures
+                        if (departure.getDay() == Helpers.getDayCode(Helpers.getCurrentDay()) &&
+                                due.after(now) && liveDepartures.size() < 5) {
+                            liveDepartures.add(departure);
+                        }
 
-                    // add other departures
-                    Date selected = simpleDateFormat.parse(selectedTime);
+                        // add other departures
+                        Date selected = simpleDateFormat.parse(selectedTime);
 
-                    if (departure.getDay() == Helpers.getDayCode(selectedDay) && due.after(selected)) {
-                        departures.add(departure);
+                        if (departure.getDay() == Helpers.getDayCode(selectedDay) && due.after(selected)) {
+                            departures.add(departure);
+                        }
                     }
                 }
             } catch (ParseException e) {
