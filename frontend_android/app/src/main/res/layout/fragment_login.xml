@@ -121,12 +121,12 @@
 
         </LinearLayout>
 
-        <com.google.android.gms.common.SignInButton
+        <Button
             android:id="@+id/google_login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:colorScheme="dark"
-
+            android:text="@string/login_with_google"
+            android:theme="@style/GoogleLoginButton"
             />
 
         <Button

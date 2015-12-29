@@ -130,6 +130,7 @@
     <string name="label_set_time">Set time</string>
     <string name="label_select_desired_services">Select desired services</string>
     <string name="label_or">or</string>
+    <string name="login_with_google">Login with Google</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -161,4 +162,5 @@
     <string name="api_key_google_maps">AIzaSyDjAGROEzgVxDKhSkF123yxS2_gb0yh8n4</string>
     <string name="api_key_tfe">0c627af5849e23b0b030bc7352550884</string>
     <string name="google_oauth_server_client_id">120484442436-lht3m9a6sc0ejgec2uhfkot97gi3guia.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">529305317246177</string>
 </resources>
