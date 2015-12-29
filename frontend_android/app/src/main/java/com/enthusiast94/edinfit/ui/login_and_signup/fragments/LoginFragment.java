@@ -50,6 +50,20 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(getString(R.string.google_oauth_server_client_id))
+                .build();
+
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
+        googleApiClient = new GoogleApiClient.Builder(getActivity())
+                .enableAutoManage(getActivity(), null)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     @Nullable
@@ -67,21 +81,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         signupButton.setOnClickListener(this);
         googleLoginButton.setOnClickListener(this);
 
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestIdToken(getString(R.string.google_oauth_server_client_id))
-                .build();
-
-        googleLoginButton.setScopes(gso.getScopeArray());
-
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        googleApiClient = new GoogleApiClient.Builder(getActivity())
-                .enableAutoManage(getActivity(), null)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage(getString(R.string.label_please_waitt));
+        progressDialog.setCancelable(false);
 
         // Start or stop loading based on the value of isLoading, which was retained on config
         // change.
@@ -91,31 +93,19 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        progressDialog.dismiss();
     }
 
     private void setLoading(boolean isLoading) {
-        LoginFragment.this.isLoading = isLoading;
+        this.isLoading = isLoading;
 
         if (isLoading) {
-            if (progressDialog == null) {
-                progressDialog = new ProgressDialog(getActivity());
-                progressDialog.setMessage(getString(R.string.label_please_waitt));
-                progressDialog.setCancelable(false);
-            }
+            progressDialog.show();
 
-            if (!progressDialog.isShowing()) {
-                progressDialog.show();
-            }
         } else {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.hide();
-            }
+            progressDialog.hide();
         }
     }
 
@@ -145,22 +135,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 if (emailError == null && passwordError == null) {
                     setLoading(true);
 
-                    UserService.getInstance().authenticate(email, password, new BaseService.Callback<User>() {
-
-                        @Override
-                        public void onSuccess(User data) {
-                            setLoading(false);
-
-                            EventBus.getDefault().post(new OnAuthenticatedEvent(data));
-                        }
-
-                        @Override
-                        public void onFailure(String message) {
-                            setLoading(false);
-
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    UserService.getInstance().authenticate(email, password, new UserCallback());
                 }
                 break;
 
@@ -185,27 +160,34 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             if (result.isSuccess()) {
                 setLoading(true);
 
-                UserService.getInstance().authenticateViaGoogle(result.getSignInAccount().getIdToken(), new BaseService.Callback<User>() {
-
-                    @Override
-                    public void onSuccess(User data) {
-                        setLoading(false);
-
-                        EventBus.getDefault().post(new OnAuthenticatedEvent(data));
-                    }
-
-                    @Override
-                    public void onFailure(String message) {
-                        setLoading(false);
-
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                UserService.getInstance().authenticateViaGoogle(
+                        result.getSignInAccount().getIdToken(), new UserCallback());
 
             } else {
                 Toast.makeText(getActivity(), getString(R.string.error_google_login),
                         Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    private class UserCallback implements BaseService.Callback<User> {
+
+        @Override
+        public void onSuccess(User data) {
+            if (getActivity() != null) {
+                setLoading(false);
+            }
+
+            EventBus.getDefault().post(new OnAuthenticatedEvent(data));
+        }
+
+        @Override
+        public void onFailure(String message) {
+            if (getActivity() != null) {
+                setLoading(false);
+            }
+
+            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         }
     }
 }

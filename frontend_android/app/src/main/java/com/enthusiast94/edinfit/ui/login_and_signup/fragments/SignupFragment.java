@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.login_and_signup.fragments;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,8 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
     private EditText passwordEditText;
     private EditText confirmPasswordEditText;
     private Button signupButton;
+
+    private ProgressDialog progressDialog;
     private boolean isLoading;
 
     @Nullable
@@ -36,52 +39,39 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_signup, container, false);
 
-        /**
-         * Find Views
-         */
-
         nameEditText = (EditText) view.findViewById(R.id.name_edittext);
         emailEditText = (EditText) view.findViewById(R.id.email_edittext);
         passwordEditText = (EditText) view.findViewById(R.id.password_edittext);
         confirmPasswordEditText = (EditText) view.findViewById(R.id.confirm_password_edittext);
         signupButton = (Button) view.findViewById(R.id.signup_button);
 
-        /**
-         * Bind event listeners
-         */
-
         signupButton.setOnClickListener(this);
 
-        /**
-         * Start or stop loading based on the value of isLoading, which is retained on config
-         * change.
-         */
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage(getString(R.string.label_please_waitt));
+        progressDialog.setCancelable(false);
 
+         // Start or stop loading based on the value of isLoading, which is retained on config
+         // change.
         setLoading(isLoading);
 
         return view;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        nameEditText = null;
-        emailEditText = null;
-        passwordEditText = null;
-        confirmPasswordEditText = null;
-        signupButton = null;
+    public void onDestroy() {
+        super.onDestroy();
+        progressDialog.dismiss();
     }
 
     private void setLoading(boolean isLoading) {
-        SignupFragment.this.isLoading = isLoading;
+        this.isLoading = isLoading;
 
         if (isLoading) {
-            signupButton.setEnabled(false);
-            signupButton.setText(getString(R.string.label_loading));
+            progressDialog.show();
+
         } else {
-            signupButton.setEnabled(true);
-            signupButton.setText(getString(R.string.action_signup));
+            progressDialog.hide();
         }
     }
 
@@ -131,16 +121,19 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
 
                         @Override
                         public void onSuccess(User data) {
-                            setLoading(false);
+                            if (getActivity() != null) {
+                                setLoading(false);
+                            }
 
                             EventBus.getDefault().post(new OnAuthenticatedEvent(data));
                         }
 
                         @Override
                         public void onFailure(String message) {
-                            setLoading(false);
-
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                            if (getActivity() != null) {
+                                setLoading(false);
+                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                 }

@@ -1,10 +1,9 @@
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".LoginActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -70,7 +69,7 @@
                 android:hint="@string/label_password"
                 android:inputType="textPassword"
                 android:layout_gravity="fill_horizontal"
-                android:imeOptions="actionNext"
+                android:imeOptions="actionDone"
                 style="@style/EditText"
                 />
 
@@ -78,10 +77,11 @@
 
         <Button
             android:id="@+id/login_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/action_login"
-            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_gravity="right"
+            android:layout_marginTop="@dimen/spacing_smaller"
             />
 
         <LinearLayout
@@ -91,8 +91,8 @@
             android:weightSum="11"
             android:layout_marginTop="@dimen/spacing_normal"
             android:layout_marginBottom="@dimen/spacing_normal"
-            android:layout_marginLeft="@dimen/spacing_normal"
-            android:layout_marginRight="@dimen/spacing_normal"
+            android:layout_marginLeft="@dimen/spacing_tiny"
+            android:layout_marginRight="@dimen/spacing_tiny"
             android:gravity="center"
             >
 
@@ -100,7 +100,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/divider_height"
                 android:layout_weight="5"
-                android:background="@color/divider"
+                android:background="@color/divider_darker"
                 />
 
             <TextView
@@ -116,7 +116,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/divider_height"
                 android:layout_weight="5"
-                android:background="@color/divider"
+                android:background="@color/divider_darker"
                 />
 
         </LinearLayout>
@@ -125,6 +125,8 @@
             android:id="@+id/google_login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:colorScheme="dark"
+
             />
 
         <Button
