@@ -9,6 +9,7 @@ var async = require("async");
 var authTokenService = require("../services/auth_token");
 var authenticationMiddleware = require("../middleware/authentication");
 var ownUserMiddleware = require("../middleware/own_user");
+var helpers = require("../utils/helpers");
 
 router.route("/users")
 
@@ -21,31 +22,13 @@ router.route("/users")
         var email = req.body.email ? req.body.email.trim() : undefined;
         var password = req.body.password ? req.body.password.trim() : undefined;
 
-        var user = new User({
-            name: name,
-            email: email,
-            password: password,
-            createdAt: Date.now()
-        });
+        createUser(name, email, password, function (err, user) {
+            if (err) return res.sendError(err.statusCode, err.message);
 
-        // perform validation
-        user.validateInfo({}, function (err) {
-            if (err) return res.sendError(400, err.message);
+            authTokenService.issueToken(user.id, function (err, token) {
+                if (err) return res.sendError(err.message);
 
-            // now that validation has been performed, hash password before saving user
-            user.hashPassword(function (err) {
-                if (err) return res.sendError(500, err.message);
-
-                user.save(function (err) {
-                    if (err) return res.sendError(500, err.message);
-
-                    // finally, issue auth token
-                    authTokenService.issueToken(user.id, function (err, token) {
-                        if (err) return res.sendError(err.message);
-
-                        return res.sendOk({token: token});
-                    });
-                });
+                return res.sendOk({token: token});
             });
         });
     })
@@ -157,4 +140,39 @@ router.route("/users/:user_id")
         });
     });
 
-module.exports = router;
+
+/**
+ * Helpers
+ */
+
+function createUser(name, email, password, callback) {
+    var user = new User({
+        name: name,
+        email: email,
+        password: password,
+        createdAt: Date.now()
+    });
+
+    // perform validation
+    user.validateInfo({}, function (err) {
+        if (err) return callback(helpers.createErrorMessage(400, err.message));
+
+        // now that validation has been performed, hash password before saving user
+        user.hashPassword(function (err) {
+            if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+            user.save(function (err) {
+                if (err) return callback(helpers.createErrorMessage(500, err.message));
+
+                return callback(null, user);
+            });
+        });
+    });
+}
+
+module.exports = {
+    router: router,
+    helpers: {
+        createUser: createUser
+    }
+};

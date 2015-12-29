@@ -7,7 +7,27 @@ var moment = require("moment");
 var config = require("../config");
 
 /**
- * API GET request helper
+ * GET request helper
+ */
+
+module.exports.getJson = function (url, onResult) {
+    https.get(url, function (res) {
+        var output = "";
+
+        res.on("data", function (chunk) {
+            output += chunk;
+        });
+
+        res.on("end", function () {
+            var jsonOutput = JSON.parse(output);
+            onResult(res.statusCode, jsonOutput);
+        });
+    });
+};
+
+
+/**
+ * TFE API GET request helper
  */
 
 module.exports.getApiJson = function(path, onResult) {
