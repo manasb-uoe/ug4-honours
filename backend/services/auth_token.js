@@ -15,15 +15,15 @@ var config = require("../config");
  */
 
 /**
- * Generates a new token using the provided payload and a secret key which
+ * Generates a new token using the provided payload (userId) and a secret key which
  * will be used to sign the token.
- * @param payload {string}
+ * @param userId {string}
  * @param callback {issueTokenCallback} The callback to call when token generation is done
  */
-module.exports.issueToken = function(payload, callback) {
+module.exports.issueToken = function(userId, callback) {
     if (!config.secret) return callback(new Error("No secret found in config file."), null);
 
-    return callback(null, jwt.sign(payload, config.secret));
+    return callback(null, jwt.sign({id: userId}, config.secret));
 };
 
 

@@ -40,7 +40,7 @@ router.route("/users")
                     if (err) return res.sendError(500, err.message);
 
                     // finally, issue auth token
-                    authTokenService.issueToken(user, function (err, token) {
+                    authTokenService.issueToken(user.id, function (err, token) {
                         if (err) return res.sendError(err.message);
 
                         return res.sendOk({token: token});
