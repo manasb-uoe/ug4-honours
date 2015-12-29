@@ -37,4 +37,5 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.1.1'
     compile 'fr.avianey.com.viewpagerindicator:library:2.4.1@aar'
     compile 'com.github.clans:fab:1.6.2'
+    compile 'com.facebook.android:facebook-android-sdk:4.6.0'
 }

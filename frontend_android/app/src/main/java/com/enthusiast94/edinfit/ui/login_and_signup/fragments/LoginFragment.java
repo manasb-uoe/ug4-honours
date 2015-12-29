@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,20 @@ import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import de.greenrobot.event.EventBus;
 
@@ -39,12 +49,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private EditText passwordEditText;
     private Button loginButton;
     private Button signupButton;
-    private SignInButton googleLoginButton;
+    private Button googleLoginButton;
+    private Button facebookLoginButton;
 
     private GoogleApiClient googleApiClient;
+    private CallbackManager callbackManager;
     private ProgressDialog progressDialog;
     private boolean isLoading;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +75,37 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 .enableAutoManage(getActivity(), null)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+        // Init Facebook SDK and related components
+        FacebookSdk.sdkInitialize(getActivity());
+        callbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                if (getActivity() != null) {
+                    setLoading(true);
+
+                    UserService.getInstance().authentivateViaFacebook(
+                            loginResult.getAccessToken().getToken(), new UserCallback());
+                }
+            }
+
+            @Override
+            public void onCancel() {
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), getString(R.string.facebook_login_cancelled),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Nullable
@@ -75,11 +117,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         passwordEditText = (EditText) view.findViewById(R.id.password_edittext);
         loginButton = (Button) view.findViewById(R.id.login_button);
         signupButton = (Button) view.findViewById(R.id.signup_button);
-        googleLoginButton = (SignInButton) view.findViewById(R.id.google_login_button);
+        googleLoginButton = (Button) view.findViewById(R.id.google_login_button);
+        facebookLoginButton = (Button) view.findViewById(R.id.facebook_login_button);
 
         loginButton.setOnClickListener(this);
         signupButton.setOnClickListener(this);
         googleLoginButton.setOnClickListener(this);
+        facebookLoginButton.setOnClickListener(this);
 
         progressDialog = new ProgressDialog(getActivity());
         progressDialog.setMessage(getString(R.string.label_please_waitt));
@@ -146,6 +190,12 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             case R.id.google_login_button:
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
                 startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
+                break;
+
+            case R.id.facebook_login_button:
+                LoginManager.getInstance().logInWithReadPermissions(LoginFragment.this,
+                        Arrays.asList("public_profile", "email"));
+                break;
         }
     }
 
@@ -168,6 +218,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         Toast.LENGTH_SHORT).show();
             }
         }
+
+        // Delegate onActivityResult call to Facebook's CallbackManager
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private class UserCallback implements BaseService.Callback<User> {

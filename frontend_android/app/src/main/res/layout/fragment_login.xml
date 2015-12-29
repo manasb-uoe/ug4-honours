@@ -130,6 +130,14 @@
             />
 
         <Button
+            android:id="@+id/facebook_login_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_with_facebook"
+            android:theme="@style/FacebookLoginButton"
+            />
+
+        <Button
             android:id="@+id/signup_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

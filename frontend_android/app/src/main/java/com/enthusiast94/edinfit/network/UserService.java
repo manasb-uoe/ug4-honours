@@ -76,6 +76,17 @@ public class UserService extends BaseService {
     }
 
     /**
+     * POST api/authenticate/facebook
+     */
+
+    public void authentivateViaFacebook(String accessToken, Callback<User> callback) {
+        Map<String, String> postDate = new HashMap<>();
+        postDate.put("access_token", accessToken);
+
+        createOrAuthenticateUser(API_BASE + "/authenticate/facebook", postDate, callback);
+    }
+
+    /**
      * POST api/users
      */
 
@@ -93,7 +104,7 @@ public class UserService extends BaseService {
      */
 
     private void createOrAuthenticateUser(String url, Map<String, String> userDetails,
-                                                 final Callback<User> callback) {
+                                          final Callback<User> callback) {
         RequestParams requestParams = new RequestParams(userDetails);
 
         AsyncHttpClient client = getAsyncHttpClient(false);
