@@ -34,10 +34,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.user_profile.activities.UserProfileActivity"
-            android:label="@string/label_user_profile" >
-        </activity>
-        <activity
             android:name=".ui.stop_info.activities.StopActivity"
             android:label="@string/app_name" >
         </activity>
@@ -51,10 +47,6 @@
         </activity>
         <activity
             android:name=".ui.wait_or_walk_mode.activities.SuggestionsActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name=".ui.search.activities.SearchActivity"
             android:label="@string/app_name" >
         </activity>
 
