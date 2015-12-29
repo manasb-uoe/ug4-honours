@@ -1,5 +1,7 @@
 package com.enthusiast94.edinfit.ui.login_and_signup.fragments;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +19,11 @@ import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,11 +33,18 @@ import de.greenrobot.event.EventBus;
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = LoginFragment.class.getSimpleName();
+    private static final int RC_GOOGLE_SIGN_IN = 1;
+
     private EditText emailEditText;
     private EditText passwordEditText;
     private Button loginButton;
     private Button signupButton;
+    private SignInButton googleLoginButton;
+
+    private GoogleApiClient googleApiClient;
+    private ProgressDialog progressDialog;
     private boolean isLoading;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,28 +57,34 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        /**
-         * Find views
-         */
-
         emailEditText = (EditText) view.findViewById(R.id.email_edittext);
         passwordEditText = (EditText) view.findViewById(R.id.password_edittext);
         loginButton = (Button) view.findViewById(R.id.login_button);
         signupButton = (Button) view.findViewById(R.id.signup_button);
-
-        /**
-         * Bind event listeners
-         */
+        googleLoginButton = (SignInButton) view.findViewById(R.id.google_login_button);
 
         loginButton.setOnClickListener(this);
         signupButton.setOnClickListener(this);
+        googleLoginButton.setOnClickListener(this);
 
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(getString(R.string.google_oauth_server_client_id))
+                .build();
 
-        /**
-         * Start or stop loading based on the value of isLoading, which was retained on config
-         * change.
-         */
+        googleLoginButton.setScopes(gso.getScopeArray());
 
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
+        googleApiClient = new GoogleApiClient.Builder(getActivity())
+                .enableAutoManage(getActivity(), null)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        // Start or stop loading based on the value of isLoading, which was retained on config
+        // change.
         setLoading(isLoading);
 
         return view;
@@ -74,21 +94,28 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onDestroyView() {
         super.onDestroyView();
 
-        emailEditText = null;
-        passwordEditText = null;
-        loginButton = null;
-        signupButton = null;
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     private void setLoading(boolean isLoading) {
         LoginFragment.this.isLoading = isLoading;
 
         if (isLoading) {
-            loginButton.setText(getString(R.string.label_loading));
-            loginButton.setEnabled(false);
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(getActivity());
+                progressDialog.setMessage(getString(R.string.label_please_waitt));
+                progressDialog.setCancelable(false);
+            }
+
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
         } else {
-            loginButton.setText(getString(R.string.action_login));
-            loginButton.setEnabled(true);
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.hide();
+            }
         }
     }
 
@@ -140,6 +167,45 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             case R.id.signup_button:
                 EventBus.getDefault().post(new ShowSignupFragmentEvent());
                 break;
+
+            case R.id.google_login_button:
+                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_GOOGLE_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+
+            if (result.isSuccess()) {
+                setLoading(true);
+
+                UserService.getInstance().authenticateViaGoogle(result.getSignInAccount().getIdToken(), new BaseService.Callback<User>() {
+
+                    @Override
+                    public void onSuccess(User data) {
+                        setLoading(false);
+
+                        EventBus.getDefault().post(new OnAuthenticatedEvent(data));
+                    }
+
+                    @Override
+                    public void onFailure(String message) {
+                        setLoading(false);
+
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.error_google_login),
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

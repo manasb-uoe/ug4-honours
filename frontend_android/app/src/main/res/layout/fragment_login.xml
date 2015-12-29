@@ -84,6 +84,49 @@
             android:layout_marginTop="@dimen/spacing_normal"
             />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="11"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:gravity="center"
+            >
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/divider_height"
+                android:layout_weight="5"
+                android:background="@color/divider"
+                />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_or"
+                android:textAllCaps="true"
+                android:gravity="center_horizontal"
+                />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="@dimen/divider_height"
+                android:layout_weight="5"
+                android:background="@color/divider"
+                />
+
+        </LinearLayout>
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_login_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
         <Button
             android:id="@+id/signup_button"
             android:layout_width="wrap_content"

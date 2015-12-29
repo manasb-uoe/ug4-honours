@@ -129,6 +129,7 @@
     <string name="label_timetable_format">Timetable (%1$s)</string>
     <string name="label_set_time">Set time</string>
     <string name="label_select_desired_services">Select desired services</string>
+    <string name="label_or">or</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
@@ -147,6 +148,7 @@
     <string name="error_could_not_geocode_location">Error! Could not geocode current location.</string>
     <string name="error_could_not_fetch_directions">Error! Could not fetch directions.</string>
     <string name="error_unexpected">Un an unexpected error occurred! Please try again.</string>
+    <string name="error_google_login">Login via Google failed.</string>
 
     <!-- Failure messages -->
     <string name="failure_could_not_reach_destination_in_time">You failed to reach your destination in time.</string>
@@ -155,7 +157,8 @@
     <string name="edinburgh_lat">55.9531</string>
     <string name="edinburgh_long">-3.1889</string>
 
-    <!-- Api keys -->
+    <!-- Api keys and Client IDs -->
     <string name="api_key_google_maps">AIzaSyDjAGROEzgVxDKhSkF123yxS2_gb0yh8n4</string>
     <string name="api_key_tfe">0c627af5849e23b0b030bc7352550884</string>
+    <string name="google_oauth_server_client_id">120484442436-lht3m9a6sc0ejgec2uhfkot97gi3guia.apps.googleusercontent.com</string>
 </resources>

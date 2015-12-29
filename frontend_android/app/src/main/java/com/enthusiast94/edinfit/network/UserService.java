@@ -65,6 +65,17 @@ public class UserService extends BaseService {
     }
 
     /**
+     * POST api/authenticate/google
+     */
+
+    public void authenticateViaGoogle(String idToken, final Callback<User> callback) {
+        Map<String, String> postData = new HashMap<>();
+        postData.put("id_token", idToken);
+
+        createOrAuthenticateUser(API_BASE + "/authenticate/google", postData, callback);
+    }
+
+    /**
      * POST api/users
      */
 

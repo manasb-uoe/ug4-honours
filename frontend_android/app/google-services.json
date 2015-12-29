@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "edinfit-1090",
+    "project_number": "120484442436",
+    "name": "EdinFit"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120484442436:android:f71a7652f0b4d28a",
+        "client_id": "android:com.enthusiast94.edinfit",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.enthusiast94.edinfit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120484442436-8cr7jsuvqhdr053l8f7e6uj2q47u4snu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.enthusiast94.edinfit",
+            "certificate_hash": "72A23643D5AB2F57BE40FCD43589A90D6D71A72E"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
