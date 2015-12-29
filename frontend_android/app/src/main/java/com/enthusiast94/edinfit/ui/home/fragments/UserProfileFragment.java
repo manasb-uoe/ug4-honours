@@ -52,7 +52,7 @@ public class UserProfileFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().post(new OnDeauthenticatedEvent());
+                logout();
             }
         });
 
@@ -70,5 +70,10 @@ public class UserProfileFragment extends Fragment {
             memberSinceTextView.setText(new SimpleDateFormat("dd MMM yyyy", Locale.UK)
                     .format(new Date(user.getCreatedAt())));
         }
+    }
+
+    private void logout() {
+        UserService.getInstance().deauthenticate();
+        EventBus.getDefault().post(new OnDeauthenticatedEvent());
     }
 }
