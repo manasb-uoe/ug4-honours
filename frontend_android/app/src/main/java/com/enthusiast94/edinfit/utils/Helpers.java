@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 /**
@@ -224,6 +225,23 @@ public class Helpers {
 
     public static int getStepsFromDistance(double distanceInM) {
         return (int) (distanceInM * 1.3123359580052494);
+    }
+
+    public static String getStartAndEndOfWeek(long millis) {
+        Date date = new Date(millis);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        calendar.add(Calendar.DAY_OF_MONTH, -(dayOfWeek - 2));
+        Date startDate = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, 6);
+        Date endDate = calendar.getTime();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM", Locale.UK);
+
+        return sdf.format(startDate) + " - " + sdf.format(endDate);
     }
 }
 

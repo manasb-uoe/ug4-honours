@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -44,6 +45,8 @@ public class ActivityFragment extends Fragment {
 
     private ActivityAdapter activityAdapter;
     private List<Activity> activities;
+    private ActivityAdapter.TimespanEnum selectedTimespan;
+    private ActivityAdapter.StatisticEnum selectedStatistic;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,10 +78,19 @@ public class ActivityFragment extends Fragment {
         if (activities == null) {
             loadActivities();
         } else {
-            activityAdapter.notifyActivitiesChanged(activities);
+            activityAdapter.notifyActivitiesChanged(activities, selectedTimespan, selectedStatistic);
         }
 
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // retain selected time span and statistic so that it can be set again after config change
+        selectedTimespan = activityAdapter.getSelectedTimeSpan();
+        selectedStatistic = activityAdapter.getSelectedStatistic();
     }
 
     private void loadActivities() {
@@ -91,7 +103,8 @@ public class ActivityFragment extends Fragment {
                 if (getActivity() != null) {
                     activities = data;
 
-                    activityAdapter.notifyActivitiesChanged(activities);
+                    activityAdapter.notifyActivitiesChanged(activities, selectedTimespan,
+                            selectedStatistic);
 
                     setRefreshIndicatorVisiblity(false);
                 }
@@ -122,8 +135,11 @@ public class ActivityFragment extends Fragment {
 
         private Context context;
         private LayoutInflater inflater;
+        private List<Activity> activities;
         private Map<String, ActivityTimeSpan> activityTimeSpansMap;
         private StatisticsSummary todaySummary;
+        private TimespanEnum selectedTimeSpan;
+        private StatisticEnum selectedStatistic;
 
         private static final int SPINNER_VIEW = 0;
         private static final int TODAY_SUMMARY_VIEW = 1;
@@ -168,7 +184,7 @@ public class ActivityFragment extends Fragment {
                 ((SummaryViewHolder) holder).bindItem(todaySummary);
 
             } else if (holder instanceof SpinnerViewHolder) {
-                // TODO bind current selection
+                ((SpinnerViewHolder) holder).bindItem(selectedTimeSpan, selectedStatistic);
             } else if (holder instanceof HeaderViewHolder) {
                 String timeSpan = (String) getItem(position);
                 ActivityTimeSpan activityTimeSpan = activityTimeSpansMap.get(timeSpan);
@@ -243,25 +259,50 @@ public class ActivityFragment extends Fragment {
             }
         }
 
-        private void notifyActivitiesChanged(List<Activity> activities) {
-            activityTimeSpansMap.clear();
+        private void notifyActivitiesChanged(List<Activity> activities,
+                                             TimespanEnum timeSpan, StatisticEnum statistic) {
+            this.activities = activities;
+            if (timeSpan != null) {
+                selectedTimeSpan = timeSpan;
+            } else {
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+                selectedTimeSpan = TimespanEnum.DAY;
+            }
+            if (statistic != null) {
+                selectedStatistic = statistic;
+            } else {
+                selectedStatistic = StatisticEnum.DISTANCE;
+            }
+
+            activityTimeSpansMap.clear();
 
             // iterate in reverse order since the dates must appear in descending order
             for (int i=activities.size()-1; i>=0; i--) {
                 Activity activity = activities.get(i);
+                String timeSpanText = null;
 
-                Date date = new Date(activity.getStart());
-                String timeSpanText = sdf.format(date);
+                switch (selectedTimeSpan) {
+                    case DAY:
+                        SimpleDateFormat sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+                        timeSpanText = sdfDay.format(activity.getStart());
+                        break;
+                    case MONTH:
+                        SimpleDateFormat sdfMonth = new SimpleDateFormat("MMMM", Locale.UK);
+                        timeSpanText = sdfMonth.format(activity.getStart());
+                        break;
+                    case WEEK:
+                        timeSpanText = Helpers.getStartAndEndOfWeek(activity.getStart());
+                        break;
+                }
 
                 if (activityTimeSpansMap.containsKey(timeSpanText)) {
                     activityTimeSpansMap.get(timeSpanText).getActivities().add(activity);
                 } else {
                     List<Activity> activitiesList = new ArrayList<>();
                     activitiesList.add(activity);
-                    ActivityTimeSpan timeSpan = new ActivityTimeSpan(null, activitiesList);
-                    activityTimeSpansMap.put(timeSpanText, timeSpan);
+                    ActivityTimeSpan activityTimeSpan =
+                            new ActivityTimeSpan(null /* summary is computed later */, activitiesList);
+                    activityTimeSpansMap.put(timeSpanText, activityTimeSpan);
                 }
             }
 
@@ -280,12 +321,29 @@ public class ActivityFragment extends Fragment {
             }
 
             // compute today's summary
-            String todayKey = sdf.format(new Date());
+            SimpleDateFormat sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+            String todayKey = sdfDay.format(new Date());
             if (activityTimeSpansMap.containsKey(todayKey)) {
                 todaySummary = activityTimeSpansMap.get(todayKey).getSummary();
             } else {
-                // TODO
-                todaySummary = new StatisticsSummary(0, 0, 0, 0);
+                double totalDistance = 0;
+                long totalTime = 0;
+
+                for (int i=activities.size()-1; i>=0; i--) {
+                    Activity activity = activities.get(i);
+                    String day = sdfDay.format(activity.getStart());
+                    if (day.equals(todayKey)) {
+                        totalDistance += activity.getDistance();
+                        totalTime += activity.getEnd() - activity.getStart();
+                    } else {
+                        // can break as soon as the day changes since today's activities will be
+                        // at the start of the list
+                        break;
+                    }
+                }
+
+                todaySummary = new StatisticsSummary(totalDistance, totalTime, 0,
+                        Helpers.getStepsFromDistance(totalDistance));
             }
 
             notifyDataSetChanged();
@@ -443,7 +501,7 @@ public class ActivityFragment extends Fragment {
             }
         }
 
-        private static class SummaryViewHolder extends RecyclerView.ViewHolder {
+        private class SummaryViewHolder extends RecyclerView.ViewHolder {
 
             private ViewPager viewPager;
             private SummaryPagerAdapter adapter;
@@ -471,39 +529,83 @@ public class ActivityFragment extends Fragment {
             }
         }
 
-        private static class SpinnerViewHolder extends RecyclerView.ViewHolder {
+        private class SpinnerViewHolder extends RecyclerView.ViewHolder {
 
-            private Context context;
             private Spinner timespanSpinner;
             private Spinner statisticSpinner;
+            private TimespanEnum[] timespanEnums;
+            private StatisticEnum[] statisticEnums;
 
             public SpinnerViewHolder(Context context, View itemView) {
                 super(itemView);
-
-                this.context = context;
 
                 // find views
                 timespanSpinner = (Spinner) itemView.findViewById(R.id.timespan_spinner);
                 statisticSpinner = (Spinner) itemView.findViewById(R.id.statistic_spinner);
 
                 // populate spinners
-                ArrayAdapter<CharSequence> timespanAdapter = ArrayAdapter.createFromResource(context,
-                        R.array.timespans, android.R.layout.simple_spinner_dropdown_item);
-                timespanAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                timespanEnums = TimespanEnum.values();
+                String[] timespans = new String[timespanEnums.length];
+                for (int i=0; i<timespans.length; i++) {
+                    timespans[i] = timespanEnums[i].getValue();
+                }
+                ArrayAdapter<CharSequence> timespanAdapter = new ArrayAdapter<CharSequence>(context,
+                        android.R.layout.simple_spinner_dropdown_item, timespans);
                 timespanSpinner.setAdapter(timespanAdapter);
 
-                ArrayAdapter<CharSequence> statisticAdapter = ArrayAdapter.createFromResource(context,
-                        R.array.statistics, android.R.layout.simple_spinner_dropdown_item);
+                statisticEnums = StatisticEnum.values();
+                String[] statistics = new String[statisticEnums.length];
+                for (int i=0; i<statisticEnums.length; i++) {
+                    statistics[i] = statisticEnums[i].getValue();
+                }
+                ArrayAdapter<CharSequence> statisticAdapter = new ArrayAdapter<CharSequence>(context,
+                        android.R.layout.simple_spinner_dropdown_item, statistics);
                 statisticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 statisticSpinner.setAdapter(statisticAdapter);
+
+                // bind event listeners
+                timespanSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        selectedTimeSpan = timespanEnums[position];
+                        notifyActivitiesChanged(activities, selectedTimeSpan, selectedStatistic);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                });
+                statisticSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        selectedStatistic = statisticEnums[position];
+                        notifyActivitiesChanged(activities, selectedTimeSpan, selectedStatistic);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                });
             }
 
-            public void bindItem() {
+            public void bindItem(TimespanEnum timespanEnum, StatisticEnum statisticEnum) {
+                for (int i=0; i<timespanEnums.length; i++) {
+                    if (timespanEnums[i] == timespanEnum) {
+                        timespanSpinner.setSelection(i);
+                        break;
+                    }
+                }
 
+                for (int i=0; i<statisticEnums.length; i++) {
+                    if (statisticEnums[i] == statisticEnum) {
+                        statisticSpinner.setSelection(i);
+                        break;
+                    }
+                }
             }
         }
 
-        private static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        private class HeaderViewHolder extends RecyclerView.ViewHolder {
 
             private TextView timeSpanTextView;
             private TextView statisticTextView;
@@ -518,12 +620,32 @@ public class ActivityFragment extends Fragment {
 
             public void bindItem(String timeSpanText, ActivityTimeSpan timeSpan) {
                 timeSpanTextView.setText(timeSpanText);
-                statisticTextView.setText(
-                        Helpers.humanizeDistance(timeSpan.getSummary().getDistance() / 1000));
+                String statisticText = null;
+
+                switch (selectedStatistic) {
+                    case DISTANCE:
+                        statisticText = Helpers.humanizeDistance(
+                                timeSpan.getSummary().getDistance() / 1000);
+                        break;
+                    case TIME:
+                        statisticText = Helpers.humanizeDurationInMillisToMinutes(
+                                timeSpan.getSummary().getTime());
+                        break;
+                    case CALORIES:
+                        statisticText = String.format(context.getString(
+                                R.string.label_calories_format), timeSpan.getSummary().getCalories());
+                        break;
+                    case STEPS:
+                        statisticText = String.format(context.getString(
+                                R.string.label_steps_format), timeSpan.getSummary().getSteps());
+                        break;
+                }
+
+                statisticTextView.setText(statisticText);
             }
         }
 
-        private static class DetailViewHolder extends RecyclerView.ViewHolder {
+        private class DetailViewHolder extends RecyclerView.ViewHolder {
 
             private Context context;
             private TextView infoTextView;
@@ -583,6 +705,42 @@ public class ActivityFragment extends Fragment {
                     }
                 }
             }
+        }
+
+        private enum TimespanEnum {
+            MONTH("Month view"), WEEK("Week view"), DAY("Day view");
+
+            private String value;
+
+            TimespanEnum(String value) {
+                this.value = value;
+            }
+
+            public String getValue() {
+                return value;
+            }
+        }
+
+        private enum StatisticEnum {
+            TIME("Activity time"), DISTANCE("Distance"), CALORIES("Calories"), STEPS("Steps");
+
+            private String value;
+
+            StatisticEnum(String value) {
+                this.value = value;
+            }
+
+            public String getValue() {
+                return value;
+            }
+        }
+
+        public TimespanEnum getSelectedTimeSpan() {
+            return selectedTimeSpan;
+        }
+
+        public StatisticEnum getSelectedStatistic() {
+            return selectedStatistic;
         }
     }
 }

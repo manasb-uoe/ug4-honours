@@ -107,6 +107,8 @@
     <string name="label_steps_today_format">%1$s steps today</string>
     <string name="label_stat_today_format">%1$s today</string>
     <string name="label_calories_burned_format">%1$s calories burned</string>
+    <string name="label_calories_format">%1$s calories</string>
+    <string name="label_steps_format">%1$s steps</string>
     <string name="label_saved_stops">Saved Stops</string>
     <string name="label_home_navigation">Home Navigation</string>
     <string name="label_reset">Reset</string>
