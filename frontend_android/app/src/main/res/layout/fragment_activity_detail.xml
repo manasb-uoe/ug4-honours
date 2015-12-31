@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light"
+    android:clickable="true"
+    >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/map_view"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            />
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/drop_shadow"
+            />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_normal"
+        android:background="@color/primary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+        android:layout_marginBottom="@dimen/spacing_small"
+        >
+
+        <TextView
+            android:id="@+id/description_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Brougham Place to Chalmers Street"
+            style="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="@dimen/font_large"
+            android:textStyle="normal"
+            />
+
+        <TextView
+            android:id="@+id/info_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wait or Walk"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_clock_96"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_activity_time"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5h 35m 20s"
+            android:layout_marginRight="@dimen/spacing_normal"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_depth_96"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_distance"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/distance_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5h 35m 20s"
+            android:layout_marginRight="@dimen/spacing_normal"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_speedometer_96"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_steps"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/steps_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5h 35m 20s"
+            android:layout_marginRight="@dimen/spacing_normal"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_human_footprints_96"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_average_speed"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/speed_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5h 35m 20s"
+            android:layout_marginRight="@dimen/spacing_normal"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_tiny"
+        android:layout_marginBottom="@dimen/spacing_tiny"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_gas_96"
+            android:layout_marginRight="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_calories"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/calories_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="5h 35m 20s"
+            android:layout_marginRight="@dimen/spacing_normal"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -22,6 +22,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.Triplet;
 import com.viewpagerindicator.CirclePageIndicator;
@@ -33,6 +34,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 01-10-2015.
@@ -647,15 +650,16 @@ public class ActivityFragment extends Fragment {
 
         private class DetailViewHolder extends RecyclerView.ViewHolder {
 
-            private Context context;
             private TextView infoTextView;
             private TextView descriptionTextView;
             private View topIndicatorView;
             private View bottomIndicatorView;
 
+            private Context context;
+            private Activity activity;
             private SimpleDateFormat sdf;
 
-            public DetailViewHolder(Context context, View itemView) {
+            public DetailViewHolder(final Context context, View itemView) {
                 super(itemView);
 
                 this.context = context;
@@ -667,23 +671,24 @@ public class ActivityFragment extends Fragment {
                 infoTextView = (TextView) itemView.findViewById(R.id.info_textview);
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
+
+
+                // bind event listeners
+                itemView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        EventBus.getDefault().post(new OnActivityClickedEvent(activity));
+                    }
+                });
             }
 
             public void bindItem(Triplet<Integer, Integer, Activity> offsetNumActivitiesActivityTriplet) {
-                String activityType;
+                this.activity = offsetNumActivitiesActivityTriplet.c;
 
-                switch (offsetNumActivitiesActivityTriplet.c.getType()) {
-                    case WAIT_OR_WALK:
-                        activityType = context.getString(R.string.action_wait_or_walk);
-                        break;
-
-                    default:
-                        throw new IllegalArgumentException("Invalid activity type: " +
-                                offsetNumActivitiesActivityTriplet.c.getType().getValue());
-                }
-
-                infoTextView.setText(String.format(context.getString(R.string.label_activity_info),
-                        activityType, sdf.format(offsetNumActivitiesActivityTriplet.c.getStart())));
+                infoTextView.setText(String.format(context.getString(R.string.label_activity_info_format),
+                        Helpers.getActivityTypeText(context, offsetNumActivitiesActivityTriplet.c.getType()),
+                                sdf.format(offsetNumActivitiesActivityTriplet.c.getStart())));
 
                 descriptionTextView.setText(offsetNumActivitiesActivityTriplet.c.getDescription());
 

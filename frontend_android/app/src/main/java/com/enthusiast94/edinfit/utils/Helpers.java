@@ -14,6 +14,7 @@ import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Activity;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.text.ParseException;
@@ -243,5 +244,16 @@ public class Helpers {
 
         return sdf.format(startDate) + " - " + sdf.format(endDate);
     }
+
+    public static String getActivityTypeText(Context context, Activity.Type type) {
+        switch (type) {
+            case WAIT_OR_WALK:
+                return context.getString(R.string.action_wait_or_walk);
+
+            default:
+                throw new IllegalArgumentException("Invalid activity type: " + type.getValue());
+        }
+    }
+
 }
 

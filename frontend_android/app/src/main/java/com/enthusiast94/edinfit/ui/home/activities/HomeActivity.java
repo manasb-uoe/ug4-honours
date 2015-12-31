@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.ui.home.activities;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
@@ -12,13 +13,15 @@ import android.view.View;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
+import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
+import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
-import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
-import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
+import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -158,6 +161,18 @@ public class HomeActivity extends AppCompatActivity {
         savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+
+            // unfix orientation in case one of the fragments fixed it
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void navigateToPage(int position) {
         viewPager.setCurrentItem(position);
         onPageSelected(position);
@@ -198,6 +213,15 @@ public class HomeActivity extends AppCompatActivity {
 
     public void onEventMainThread(OnDeauthenticatedEvent event) {
         goToLogin();
+    }
+
+    public void onEventMainThread(OnActivityClickedEvent event) {
+        getSupportFragmentManager().beginTransaction()
+                .addToBackStack(null)
+                .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                .add(android.R.id.content, ActivityDetailFragment.newInstance(event.getActivity()),
+                        ActivityDetailFragment.TAG)
+                .commit();
     }
 
     private class MainPagerAdapter extends FragmentPagerAdapter {
