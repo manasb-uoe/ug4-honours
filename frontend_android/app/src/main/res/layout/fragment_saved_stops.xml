@@ -19,7 +19,7 @@
             android:layout_height="match_parent"
             android:scrollbars="vertical"
             android:clipToPadding="false"
-            android:paddingBottom="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_huge"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>

@@ -1,6 +1,8 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,16 +13,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cocosw.bottomsheet.BottomSheet;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Departure;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
+import com.enthusiast94.edinfit.utils.DepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
@@ -131,11 +134,11 @@ public class SavedStopsFragment extends Fragment {
 
     private static class SavedStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private Context context;
+        private Activity context;
         private LayoutInflater inflater;
         private List<Stop> savedStops;
 
-        public SavedStopsAdapter(Context context) {
+        public SavedStopsAdapter(Activity context) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             savedStops = new ArrayList<>();
@@ -175,98 +178,56 @@ public class SavedStopsFragment extends Fragment {
             notifyDataSetChanged();
         }
 
-        private static class DepartureViews {
-
-            public View container;
-            public TextView serviceNameTextView;
-            public TextView destinationTextView;
-            public TextView timeTextView;
-
-            public DepartureViews(View container, TextView serviceNameTextView, TextView destinationTextView, TextView timeTextView) {
-                this.container = container;
-                this.serviceNameTextView = serviceNameTextView;
-                this.destinationTextView = destinationTextView;
-                this.timeTextView = timeTextView;
-            }
-        }
-
         private class SavedStopViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener {
 
             private Stop stop;
             private TextView stopNameTextView;
-            private ImageButton moreOptionsButton;
             private TextView noUpcomingDeparturesTextView;
-            private DepartureViews[] departureViewsArray;
+            private DepartureView[] departureViews;
 
             public SavedStopViewHolder(View itemView) {
                 super(itemView);
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
                 noUpcomingDeparturesTextView =
                         (TextView) itemView.findViewById(R.id.no_upcoming_departures_textview);
-                departureViewsArray = new DepartureViews[]{
-                        new DepartureViews(
-                                itemView.findViewById(R.id.departure_container_1),
-                                (TextView) itemView.findViewById(R.id.service_name_textview_1),
-                                (TextView) itemView.findViewById(R.id.destination_textview_1),
-                                (TextView) itemView.findViewById(R.id.time_textview_1)
-                        ),
-                        new DepartureViews(
-                                itemView.findViewById(R.id.departure_container_2),
-                                (TextView) itemView.findViewById(R.id.service_name_textview_2),
-                                (TextView) itemView.findViewById(R.id.destination_textview_2),
-                                (TextView) itemView.findViewById(R.id.time_textview_2)
-                        ),
-                        new DepartureViews(
-                                itemView.findViewById(R.id.departure_container_3),
-                                (TextView) itemView.findViewById(R.id.service_name_textview_3),
-                                (TextView) itemView.findViewById(R.id.destination_textview_3),
-                                (TextView) itemView.findViewById(R.id.time_textview_3)
-                        ),
-                        new DepartureViews(
-                                itemView.findViewById(R.id.departure_container_4),
-                                (TextView) itemView.findViewById(R.id.service_name_textview_4),
-                                (TextView) itemView.findViewById(R.id.destination_textview_4),
-                                (TextView) itemView.findViewById(R.id.time_textview_4)
-                        )
-
+                departureViews = new DepartureView[]{
+                        (DepartureView) itemView.findViewById(R.id.departure_container_1),
+                        (DepartureView) itemView.findViewById(R.id.departure_container_2),
+                        (DepartureView) itemView.findViewById(R.id.departure_container_3),
+                        (DepartureView) itemView.findViewById(R.id.departure_container_4)
                 };
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(stop.getName());
+                stopNameTextView.setText(String.format(context.getString(R.string.label_stop_name_with_direction),
+                        stop.getName(), stop.getDirection()));
 
                 List<Departure> departures = stop.getDepartures();
                 if (departures.size() > 0) {
                     noUpcomingDeparturesTextView.setVisibility(View.GONE);
 
-                    for (int i=0; i<departureViewsArray.length; i++) {
-                        DepartureViews departureViews  = departureViewsArray[i];
+                    for (int i=0; i< departureViews.length; i++) {
+                        DepartureView departureView  = this.departureViews[i];
 
                         if (i < departures.size()) {
-                            Departure departure = departures.get(i);
-                            departureViews.serviceNameTextView.setText(departure.getServiceName());
-                            departureViews.destinationTextView.setText(departure.getDestination());
-                            departureViews.timeTextView.setText(
-                                    Helpers.humanizeLiveDepartureTime(departure.getTime()));
-                            departureViews.container.setVisibility(View.VISIBLE);
+                            departureView.setDeparture(departures.get(i));
+                            departureView.setVisibility(View.VISIBLE);
                         } else {
-                            departureViews.container.setVisibility(View.GONE);
+                            departureView.setVisibility(View.GONE);
                         }
                     }
                 } else {
                     noUpcomingDeparturesTextView.setVisibility(View.VISIBLE);
-                    for (DepartureViews departureViews : departureViewsArray) {
-                        departureViews.container.setVisibility(View.GONE);
+                    for (DepartureView departureView : this.departureViews) {
+                        departureView.setVisibility(View.GONE);
                     }
                 }
             }
@@ -276,33 +237,49 @@ public class SavedStopsFragment extends Fragment {
                 int id = v.getId();
 
                 if (id == itemView.getId()) {
-                    startStopActivity(stop);
-                } else if (id == moreOptionsButton.getId()) {
-                    StopService.getInstance().saveOrUnsaveStop(stop.getId(), false, new BaseService.Callback<Void>() {
+                    new BottomSheet.Builder(context)
+                            .title(String.format(context.getString(R.string.label_stop_name_with_direction),
+                                    stop.getName(), stop.getDirection()))
+                            .sheet(R.menu.menu_favourite_stop)
+                            .listener(new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case R.id.action_view_departures:
+                                            startStopActivity(stop);
+                                            break;
+                                        case R.id.action_remove_from_favourites:
+                                            StopService.getInstance().saveOrUnsaveStop(stop.getId(), false, new BaseService.Callback<Void>() {
 
-                        @Override
-                        public void onSuccess(Void data) {
-                            if (context != null) {
-                                // remove unsaved stop from saved stops list
-                                for (int i=0; i<savedStops.size(); i++) {
-                                    if (savedStops.get(i).equals(stop)) {
-                                        savedStops.remove(stop);
-                                        notifyItemRemoved(i);
-                                        break;
+                                                @Override
+                                                public void onSuccess(Void data) {
+                                                    if (context != null) {
+                                                        // remove unsaved stop from saved stops list
+                                                        for (int i=0; i<savedStops.size(); i++) {
+                                                            if (savedStops.get(i).equals(stop)) {
+                                                                savedStops.remove(stop);
+                                                                notifyItemRemoved(i);
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        Toast.makeText(context, String.format(
+                                                                context.getString(R.string.success_stop_unsaved),
+                                                                stop.getName()), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onFailure(String message) {
+                                                    if (context != null) {
+                                                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                            break;
                                     }
                                 }
-
-                                Toast.makeText(context, String.format(
-                                        context.getString(R.string.success_stop_unsaved),
-                                        stop.getName()), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(String message) {
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                            }).show();
                 }
             }
         }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/service_name_border"
+        android:paddingLeft="@dimen/spacing_smaller"
+        android:paddingRight="@dimen/spacing_smaller"
+        android:paddingBottom="@dimen/spacing_super_tiny"
+        android:paddingTop="@dimen/spacing_super_tiny"
+        >
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_bus_96_zero_padding"
+            android:layout_gravity="center_vertical"
+            />
+
+        <TextView
+            android:id="@+id/service_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/font_normal_large"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            android:text="5"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/destination_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Downtown"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        android:layout_marginRight="@dimen/spacing_small"
+        android:singleLine="true"
+        />
+
+    <TextView
+        android:id="@+id/time_textview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="@color/accent"
+        android:gravity="center_vertical|right"
+        android:textSize="@dimen/font_normal_large"
+        style="@style/Base.TextAppearance.AppCompat.Body2"
+        android:text="28 min"
+        />
+
+</merge>

@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clickable="true"
     android:foreground="?attr/selectableItemBackground"
     android:background="@android:color/white"
-    android:paddingLeft="@dimen/spacing_normal"
-    android:paddingRight="@dimen/spacing_normal"
-    android:paddingTop="@dimen/spacing_small"
-    android:layout_marginTop="@dimen/spacing_small"
+    android:layout_marginTop="@dimen/spacing_smaller"
+    android:layout_marginLeft="@dimen/spacing_smaller"
+    android:layout_marginRight="@dimen/spacing_smaller"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="1dp"
     >
 
     <LinearLayout
@@ -18,65 +20,33 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/spacing_smaller"
-            >
-
-            <FrameLayout
-                android:id="@+id/direction_textview_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/spacing_normal"
-                android:layout_alignTop="@+id/more_options_button"
-                android:layout_alignBottom="@+id/more_options_button"
-                >
-
-                <TextView
-                    android:id="@+id/direction_textview"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_gravity="center"
-                    android:text="NE"
-                    android:textSize="@dimen/font_small"
-                    android:textColor="@android:color/white"
-                    android:background="@drawable/stop_direction_background"
-                    android:textStyle="bold"
-                    />
-
-            </FrameLayout>
-
             <TextView
                 android:id="@+id/stop_name_textview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chalmers Street"
-                android:layout_toRightOf="@id/direction_textview_container"
-                android:layout_alignTop="@id/direction_textview_container"
-                android:layout_alignBottom="@id/direction_textview_container"
-                android:gravity="center"
-                style="@style/TextAppearance.AppCompat.Body2"
-                />
-
-            <ImageButton
-                android:id="@+id/more_options_button"
-                android:layout_width="27dp"
                 android:layout_height="25dp"
-                android:src="@drawable/ic_action_action_highlight_remove"
-                android:background="?attr/selectableItemBackground"
-                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                android:textSize="@dimen/font_normal_large"
+                android:text="Waterloo Place"
+                style="@style/Base.TextAppearance.AppCompat.Body2"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:layout_marginRight="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_smaller"
+                android:layout_marginBottom="@dimen/spacing_smaller"
                 />
 
-        </RelativeLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/divider"
+            android:layout_marginBottom="@dimen/spacing_smaller"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/saved_stop_departures_border"
+            android:paddingLeft="@dimen/spacing_small"
+            android:paddingRight="@dimen/spacing_small"
             android:layout_marginBottom="@dimen/spacing_small"
             >
 
@@ -90,164 +60,35 @@
                 android:visibility="gone"
                 />
 
-            <LinearLayout
+            <com.enthusiast94.edinfit.utils.DepartureView
                 android:id="@+id/departure_container_1"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/spacing_super_tiny"
-                android:paddingBottom="@dimen/spacing_super_tiny"
-                >
+                android:layout_marginBottom="@dimen/spacing_tiny"
+                />
 
-                <TextView
-                    android:id="@+id/service_name_textview_1"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:text="45"
-                    />
-
-                <TextView
-                    android:id="@+id/destination_textview_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:text="Brougham Place - Chalmers St"
-                    />
-
-                <TextView
-                    android:id="@+id/time_textview_1"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical|right"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/accent"
-                    android:text="due"
-                    />
-
-            </LinearLayout>
-
-            <LinearLayout
+            <com.enthusiast94.edinfit.utils.DepartureView
                 android:id="@+id/departure_container_2"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/spacing_super_tiny"
-                android:paddingBottom="@dimen/spacing_super_tiny"
-                >
+                android:layout_marginBottom="@dimen/spacing_tiny"
+                />
 
-                <TextView
-                    android:id="@+id/service_name_textview_2"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:text="45"
-                    />
-
-                <TextView
-                    android:id="@+id/destination_textview_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:text="Brougham Place - Chalmers St"
-                    />
-
-                <TextView
-                    android:id="@+id/time_textview_2"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical|right"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/accent"
-                    android:text="5 min"
-                    />
-
-            </LinearLayout>
-
-            <LinearLayout
+            <com.enthusiast94.edinfit.utils.DepartureView
                 android:id="@+id/departure_container_3"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/spacing_super_tiny"
-                android:paddingBottom="@dimen/spacing_super_tiny"
-                >
+                android:layout_marginBottom="@dimen/spacing_tiny"
+                />
 
-                <TextView
-                    android:id="@+id/service_name_textview_3"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:text="45"
-                    />
-
-                <TextView
-                    android:id="@+id/destination_textview_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:text="Brougham Place - Chalmers St"
-                    />
-
-                <TextView
-                    android:id="@+id/time_textview_3"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical|right"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:text="5 min"
-                    android:textColor="@color/accent"
-                    />
-
-            </LinearLayout>
-
-            <LinearLayout
+            <com.enthusiast94.edinfit.utils.DepartureView
                 android:id="@+id/departure_container_4"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/spacing_super_tiny"
-                android:paddingBottom="@dimen/spacing_super_tiny"
-                >
-
-                <TextView
-                    android:id="@+id/service_name_textview_4"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:text="45"
-                    />
-
-                <TextView
-                    android:id="@+id/destination_textview_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:layout_marginRight="@dimen/spacing_small"
-                    android:text="Brougham Place - Chalmers St"
-                    />
-
-                <TextView
-                    android:id="@+id/time_textview_4"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical|right"
-                    style="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/accent"
-                    android:text="5 min"
-                    />
-
-            </LinearLayout>
+                />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</FrameLayout>
+</android.support.v7.widget.CardView>
