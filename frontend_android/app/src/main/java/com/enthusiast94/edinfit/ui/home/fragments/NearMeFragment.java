@@ -416,6 +416,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
             private Stop stop;
             private TextView stopNameTextView;
             private TextView servicesTextView;
+            private TextView destinationsTextView;
+            private TextView idTextView;
             private TextView walkDurationTextView;
             private ImageView starImageView;
 
@@ -425,6 +427,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 servicesTextView = (TextView) itemView.findViewById(R.id.services_textview);
+                destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
+                idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
                 walkDurationTextView = (TextView) itemView.findViewById(R.id.walk_duration_textview);
                 starImageView = (ImageView) itemView.findViewById(R.id.star_imageview);
 
@@ -450,6 +454,19 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 }
                 servicesTextView.setText(services);
 
+                // combine list of destinations into comma separated string
+                String destinations = "";
+                if (stop.getDestinations().size() > 0) {
+                    for (String destination : stop.getDestinations()) {
+                        destinations += destination + ", ";
+                    }
+                    destinations = destinations.substring(0, destinations.length() - 2);
+                } else {
+                    destinations = context.getString(R.string.label_none);
+                }
+                destinationsTextView.setText(destinations);
+
+                idTextView.setText(stop.getId());
                 walkDurationTextView.setText(Helpers.getWalkingDurationFromDistance(stop.getDistanceAway()));
 
                 if (savedStopIds.contains(stop.getId())) {
