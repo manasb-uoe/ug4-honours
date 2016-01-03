@@ -255,5 +255,14 @@ public class Helpers {
         }
     }
 
+    public static String getWalkingDurationFromDistance(double distanceInKm) {
+        double walkingDurationInMin = distanceInKm * 1000 / 80.0; // 80 m = 1 min
+        if (walkingDurationInMin <= 1) {
+            return "1 min walk";
+        } else {
+            return String.format("%.0f", walkingDurationInMin) + " min walk";
+        }
+    }
+
 }
 

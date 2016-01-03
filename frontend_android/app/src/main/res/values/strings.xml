@@ -37,7 +37,7 @@
     <string name="label_no_upcoming_departures">No upcoming departures</string>
     <string name="label_not_found">Not found</string>
     <string name="label_last_updated">Last updated at: </string>
-    <string name="label_current_location">Current location</string>
+    <string name="lalbe_last_updated_at_format">Last updated at %1$s</string>
     <string name="label_member_since">Member since</string>
     <string name="label_departures">Departures</string>
     <string name="label_map">Map</string>
@@ -138,6 +138,9 @@
     <string name="label_activity_time">Activity Time</string>
     <string name="label_average_speed">Average Speed</string>
     <string name="label_speed_format">%1$s kmph</string>
+    <string name="label_view_departures">View departures</string>
+    <string name="label_add_to_favourites">Add to Favourites</string>
+    <string name="label_remove_from_favourites">Remove from Favourites</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

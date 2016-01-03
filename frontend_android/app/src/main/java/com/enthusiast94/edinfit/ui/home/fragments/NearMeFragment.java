@@ -1,6 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -13,12 +13,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cocosw.bottomsheet.BottomSheet;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
@@ -27,7 +27,6 @@ import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
-import com.enthusiast94.edinfit.utils.MoreStopOptionsDialog;
 import com.enthusiast94.edinfit.utils.ReverseGeocoder;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -52,7 +51,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
     private SlidingUpPanelLayout slidingUpPanelLayout;
     private RecyclerView nearbyStopsRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private TextView currentLocationTextView;
+    private TextView selectedLocationTextView;
+    private TextView lastUpdatedAtTextView;
     private MapView mapView;
     private ProgressBar mapProgressBar;
     private ImageView mapImageView;
@@ -90,7 +90,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         slidingUpPanelLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_panel_layout);
         nearbyStopsRecyclerView = (RecyclerView) view.findViewById(R.id.nearby_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-        currentLocationTextView = (TextView) view.findViewById(R.id.current_location_textview);
+        selectedLocationTextView = (TextView) view.findViewById(R.id.selected_location_textview);
+        lastUpdatedAtTextView = (TextView) view.findViewById(R.id.last_updated_at_textview);
         mapView = (MapView) view.findViewById(R.id.map_view);
         mapProgressBar = (ProgressBar) view.findViewById(R.id.map_progress_bar);
         mapImageView = (ImageView) view.findViewById(R.id.map_imageview);
@@ -127,7 +128,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                             @Override
                             public void onFailure(String error) {
-                                currentLocationTextView.setText(
+                                selectedLocationTextView.setText(
                                         getString(R.string.label_unknown));
                             }
                         });
@@ -164,7 +165,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                     if (latLng.latitude == stopLocation.get(1) && latLng.longitude == stopLocation.get(0)) {
                         marker.showInfoWindow();
                         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                         break;
                     }
                 }
@@ -269,7 +270,10 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         }
         stopMarkers = new ArrayList<>();
 
-        currentLocationTextView.setText(userLocationName);
+        selectedLocationTextView.setText(userLocationName);
+
+        lastUpdatedAtTextView.setText(String.format(getString(
+                R.string.lalbe_last_updated_at_format), Helpers.getCurrentTime24h()));
 
         // add nearby stop markers to map
 
@@ -298,8 +302,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         if (userLocationMarker == null || !userLocationMarker.isVisible()) {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(userLocationLatLng);
-            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
-                    R.drawable.user_location_marker)));
             userLocationMarker = map.addMarker(markerOptions);
         }
 
@@ -376,12 +378,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
     private static abstract class NearbyStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private Context context;
+        private android.app.Activity context;
         private LayoutInflater inflater;
         private List<Stop> nearbyStops;
         private List<String> savedStopIds;
 
-        public NearbyStopsAdapter(Context context) {
+        public NearbyStopsAdapter(android.app.Activity context /* BottomSheet only seems to work with Activity and not just Context */) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             nearbyStops = new ArrayList<>();
@@ -413,12 +415,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
             private Stop stop;
             private TextView stopNameTextView;
-            private TextView directionTextView;
-            private ImageButton moreOptionsButton;
             private TextView servicesTextView;
-            private TextView destinationsTextView;
-            private TextView idTextView;
-            private TextView distanceAwayTextView;
+            private TextView walkDurationTextView;
             private ImageView starImageView;
 
             public StopViewHolder(View itemView) {
@@ -426,24 +424,19 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                directionTextView = (TextView) itemView.findViewById(R.id.direction_textview);
-                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
                 servicesTextView = (TextView) itemView.findViewById(R.id.services_textview);
-                destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
-                idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
-                distanceAwayTextView = (TextView) itemView.findViewById(R.id.distance_away_textview);
+                walkDurationTextView = (TextView) itemView.findViewById(R.id.walk_duration_textview);
                 starImageView = (ImageView) itemView.findViewById(R.id.star_imageview);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(stop.getName());
-                directionTextView.setText(stop.getDirection());
+                stopNameTextView.setText(String.format(context.getString(
+                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
 
                 // combine list of services into comma separated string
                 String services = "";
@@ -457,25 +450,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 }
                 servicesTextView.setText(services);
 
-                // combine list of destinations into comma separated string
-                String destinations = "";
-                if (stop.getDestinations().size() > 0) {
-                    for (String destination : stop.getDestinations()) {
-                        destinations += destination + ", ";
-                    }
-                    destinations = destinations.substring(0, destinations.length() - 2);
-                } else {
-                    destinations = context.getString(R.string.label_none);
-                }
-                destinationsTextView.setText(destinations);
-
-                idTextView.setText(stop.getId());
-                distanceAwayTextView.setText(Helpers.humanizeDistance(stop.getDistanceAway()));
+                walkDurationTextView.setText(Helpers.getWalkingDurationFromDistance(stop.getDistanceAway()));
 
                 if (savedStopIds.contains(stop.getId())) {
                     starImageView.setVisibility(View.VISIBLE);
                 } else {
-                    starImageView.setVisibility(View.INVISIBLE);
+                    starImageView.setVisibility(View.GONE);
                 }
             }
 
@@ -484,63 +464,102 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 int id = v.getId();
 
                 if (id == itemView.getId()) {
-                    startStopActivity(stop);
-                } else if (id == moreOptionsButton.getId()) {
-                    MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(
-                            context, stop, new MoreStopOptionsDialog.ResponseListener() {
+                    if (!savedStopIds.contains(stop.getId())) {
+                        new BottomSheet.Builder(context)
+                                .title(String.format(context.getString(R.string.label_stop_name_with_direction),
+                                        stop.getName(), stop.getDirection()))
+                                .sheet(R.menu.menu_nearby_stop_1)
+                                .listener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which) {
+                                            case R.id.action_show_on_map:
+                                                onShowStopOnMapOptionSelected(stop);
+                                                break;
+                                            case R.id.action_view_departures:
+                                                startStopActivity(stop);
+                                                break;
+                                            case R.id.action_add_to_favourites:
+                                                StopService.getInstance().saveOrUnsaveStop(stop.getId(),
+                                                        true, new BaseService.Callback<Void>() {
 
-                        @Override
-                        public void onShowStopOnMopOptionSelected() {
-                            NearbyStopsAdapter.this.onShowStopOnMapOptionSelected(stop);
-                        }
+                                                            @Override
+                                                            public void onSuccess(Void data) {
+                                                                savedStopIds.add(stop.getId());
 
-                        @Override
-                        public void onStopSaved(String error) {
-                            savedStopIds.add(stop.getId());
+                                                                notifyItemChanged(getAdapterPosition());
 
-                            notifyItemChanged(getAdapterPosition());
+                                                                if (context != null) {
+                                                                    Toast.makeText(context, String.format(
+                                                                            context.getString(R.string.success_stop_saved),
+                                                                            stop.getName()), Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
 
-                            if (context != null) {
-                                if (error == null) {
-                                    Toast.makeText(context, String.format(
-                                            context.getString(R.string.success_stop_saved),
-                                            stop.getName()), Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                                                            @Override
+                                                            public void onFailure(String message) {
+                                                                if (context != null) {
+                                                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+                                                        });
+                                                break;
+                                        }
+                                    }
+                                }).show();
+                    } else {
+                        new BottomSheet.Builder(context)
+                                .title(String.format(context.getString(R.string.label_stop_name_with_direction),
+                                        stop.getName(), stop.getDirection()))
+                                .sheet(R.menu.menu_nearby_stop_2)
+                                .listener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which) {
+                                            case R.id.action_show_on_map:
+                                                onShowStopOnMapOptionSelected(stop);
+                                                break;
+                                            case R.id.action_view_departures:
+                                                startStopActivity(stop);
+                                                break;
+                                            case R.id.action_remove_from_favourites:
+                                                StopService.getInstance().saveOrUnsaveStop(stop.getId(), false, new BaseService.Callback<Void>() {
+
+                                                    @Override
+                                                    public void onSuccess(Void data) {
+                                                        savedStopIds.remove(stop.getId());
+
+                                                        if (context != null) {
+                                                            notifyItemChanged(getAdapterPosition());
+                                                            Toast.makeText(context, String.format(
+                                                                    context.getString(R.string.success_stop_unsaved),
+                                                                    stop.getName()), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+
+                                                        @Override
+                                                        public void onFailure(String message) {
+                                                            if (context != null) {
+                                                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        }
+                                                    });
+                                                    break;
+                                                }
+                                        }
+                                    }).show();
                                 }
-                            }
-                        }
-
-                        @Override
-                        public void onStopUnsaved(String error) {
-                            savedStopIds.remove(stop.getId());
-
-                            notifyItemChanged(getAdapterPosition());
-
-                            if (context != null) {
-                                if (error == null) {
-                                    Toast.makeText(context, String.format(
-                                            context.getString(R.string.success_stop_unsaved),
-                                            stop.getName()), Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-                    });
-
-                    moreStopOptionsDialog.show();
+                    }
                 }
             }
-        }
 
-        private void startStopActivity(Stop stop) {
-            Intent startActivityIntent = new Intent(context, StopActivity.class);
-            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
-            context.startActivity(startActivityIntent);
-        }
+            private void startStopActivity(Stop stop) {
+                Intent startActivityIntent = new Intent(context, StopActivity.class);
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+                context.startActivity(startActivityIntent);
+            }
 
-        public abstract void onShowStopOnMapOptionSelected(Stop stop);
+            public abstract void onShowStopOnMapOptionSelected(Stop stop);
+        }
     }
-}

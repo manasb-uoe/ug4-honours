@@ -55,8 +55,6 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_action_maps_directions_walk_accent"
-            android:layout_alignTop="@id/star_imageview"
-            android:layout_alignBottom="@id/star_imageview"
             android:layout_toLeftOf="@+id/distance_away_textview"
             />
 

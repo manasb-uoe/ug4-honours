@@ -1,185 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:foreground="?attr/selectableItemBackground"
     android:background="@android:color/white"
-    android:paddingLeft="@dimen/spacing_normal"
-    android:paddingRight="@dimen/spacing_normal"
-    android:paddingTop="@dimen/spacing_small"
-    android:layout_marginTop="@dimen/spacing_small"
+    android:layout_marginTop="@dimen/spacing_smaller"
+    android:layout_marginLeft="@dimen/spacing_smaller"
+    android:layout_marginRight="@dimen/spacing_smaller"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="1dp"
     >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
+        >
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <FrameLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:clickable="true"
             >
 
-            <FrameLayout
-                android:id="@+id/direction_textview_container"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/spacing_normal"
-                android:layout_alignTop="@+id/more_options_button"
-                android:layout_alignBottom="@+id/more_options_button"
-                >
+                android:src="@drawable/ic_action_flag_2_filled_96"
+                android:layout_marginRight="@dimen/spacing_small"
+                android:layout_gravity="center_vertical"
+                />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/direction_textview"
-                    android:layout_width="40dp"
+                    android:id="@+id/stop_name_textview"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_gravity="center"
-                    android:text="NE"
-                    android:textSize="@dimen/font_small"
-                    android:textColor="@android:color/white"
-                    android:background="@drawable/stop_direction_background"
-                    android:textStyle="bold"
+                    android:textSize="@dimen/font_normal_large"
+                    android:text="Waterloo Place"
+                    style="@style/Base.TextAppearance.AppCompat.Body2"
                     />
 
-            </FrameLayout>
+                <ImageView
+                    android:id="@+id/star_imageview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_action_toggle_star_yellow"
+                    />
 
-            <TextView
-                android:id="@+id/stop_name_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chalmers Street"
-                android:layout_toRightOf="@id/direction_textview_container"
-                android:layout_alignTop="@id/direction_textview_container"
-                android:layout_alignBottom="@id/direction_textview_container"
-                android:gravity="center"
-                style="@style/TextAppearance.AppCompat.Body2"
-                />
-
-            <ImageButton
-                android:id="@+id/more_options_button"
-                android:layout_width="27dp"
-                android:layout_height="25dp"
-                android:src="@drawable/ic_action_navigation_more_vert"
-                android:background="?attr/selectableItemBackground"
-                android:layout_alignParentRight="true"
-                />
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/spacing_tiny"
-            >
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_action_action_info_outline"
-                android:layout_marginRight="@dimen/spacing_normal"
-                />
-
-            <TextView
-                android:id="@+id/stop_id_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="3265565"
-                android:gravity="center_vertical"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_action_maps_directions_bus"
-                android:layout_marginRight="@dimen/spacing_normal"
-                />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/services_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15, 16, 56, 89"
-                android:gravity="center_vertical"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_action_maps_pin_drop"
-                android:layout_marginRight="@dimen/spacing_normal"
+                android:text="15, 14, 56"
                 />
 
             <TextView
-                android:id="@+id/destinations_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Wilford Spine, Jack Potato"
-                android:gravity="center_vertical"
-                />
-
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-
-            <ImageView
-                android:id="@+id/star_imageview"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_toggle_star_yellow"
-                android:visibility="invisible"
-                />
-
-            <ImageView
-                android:id="@+id/distance_away_imageview"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_action_maps_directions_walk_accent"
-                android:layout_alignTop="@id/star_imageview"
-                android:layout_alignBottom="@id/star_imageview"
-                android:layout_toLeftOf="@+id/distance_away_textview"
-                />
-
-            <TextView
-                android:id="@+id/distance_away_textview"
+                android:id="@+id/walk_duration_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/accent"
+                style="@style/Base.TextAppearance.AppCompat.Body1"
                 android:text="150 m"
-                android:gravity="center_vertical"
-                android:layout_alignParentRight="true"
-                android:layout_alignTop="@id/distance_away_imageview"
-                android:layout_alignBottom="@id/distance_away_imageview"
-                style="@style/TextAppearance.AppCompat.Body2"
                 />
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
-</FrameLayout>
+</android.support.v7.widget.CardView>

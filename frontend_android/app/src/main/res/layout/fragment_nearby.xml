@@ -6,27 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
-    sothree:umanoDragView="@+id/drag_view"
-    sothree:umanoPanelHeight="?actionBarSize"
-    sothree:umanoShadowHeight="4dp">
+    sothree:umanoPanelHeight="150dp"
+    sothree:umanoShadowHeight="4dp"
+    sothree:umanoScrollableView="@+id/nearby_stops_recyclerview"
+    sothree:umanoFadeColor="@android:color/transparent"
+    sothree:umanoParallaxOffset="60dp"
+    >
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/nearby_stops_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none"
-            android:background="@color/background_grey"
-            android:clipToPadding="false"
-            android:paddingBottom="@dimen/spacing_small"
-            />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+        />
 
     <LinearLayout
         android:orientation="vertical"
@@ -36,11 +27,12 @@
         >
 
         <RelativeLayout
-            android:id="@+id/drag_view"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:paddingLeft="@dimen/spacing_normal"
             android:paddingRight="@dimen/spacing_normal"
+            android:paddingTop="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_small"
             android:gravity="center_vertical"
             >
 
@@ -63,7 +55,7 @@
                     >
 
                     <TextView
-                        android:id="@+id/current_location_textview"
+                        android:id="@+id/selected_location_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/label_loading"
@@ -71,9 +63,12 @@
                         />
 
                     <TextView
+                        android:id="@+id/last_updated_at_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_current_location"
+                        android:text="@string/label_loading"
+                        android:layout_marginRight="@dimen/spacing_small"
+                        android:textSize="@dimen/font_small"
                         />
 
                 </LinearLayout>
@@ -114,11 +109,23 @@
             android:background="@color/divider"
             />
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/map_view"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            >
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/nearby_stops_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:background="@color/background_grey"
+                android:clipToPadding="false"
+                android:paddingBottom="@dimen/spacing_small"
+                />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
     </LinearLayout>
 
