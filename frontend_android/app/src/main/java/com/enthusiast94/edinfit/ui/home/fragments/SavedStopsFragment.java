@@ -1,7 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,7 +22,7 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
-import com.enthusiast94.edinfit.utils.DepartureView;
+import com.enthusiast94.edinfit.utils.LiveDepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import java.util.ArrayList;
@@ -184,7 +183,7 @@ public class SavedStopsFragment extends Fragment {
             private Stop stop;
             private TextView stopNameTextView;
             private TextView noUpcomingDeparturesTextView;
-            private DepartureView[] departureViews;
+            private LiveDepartureView[] liveDepartureViews;
 
             public SavedStopViewHolder(View itemView) {
                 super(itemView);
@@ -193,11 +192,11 @@ public class SavedStopsFragment extends Fragment {
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 noUpcomingDeparturesTextView =
                         (TextView) itemView.findViewById(R.id.no_upcoming_departures_textview);
-                departureViews = new DepartureView[]{
-                        (DepartureView) itemView.findViewById(R.id.departure_container_1),
-                        (DepartureView) itemView.findViewById(R.id.departure_container_2),
-                        (DepartureView) itemView.findViewById(R.id.departure_container_3),
-                        (DepartureView) itemView.findViewById(R.id.departure_container_4)
+                liveDepartureViews = new LiveDepartureView[]{
+                        (LiveDepartureView) itemView.findViewById(R.id.departure_container_1),
+                        (LiveDepartureView) itemView.findViewById(R.id.departure_container_2),
+                        (LiveDepartureView) itemView.findViewById(R.id.departure_container_3),
+                        (LiveDepartureView) itemView.findViewById(R.id.departure_container_4)
                 };
 
                 // bind event listeners
@@ -214,20 +213,20 @@ public class SavedStopsFragment extends Fragment {
                 if (departures.size() > 0) {
                     noUpcomingDeparturesTextView.setVisibility(View.GONE);
 
-                    for (int i=0; i< departureViews.length; i++) {
-                        DepartureView departureView  = this.departureViews[i];
+                    for (int i=0; i< liveDepartureViews.length; i++) {
+                        LiveDepartureView liveDepartureView = this.liveDepartureViews[i];
 
                         if (i < departures.size()) {
-                            departureView.setDeparture(departures.get(i));
-                            departureView.setVisibility(View.VISIBLE);
+                            liveDepartureView.bindItem(departures.get(i));
+                            liveDepartureView.setVisibility(View.VISIBLE);
                         } else {
-                            departureView.setVisibility(View.GONE);
+                            liveDepartureView.setVisibility(View.GONE);
                         }
                     }
                 } else {
                     noUpcomingDeparturesTextView.setVisibility(View.VISIBLE);
-                    for (DepartureView departureView : this.departureViews) {
-                        departureView.setVisibility(View.GONE);
+                    for (LiveDepartureView liveDepartureView : this.liveDepartureViews) {
+                        liveDepartureView.setVisibility(View.GONE);
                     }
                 }
             }

@@ -1,50 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.enthusiast94.edinfit.utils.DepartureView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/spacing_small"
-    android:paddingBottom="@dimen/spacing_small"
+    android:paddingTop="@dimen/spacing_tiny"
+    android:paddingBottom="@dimen/spacing_tiny"
     android:paddingLeft="@dimen/spacing_normal"
     android:paddingRight="@dimen/spacing_normal"
-    android:layout_below="@+id/divider1"
     android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true"
     android:layout_alignParentRight="true"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    >
-
-    <TextView
-        android:id="@+id/service_name_textview"
-        android:layout_width="40dp"
-        android:layout_height="match_parent"
-        android:layout_marginRight="@dimen/spacing_normal"
-        android:gravity="center"
-        android:background="@drawable/stop_direction_background"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:text="45"
-        />
-
-    <TextView
-        android:id="@+id/destination_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:layout_marginRight="@dimen/spacing_small"
-        android:text="Brougham Place - Chalmers St"
-        style="@style/TextAppearance.AppCompat.Body1"
-        />
-
-    <TextView
-        android:id="@+id/time_textview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical|right"
-        style="@style/TextAppearance.AppCompat.Body2"
-        android:text="5 min"
-        />
-
-</LinearLayout>
+    />

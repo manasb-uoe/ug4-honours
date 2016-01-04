@@ -33,13 +33,17 @@ import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
+import com.enthusiast94.edinfit.utils.DepartureView;
+import com.enthusiast94.edinfit.utils.LiveDepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
+import com.enthusiast94.edinfit.utils.StopView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -62,7 +66,6 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private RecyclerView departuresRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private MapView mapView;
-    private TextView walkDurationTextView;
 
     private String stopId;
     private Stop stop;
@@ -103,7 +106,6 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         departuresRecyclerView = (RecyclerView) view.findViewById(R.id.departures_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
-        walkDurationTextView = (TextView) view.findViewById(R.id.walk_duration_textview);
 
         // retrieve stop id from arguments so that the data corresponding to its stop can be loaded
         stopId = getArguments().getString(EXTRA_STOP_ID);
@@ -386,14 +388,15 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
 
         // add stop marker with info window containing stop name
-        map.addMarker(new MarkerOptions()
+        final Marker stopMarker = map.addMarker(new MarkerOptions()
                 .position(stopLatLng)
                 .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
                         R.drawable.stop_marker)))
-                .title(stop.getName())).showInfoWindow();
+                .title(stop.getName()));
 
         // move map focus to user's last known location
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
+        stopMarker.showInfoWindow();
 
         DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
                 new BaseService.Callback<Directions>() {
@@ -413,9 +416,9 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
                             map.addPolyline(polylineOptions);
 
-                            // update drag view title with travel duration
-                            walkDurationTextView.setText(String.format(
-                                    getString(R.string.label_walk_duration_base), directions.getDurationText()));
+                            stopMarker.setSnippet(String.format(getString(
+                                    R.string.label_walk_duration_base), directions.getDurationText()));
+                            stopMarker.showInfoWindow(); // refresh info window since text was changed
                         }
                     }
 
@@ -615,31 +618,19 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                 implements View.OnClickListener {
 
             private Departure departure;
-            private TextView serviceNameTextView;
-            private TextView destinationTextView;
-            private TextView timeTextView;
+            private DepartureView departureView;
 
             public DepartureViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                serviceNameTextView =
-                        (TextView) itemView.findViewById(R.id.service_name_textview);
-                destinationTextView =
-                        (TextView) itemView.findViewById(R.id.destination_textview);
-                timeTextView =
-                        (TextView) itemView.findViewById(R.id.time_textview);
-
-                // bind event listeners
-                itemView.setOnClickListener(this);
+                departureView = (DepartureView) itemView;
+                departureView.setOnClickListener(this);
             }
 
             public void bindItem(Departure departure) {
                 this.departure = departure;
 
-                serviceNameTextView.setText(departure.getServiceName());
-                destinationTextView.setText(departure.getDestination());
-                timeTextView.setText(departure.getTime());
+                departureView.bindItem(departure);
             }
 
             @Override
@@ -680,52 +671,18 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
         private class StopViewHolder extends RecyclerView.ViewHolder {
 
-            private TextView stopNameTextView;
-            private TextView directionTextView;
-            private TextView servicesTextView;
-            private TextView destinationsTextView;
-            private TextView idTextView;
+            private StopView stopView;
 
             public StopViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                directionTextView = (TextView) itemView.findViewById(R.id.direction_textview);
-                servicesTextView = (TextView) itemView.findViewById(R.id.services_textview);
-                destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
-                idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
+                stopView = (StopView) itemView.findViewById(R.id.stop_view);
             }
 
             public void bindItem(Stop stop) {
-                stopNameTextView.setText(stop.getName());
-                directionTextView.setText(stop.getDirection());
-
-                // combine list of services into comma separated string
-                String services = "";
-                if (stop.getServices().size() > 0) {
-                    for (String service : stop.getServices()) {
-                        services += service + ", ";
-                    }
-                    services = services.substring(0, services.length() - 2);
-                } else {
-                    services = context.getString(R.string.label_none);
-                }
-                servicesTextView.setText(services);
-
-                // combine list of destinations into comma separated string
-                String destinations = "";
-                if (stop.getDestinations().size() > 0) {
-                    for (String destination : stop.getDestinations()) {
-                        destinations += destination + ", ";
-                    }
-                    destinations = destinations.substring(0, destinations.length() - 2);
-                } else {
-                    destinations = context.getString(R.string.label_none);
-                }
-                destinationsTextView.setText(destinations);
-
-                idTextView.setText(stop.getId());
+                // isFavourite is always set as false since favourite star is already shown in
+                // the app bar
+                stopView.bindItem(stop, false);
             }
         }
 
@@ -740,31 +697,20 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                 implements View.OnClickListener {
 
             private Departure departure;
-            private TextView serviceNameTextView;
-            private TextView destinationTextView;
-            private TextView timeTextView;
+            private LiveDepartureView liveDepartureView;
 
             public LiveDepartureViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                serviceNameTextView =
-                        (TextView) itemView.findViewById(R.id.service_name_textview);
-                destinationTextView =
-                        (TextView) itemView.findViewById(R.id.destination_textview);
-                timeTextView =
-                        (TextView) itemView.findViewById(R.id.time_textview);
+                liveDepartureView = (LiveDepartureView) itemView;
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
+                liveDepartureView.setOnClickListener(this);
             }
 
             public void bindItem(Departure departure) {
                 this.departure = departure;
 
-                serviceNameTextView.setText(departure.getServiceName());
-                destinationTextView.setText(departure.getDestination());
-                timeTextView.setText(Helpers.humanizeLiveDepartureTime(departure.getTime()));
+                liveDepartureView.bindItem(departure);
             }
 
             @Override

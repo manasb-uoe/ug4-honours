@@ -7,8 +7,8 @@
     android:layout_alignParentLeft="true"
     android:layout_alignParentStart="true"
     android:gravity="center_vertical"
-    android:background="@color/light_grey"
     android:padding="@dimen/spacing_normal"
+    android:layout_marginTop="@dimen/spacing_small"
     >
 
     <TextView
@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/label_timetable_format"
+        android:textColor="@color/accent"
         style="@style/Base.TextAppearance.AppCompat.Body2"
         />
 
@@ -29,7 +30,16 @@
         android:textColor="@color/primary_dark"
         style="@style/Base.TextAppearance.AppCompat.Body2"
         android:clickable="true"
+        android:textSize="@dimen/font_small"
         android:background="?attr/selectableItemBackgroundBorderless"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_divider_height"
+        android:background="@color/accent"
+        android:layout_marginTop="@dimen/spacing_smaller"
+        android:layout_below="@id/selected_time_textview"
         />
 
 </RelativeLayout>

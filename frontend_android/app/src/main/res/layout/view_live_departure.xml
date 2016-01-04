@@ -46,10 +46,11 @@
         android:id="@+id/time_textview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="@color/accent"
         android:gravity="center_vertical|right"
         android:textSize="@dimen/font_normal_large"
         style="@style/Base.TextAppearance.AppCompat.Body2"
-        android:text="15:45"
+        android:text="28 min"
         />
 
 </merge>

@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:background="@color/light_grey"
+    android:orientation="vertical"
     android:padding="@dimen/spacing_normal"
-    android:text="@string/label_live_departures"
-    style="@style/Base.TextAppearance.AppCompat.Body2"
-    />
+    >
+
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="@string/label_live_departures"
+        style="@style/Base.TextAppearance.AppCompat.Body2"
+        android:textColor="@color/accent"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_divider_height"
+        android:background="@color/accent"
+        android:layout_marginTop="@dimen/spacing_smaller"
+        />
+
+</LinearLayout>
