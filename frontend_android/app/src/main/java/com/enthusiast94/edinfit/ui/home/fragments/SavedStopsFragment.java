@@ -285,8 +285,7 @@ public class SavedStopsFragment extends Fragment {
 
         private void startStopActivity(Stop stop) {
             Intent startActivityIntent = new Intent(context, StopActivity.class);
-            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+            startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
             context.startActivity(startActivityIntent);
         }
     }

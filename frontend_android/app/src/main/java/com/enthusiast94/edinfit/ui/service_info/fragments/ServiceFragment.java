@@ -541,8 +541,7 @@ public class ServiceFragment extends Fragment {
                 int id = v.getId();
                 if (id == itemView.getId()) {
                     Intent startActivityIntent = new Intent(context, StopActivity.class);
-                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+                    startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
                     context.startActivity(startActivityIntent);
                 } else if (id == moreOptionsButton.getId()) {
                     MoreStopOptionsDialog moreStopOptionsDialog = new MoreStopOptionsDialog(

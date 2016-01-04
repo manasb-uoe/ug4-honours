@@ -1,6 +1,5 @@
 package com.enthusiast94.edinfit.ui.stop_info.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.service_info.fragments.ServiceFragment;
 import com.enthusiast94.edinfit.ui.stop_info.fragments.StopFragment;
 
@@ -16,31 +16,14 @@ import com.enthusiast94.edinfit.ui.stop_info.fragments.StopFragment;
  */
 public class StopActivity extends AppCompatActivity {
 
-    public static final String EXTRA_STOP_ID = "stopId";
-    public static final String EXTRA_STOP_NAME = "stopName";
+    public static final String EXTRA_STOP = "stop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stop);
 
-        /**
-         * Find views
-         */
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        /**
-         * Retrieve stop id from intent, so that the corresponding stop's data can be fetched
-         * from the server
-         */
-
-        Intent intent = getIntent();
-        String stopId = intent.getStringExtra(EXTRA_STOP_ID);
-
-        /**
-         * Setup app bar
-         */
 
         setSupportActionBar(toolbar);
         ActionBar appBar = getSupportActionBar();
@@ -50,16 +33,13 @@ public class StopActivity extends AppCompatActivity {
             appBar.setTitle(getString(R.string.label_departure_times));
         }
 
-        /**
-         * Add stop fragment
-         */
+        Stop stop = getIntent().getParcelableExtra(EXTRA_STOP);
 
         if (getSupportFragmentManager().findFragmentByTag(ServiceFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container_framelayout, StopFragment.newInstance(stopId), ServiceFragment.TAG)
+                    .add(R.id.fragment_container_framelayout, StopFragment.newInstance(stop), ServiceFragment.TAG)
                     .commit();
         }
-
     }
 
     @Override

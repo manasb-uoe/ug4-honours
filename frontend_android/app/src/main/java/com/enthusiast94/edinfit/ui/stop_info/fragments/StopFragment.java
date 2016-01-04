@@ -34,8 +34,8 @@ import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.utils.DepartureView;
-import com.enthusiast94.edinfit.utils.LiveDepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.LiveDepartureView;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.StopView;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -60,15 +60,15 @@ import java.util.Locale;
 public class StopFragment extends Fragment implements LocationProvider.LastKnowLocationCallback {
 
     private static final String TAG = StopFragment.class.getSimpleName();
-    public static final String EXTRA_STOP_ID = "stopId";
+    private static final String EXTRA_STOP = "stop";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
 
     private RecyclerView departuresRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private MapView mapView;
 
-    private String stopId;
     private Stop stop;
+    private Marker stopMarker;
     private LatLng userLocationLatLng;
     private DeparturesAdapter departuresAdapter;
     private GoogleMap map;
@@ -79,10 +79,10 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private String selectedDay = Helpers.getCurrentDay();
     private String selectedTime = Helpers.getCurrentTime24h();
 
-    public static StopFragment newInstance(String stopId) {
+    public static StopFragment newInstance(Stop stop) {
         StopFragment instance = new StopFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_STOP_ID, stopId);
+        bundle.putParcelable(EXTRA_STOP, stop);
         instance.setArguments(bundle);
 
         return instance;
@@ -107,9 +107,6 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mapView = (MapView) view.findViewById(R.id.map_view);
 
-        // retrieve stop id from arguments so that the data corresponding to its stop can be loaded
-        stopId = getArguments().getString(EXTRA_STOP_ID);
-
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
                 savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
         mapView.onCreate(mapViewSavedInstanceState);
@@ -117,7 +114,6 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -138,12 +134,26 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         };
         departuresRecyclerView.setAdapter(departuresAdapter);
 
+        if (savedInstanceState == null) {
+            stop = getArguments().getParcelable(EXTRA_STOP);
+        }
+
+        // add stop marker to map
+        LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
+        stopMarker = map.addMarker(new MarkerOptions()
+                .position(stopLatLng)
+                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
+                        R.drawable.stop_marker)))
+                .title(stop.getName()));
+        stopMarker.showInfoWindow();
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 15));
+
         if (!locationProvider.isConnected()) {
             locationProvider.connect();
         } else {
             departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
                     selectedTime);
-            updateMapSlidingPanel(userLocationLatLng);
+            addWalkingDirectionsToMap(userLocationLatLng);
         }
 
         return view;
@@ -155,7 +165,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         mapView.onResume();
 
         // keep live departures up to date
-        if (stop != null) {
+        if (stop.getDepartures() != null) {
             departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
                     selectedTime);
         }
@@ -200,7 +210,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         // set save/unsave button icon depending on whether the current stop is saved or not
         MenuItem saveOrUnsaveItem = menu.findItem(R.id.action_save_or_unsave);
 
-        if (UserService.getInstance().getAuthenticatedUser().getSavedStops().contains(stopId)) {
+        if (UserService.getInstance().getAuthenticatedUser().getSavedStops().contains(stop.getId())) {
             saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star);
         } else {
             saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star_outline);
@@ -218,9 +228,9 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             case R.id.action_save_or_unsave:
                 final boolean shouldSave = !UserService.getInstance().getAuthenticatedUser().
-                        getSavedStops().contains(stopId);
+                        getSavedStops().contains(stop.getId());
 
-                StopService.getInstance().saveOrUnsaveStop(stopId, shouldSave,
+                StopService.getInstance().saveOrUnsaveStop(stop.getId(), shouldSave,
                         new BaseService.Callback<Void>() {
 
                             @Override
@@ -259,7 +269,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private void loadStop(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getInstance().getStop(stopId, null, null, new BaseService.Callback<Stop>() {
+        StopService.getInstance().getStop(stop.getId(), null, null, new BaseService.Callback<Stop>() {
 
             @Override
             public void onSuccess(Stop data) {
@@ -275,7 +285,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                     departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
                             selectedTime);
 
-                    updateMapSlidingPanel(userLocationLatLng);
+                    addWalkingDirectionsToMap(userLocationLatLng);
                 }
             }
 
@@ -384,19 +394,8 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         alertDialog.show();
     }
 
-    private void updateMapSlidingPanel(LatLng userLocationLatLng) {
-        LatLng stopLatLng = new LatLng(stop.getLocation().get(1), stop.getLocation().get(0));
-
-        // add stop marker with info window containing stop name
-        final Marker stopMarker = map.addMarker(new MarkerOptions()
-                .position(stopLatLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerIcon(getActivity(),
-                        R.drawable.stop_marker)))
-                .title(stop.getName()));
-
-        // move map focus to user's last known location
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 16));
-        stopMarker.showInfoWindow();
+    private void addWalkingDirectionsToMap(final LatLng userLocationLatLng) {
+        LatLng stopLatLng = stopMarker.getPosition();
 
         DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
                 new BaseService.Callback<Directions>() {
@@ -417,7 +416,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                             map.addPolyline(polylineOptions);
 
                             stopMarker.setSnippet(String.format(getString(
-                                    R.string.label_walk_duration_base), directions.getDurationText()));
+                                    R.string.label_walk_duration_format), directions.getDurationText()));
                             stopMarker.showInfoWindow(); // refresh info window since text was changed
                         }
                     }

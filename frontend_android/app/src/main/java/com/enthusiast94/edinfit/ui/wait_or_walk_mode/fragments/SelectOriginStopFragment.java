@@ -355,8 +355,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
                 v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
                 Intent startActivityIntent = new Intent(getActivity(), StopActivity.class);
-                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.getId());
-                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_NAME, stop.getName());
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
                 startActivity(startActivityIntent);
 
                 return true;

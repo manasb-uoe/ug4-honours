@@ -53,7 +53,7 @@
     <string name="label_start">Start</string>
     <string name="label_next">Next</string>
     <string name="label_end">End</string>
-    <string name="label_walk_duration_base">Walk (%1$s)</string>
+    <string name="label_walk_duration_format">%1$s walk</string>
     <string name="label_walk_duration">Walk Duration</string>
     <string name="label_wait_duration_base">Wait (%1$s)</string>
     <string name="label_wait_duration">Wait Duration</string>
