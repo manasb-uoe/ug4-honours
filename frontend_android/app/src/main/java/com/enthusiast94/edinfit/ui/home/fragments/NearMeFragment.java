@@ -28,6 +28,7 @@ import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.ReverseGeocoder;
+import com.enthusiast94.edinfit.utils.StopView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -414,73 +415,27 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 implements View.OnClickListener {
 
             private Stop stop;
-            private TextView stopNameTextView;
-            private TextView servicesTextView;
-            private TextView destinationsTextView;
-            private TextView idTextView;
-            private TextView walkDurationTextView;
-            private ImageView starImageView;
+            private StopView stopView;
 
             public StopViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                servicesTextView = (TextView) itemView.findViewById(R.id.services_textview);
-                destinationsTextView = (TextView) itemView.findViewById(R.id.destinations_textview);
-                idTextView = (TextView) itemView.findViewById(R.id.stop_id_textview);
-                walkDurationTextView = (TextView) itemView.findViewById(R.id.walk_duration_textview);
-                starImageView = (ImageView) itemView.findViewById(R.id.star_imageview);
+                stopView = (StopView) itemView;
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
+                stopView.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(context.getString(
-                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
-
-                // combine list of services into comma separated string
-                String services = "";
-                if (stop.getServices().size() > 0) {
-                    for (String service : stop.getServices()) {
-                        services += service + ", ";
-                    }
-                    services = services.substring(0, services.length() - 2);
-                } else {
-                    services = context.getString(R.string.label_none);
-                }
-                servicesTextView.setText(services);
-
-                // combine list of destinations into comma separated string
-                String destinations = "";
-                if (stop.getDestinations().size() > 0) {
-                    for (String destination : stop.getDestinations()) {
-                        destinations += destination + ", ";
-                    }
-                    destinations = destinations.substring(0, destinations.length() - 2);
-                } else {
-                    destinations = context.getString(R.string.label_none);
-                }
-                destinationsTextView.setText(destinations);
-
-                idTextView.setText(stop.getId());
-                walkDurationTextView.setText(Helpers.getWalkingDurationFromDistance(stop.getDistanceAway()));
-
-                if (savedStopIds.contains(stop.getId())) {
-                    starImageView.setVisibility(View.VISIBLE);
-                } else {
-                    starImageView.setVisibility(View.GONE);
-                }
+                stopView.bindItem(stop, savedStopIds.contains(stop.getId()));
             }
 
             @Override
             public void onClick(View v) {
                 int id = v.getId();
 
-                if (id == itemView.getId()) {
+                if (id == stopView.getId()) {
                     if (!savedStopIds.contains(stop.getId())) {
                         new BottomSheet.Builder(context)
                                 .title(String.format(context.getString(R.string.label_stop_name_with_direction),

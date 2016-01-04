@@ -28,8 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/down_arrow_imageview"
         android:layout_marginRight="@dimen/spacing_normal"
-        android:layout_alignBottom="@id/stop_name_textview"
-        android:layout_alignTop="@id/stop_name_textview"
+        android:layout_alignBottom="@+id/stop_name_textview"
+        android:layout_alignTop="@+id/stop_name_textview"
         android:orientation="vertical"
         android:weightSum="7"
         >
