@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_view_departures"
+        android:title="@string/label_view_departures"
+        android:icon="@drawable/ic_action_device_access_time_light"
+        />
+    <item
+        android:id="@+id/action_add_to_favourites"
+        android:title="@string/label_add_to_favourites"
+        android:icon="@drawable/ic_action_toggle_star_light"
+        />
+</menu>

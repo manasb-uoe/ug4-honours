@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,15 +20,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cocosw.bottomsheet.BottomSheet;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.ServiceView;
+import com.enthusiast94.edinfit.utils.StopView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +54,7 @@ public class SearchFragment extends Fragment {
     private List<Service> services;
     private List<Stop> stops;
     private String filter;
+    private List<String> savedStopIds;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,6 +73,8 @@ public class SearchFragment extends Fragment {
         hintView = view.findViewById(R.id.hint_view);
         noResultsTextView = (TextView) view.findViewById(R.id.no_results_textview);
         searchResultsRecyclerView = (RecyclerView) view.findViewById(R.id.search_results_recyclerview);
+
+        savedStopIds = UserService.getInstance().getAuthenticatedUser().getSavedStops();
 
         searchAdapter = new SearchAdapter();
         searchResultsRecyclerView.setAdapter(searchAdapter);
@@ -303,26 +311,21 @@ public class SearchFragment extends Fragment {
         private class ServiceViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener {
 
-            private TextView serviceNameTextView;
-            private TextView destinationTextView;
             private Service service;
+            private ServiceView serviceView;
 
             public ServiceViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                serviceNameTextView = (TextView) itemView.findViewById(R.id.service_name_textview);
-                destinationTextView = (TextView) itemView.findViewById(R.id.destination_textview);
+                serviceView = (ServiceView) itemView;
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
+                serviceView.setOnClickListener(this);
             }
 
             public void bindItem(Service service) {
                 this.service = service;
 
-                serviceNameTextView.setText(service.getName());
-                destinationTextView.setText(service.getDescription());
+                serviceView.bindItem(service);
             }
 
             @Override
@@ -336,30 +339,111 @@ public class SearchFragment extends Fragment {
         private class StopViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener {
 
-            private TextView stopNameTextView;
-            private TextView stopDirectionTextView;
             private Stop stop;
+            private StopView stopView;
 
             public StopViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                stopDirectionTextView = (TextView) itemView.findViewById(R.id.stop_direction_textview);
+                stopView = (StopView) itemView;
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
+                stopView.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(stop.getName());
-                stopDirectionTextView.setText(stop.getDirection());
+                stopView.bindItem(stop, savedStopIds.contains(stop.getId()));
             }
 
             @Override
             public void onClick(View v) {
+                int id = v.getId();
+
+                if (id == stopView.getId()) {
+                    if (!savedStopIds.contains(stop.getId())) {
+                        new BottomSheet.Builder(getActivity())
+                                .title(String.format(getString(R.string.label_stop_name_with_direction),
+                                        stop.getName(), stop.getDirection()))
+                                .sheet(R.menu.menu_search_stop_1)
+                                .listener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which) {
+                                            case R.id.action_view_departures:
+                                                startStopActivity(stop);
+                                                break;
+                                            case R.id.action_add_to_favourites:
+                                                StopService.getInstance().saveOrUnsaveStop(stop.getId(),
+                                                        true, new BaseService.Callback<Void>() {
+
+                                                            @Override
+                                                            public void onSuccess(Void data) {
+                                                                savedStopIds.add(stop.getId());
+
+                                                                notifyItemChanged(getAdapterPosition());
+
+                                                                if (getActivity() != null) {
+                                                                    Toast.makeText(getActivity(), String.format(
+                                                                            getString(R.string.success_stop_saved),
+                                                                            stop.getName()), Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(String message) {
+                                                                if (getActivity() != null) {
+                                                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+                                                        });
+                                                break;
+                                        }
+                                    }
+                                }).show();
+                    } else {
+                        new BottomSheet.Builder(getActivity())
+                                .title(String.format(getString(R.string.label_stop_name_with_direction),
+                                        stop.getName(), stop.getDirection()))
+                                .sheet(R.menu.menu_search_stop_2)
+                                .listener(new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which) {
+                                            case R.id.action_view_departures:
+                                                startStopActivity(stop);
+                                                break;
+                                            case R.id.action_remove_from_favourites:
+                                                StopService.getInstance().saveOrUnsaveStop(stop.getId(), false, new BaseService.Callback<Void>() {
+
+                                                    @Override
+                                                    public void onSuccess(Void data) {
+                                                        savedStopIds.remove(stop.getId());
+
+                                                        if (getActivity() != null) {
+                                                            notifyItemChanged(getAdapterPosition());
+                                                            Toast.makeText(getActivity(), String.format(
+                                                                    getString(R.string.success_stop_unsaved),
+                                                                    stop.getName()), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(String message) {
+                                                        if (getActivity() != null) {
+                                                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                                break;
+                                        }
+                                    }
+                                }).show();
+                    }
+                }
+            }
+
+            private void startStopActivity(Stop stop) {
                 Intent startActivityIntent = new Intent(getActivity(), StopActivity.class);
                 startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
                 startActivity(startActivityIntent);

@@ -1,38 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.enthusiast94.edinfit.utils.StopView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/spacing_normal"
-    android:paddingRight="@dimen/spacing_normal"
-    android:paddingTop="@dimen/spacing_small"
-    android:paddingBottom="@dimen/spacing_small"
-    android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    >
-
-    <TextView
-        android:id="@+id/stop_direction_textview"
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:text="NEE"
-        android:textSize="@dimen/font_small"
-        android:textColor="@android:color/white"
-        android:background="@drawable/stop_direction_background"
-        android:layout_marginRight="@dimen/spacing_normal"
-        style="@style/TextAppearance.AppCompat.Body2"
-        />
-
-    <TextView
-        android:id="@+id/stop_name_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Princes Street"
-        android:gravity="center_vertical"
-        android:layout_gravity="center_vertical"
-        style="@style/TextAppearance.AppCompat.Body1"
-        />
-
-</LinearLayout>
+    android:foreground="?attr/selectableItemBackground"
+    android:background="@android:color/white"
+    android:layout_marginTop="@dimen/spacing_smaller"
+    android:layout_marginLeft="@dimen/spacing_smaller"
+    android:layout_marginRight="@dimen/spacing_smaller"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="1dp"
+    />

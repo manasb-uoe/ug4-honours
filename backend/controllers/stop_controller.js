@@ -18,7 +18,7 @@ var router = express.Router();
 router.get("/stops", function (req, res) {
     Stop
         .find({})
-        .select("stopId name direction")
+        .select("-serviceType -departures")
         .exec(function (err, stops) {
             if (err) {
                 return res.sendError(500, err.message);

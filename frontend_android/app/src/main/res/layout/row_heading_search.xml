@@ -22,7 +22,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sample Heading"
-            style="@style/TextViewHeading"
+            android:textColor="@color/accent"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
             />
 
         <TextView
@@ -31,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="right"
-            android:textColor="@color/accent"
             android:text="2 results"
             />
 
@@ -39,9 +39,9 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/divider"
-        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_height="@dimen/thick_divider_height"
+        android:background="@color/accent"
+        android:layout_marginTop="@dimen/spacing_smaller"
         />
 
 </LinearLayout>
