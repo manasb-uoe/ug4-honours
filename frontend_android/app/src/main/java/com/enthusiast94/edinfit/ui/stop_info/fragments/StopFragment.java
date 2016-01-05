@@ -165,7 +165,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
         mapView.onResume();
 
         // keep live departures up to date
-        if (stop.getDepartures() != null) {
+        if (stop.getDepartures() != null && selectedServices != null) {
             departuresAdapter.notifyDeparturesChanged(stop, selectedServices, selectedDay,
                     selectedTime);
         }
