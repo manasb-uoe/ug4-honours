@@ -67,8 +67,6 @@ public class ActivityDetailFragment extends Fragment {
         TextView speedTextView = (TextView) view.findViewById(R.id.speed_textview);
         TextView stepsTextView = (TextView) view.findViewById(R.id.steps_textview);
         TextView caloriesTextView = (TextView) view.findViewById(R.id.calories_textview);
-        TextView descriptionTextView = (TextView) view.findViewById(R.id.description_textview);
-        TextView infoTextView = (TextView) view.findViewById(R.id.info_textview);
 
         // setup toolbar
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
@@ -94,12 +92,12 @@ public class ActivityDetailFragment extends Fragment {
         caloriesTextView.setText(String.valueOf(0));
         speedTextView.setText(String.format(getString(R.string.label_speed_format),
                 activity.getAverageSpeed() * (60 * 60 / (1000.0)))); // convert from m/s to km/h
-        descriptionTextView.setText(activity.getDescription());
+        toolbar.setTitle(activity.getDescription());
 
         String dateAndTime = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.UK)
                 .format(new Date(activity.getStart()));
-        infoTextView.setText(String.format(getString(R.string.label_activity_info_format),
-                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime));
+        toolbar.setSubtitle((String.format(getString(R.string.label_activity_info_format),
+                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime)));
 
         PolylineOptions polylineOptions = new PolylineOptions();
         int polyLineColor = ContextCompat.getColor(getActivity(), R.color.red);
