@@ -11,6 +11,5 @@
         android:id="@+id/action_save_or_unsave"
         android:title="@string/label_save"
         app:showAsAction="always"
-        android:icon="@drawable/ic_toggle_star_unselected"
         />
 </menu>

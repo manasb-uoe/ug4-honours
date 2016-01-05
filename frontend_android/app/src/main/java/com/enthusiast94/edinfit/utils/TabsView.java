@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.utils;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -97,21 +98,23 @@ public class TabsView extends LinearLayout {
         int tabPosition = indexOfChild(tabView);
 
         titleTextView.setText(tabContentProvider.getTitle(tabPosition));
+        iconImageView.setImageResource(tabContentProvider.getIcon(tabPosition));
 
         if (shouldSelect) {
-            titleTextView.setTextColor(tabContentProvider.getSelectedTextColor(tabPosition));
-            iconImageView.setImageResource(tabContentProvider.getSelectedIcon(tabPosition));
+            titleTextView.setTextColor(tabContentProvider.getSelectedTitleColor(tabPosition));
+            iconImageView.setColorFilter(tabContentProvider.getSelectedIconColor(tabPosition));
         } else {
-            titleTextView.setTextColor(tabContentProvider.getUnselectedTextColor(tabPosition));
-            iconImageView.setImageResource(tabContentProvider.getUnselectedIcon(tabPosition));
+            titleTextView.setTextColor(tabContentProvider.getUnselectedTitleColor(tabPosition));
+            iconImageView.setColorFilter(tabContentProvider.getUnselectedIconColor(tabPosition), PorterDuff.Mode.SRC_ATOP);
         }
     }
 
     public interface TabContentProvider {
         int getTitle(int position);
-        int getSelectedTextColor(int position);
-        int getUnselectedTextColor(int position);
-        int getSelectedIcon(int position);
-        int getUnselectedIcon(int position);
+        int getIcon(int position);
+        int getSelectedTitleColor(int position);
+        int getUnselectedTitleColor(int position);
+        int getSelectedIconColor(int position);
+        int getUnselectedIconColor(int position);
     }
 }

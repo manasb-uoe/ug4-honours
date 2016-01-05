@@ -25,6 +25,7 @@
                 android:id="@+id/tabs_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/primary"
                 />
 
         </android.support.design.widget.AppBarLayout>
@@ -51,7 +52,7 @@
                 fab:menu_showShadow="true"
                 fab:menu_colorNormal="@color/accent"
                 fab:menu_colorPressed="@color/accent"
-                fab:menu_backgroundColor="@color/white_opaque_70"
+                fab:menu_backgroundColor="@color/white_opaque_60"
                 >
 
                 <com.github.clans.fab.FloatingActionButton

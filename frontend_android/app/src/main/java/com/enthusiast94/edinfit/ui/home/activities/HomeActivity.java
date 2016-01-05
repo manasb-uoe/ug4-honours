@@ -21,7 +21,6 @@ import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
@@ -191,8 +190,7 @@ public class HomeActivity extends AppCompatActivity {
 
         private static final int FRAGMENT_COUNT = 4;
         private Context context;
-        private int[] tabIconsUnselected;
-        private int[] tabIconsSelected;
+        private int[] tabIcons;
         private int[] tabTitles;
 
         public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
@@ -200,13 +198,9 @@ public class HomeActivity extends AppCompatActivity {
 
             this.context = context;
 
-            tabIconsUnselected = new int[]{R.drawable.ic_directions_run_unselected,
-                    R.drawable.ic_near_me_unselected, R.drawable.ic_toggle_star_unselected,
-                    R.drawable.ic_social_person_unselected};
-
-            tabIconsSelected = new int[]{R.drawable.ic_directions_run_selected,
-                    R.drawable.ic_near_me_selected, R.drawable.ic_toggle_star_selected,
-                    R.drawable.ic_social_person_selected};
+            tabIcons = new int[]{R.drawable.ic_directions_run_white_36dp,
+                    R.drawable.ic_near_me_white_36dp, R.drawable.ic_star_white_36dp,
+                    R.drawable.ic_person_pin_white_36dp};
 
             tabTitles = new int[]{R.string.label_activity, R.string.label_nearby, R.string.favourites, R.string.label_profile};
         }
@@ -233,23 +227,28 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         @Override
-        public int getSelectedTextColor(int position) {
-            return ContextCompat.getColor(context, R.color.primary);
+        public int getIcon(int position) {
+            return tabIcons[position];
         }
 
         @Override
-        public int getUnselectedTextColor(int position) {
-            return ContextCompat.getColor(context, R.color.black_opaque_60);
+        public int getSelectedTitleColor(int position) {
+            return ContextCompat.getColor(context, android.R.color.white);
         }
 
         @Override
-        public int getSelectedIcon(int position) {
-            return tabIconsSelected[position];
+        public int getUnselectedTitleColor(int position) {
+            return ContextCompat.getColor(context, R.color.white_opaque_60);
         }
 
         @Override
-        public int getUnselectedIcon(int position) {
-            return tabIconsUnselected[position];
+        public int getSelectedIconColor(int position) {
+            return ContextCompat.getColor(context, android.R.color.white);
+        }
+
+        @Override
+        public int getUnselectedIconColor(int position) {
+            return ContextCompat.getColor(context, R.color.primary_opaque_65);
         }
     }
 }
