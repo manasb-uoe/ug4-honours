@@ -14,29 +14,20 @@
         android:orientation="vertical"
         >
 
-        <FrameLayout
+
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            >
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/divider"
-                android:layout_gravity="bottom"
-                />
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tablayout"
+            <com.enthusiast94.edinfit.utils.TabsView
+                android:id="@+id/tabs_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:tabGravity="fill"
-                app:tabMode="fixed"
-                fab:theme="@style/ThemeOverlay.AppCompat"
-                fab:tabIndicatorColor="@color/primary"
-                fab:tabIndicatorHeight="2dp"
                 />
 
-        </FrameLayout>
+        </android.support.design.widget.AppBarLayout>
 
         <FrameLayout
             android:layout_width="match_parent"

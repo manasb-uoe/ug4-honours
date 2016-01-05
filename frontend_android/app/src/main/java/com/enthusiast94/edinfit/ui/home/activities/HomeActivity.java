@@ -1,12 +1,14 @@
 package com.enthusiast94.edinfit.ui.home.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -23,6 +25,7 @@ import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
+import com.enthusiast94.edinfit.utils.TabsView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -36,53 +39,33 @@ public class HomeActivity extends AppCompatActivity {
     private FloatingActionMenu fabMenu;
     private FloatingActionButton waitOrWalkFab;
     private FloatingActionButton journeyPlannerFab;
-    private TabLayout tabLayout;
+    private TabsView tabsView;
 
     private Handler handler;
     private ViewPager viewPager;
+    private MainPagerAdapter adapter;
     private int selectedPageIndex;
-    private final int[] tabIconsUnselected = new int[]{R.drawable.ic_directions_run_unselected,
-            R.drawable.ic_near_me_unselected, R.drawable.ic_search_unselected, R.drawable.ic_toggle_star_unselected,
-            R.drawable.ic_social_person_unselected};
-    private final int[] tabIconsSelected = new int[]{R.drawable.ic_directions_run_selected,
-            R.drawable.ic_near_me_selected, R.drawable.ic_search_selected, R.drawable.ic_toggle_star_selected,
-            R.drawable.ic_social_person_selected};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /**
-         * Start login activity if user is not authenticated, else continue with this activity
-         */
-
+        // start login activity if user is not authenticated, else continue with this activity
         if (!UserService.getInstance().isUserAuthenticated()) {
             goToLogin();
         } else {
             setContentView(R.layout.activity_home);
-
-            /**
-             * Register with default event bus
-             */
-
+            handler = new Handler();
             EventBus.getDefault().register(this);
 
-            /**
-             * Find views
-             */
-
+            // find views
             viewPager = (ViewPager) findViewById(R.id.viewpager);
             fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
             waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
             journeyPlannerFab = (FloatingActionButton) findViewById(R.id.journey_planner_fab);
-            tabLayout = (TabLayout) findViewById(R.id.tablayout);
+            tabsView = (TabsView) findViewById(R.id.tabs_view);
 
-            /**
-             * Setup floating action menu item clicks
-             */
-
-            handler = new Handler();
-
+            // setup floating action menu item clicks
             waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -101,7 +84,6 @@ public class HomeActivity extends AppCompatActivity {
 
                 }
             });
-
             journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -110,11 +92,9 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
 
-            /**
-             * Setup view pager with
-             */
-
-            viewPager.setAdapter(new MainPagerAdapter());
+            // setup viewpager and tabs
+            adapter = new MainPagerAdapter(this, getSupportFragmentManager());
+            viewPager.setAdapter(adapter);
             viewPager.setOffscreenPageLimit(2);
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -130,13 +110,10 @@ public class HomeActivity extends AppCompatActivity {
                 public void onPageScrollStateChanged(int state) {
                 }
             });
-            setupTabs();
+            tabsView.setViewPager(viewPager);
 
-            /**
-             * Navigate to viewpager page based on the page index in saved instance state, ensuring that
-             * the correct page is selected after configuration changes.
-             */
-
+            // Navigate to viewpager page based on the page index in saved instance state,
+            // ensuring that the correct page is selected after configuration changes.
             if (savedInstanceState == null) {
                 selectedPageIndex = 0; /* default = Activity fragment */
             } else {
@@ -144,6 +121,7 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             viewPager.setCurrentItem(selectedPageIndex);
+            tabsView.setSelectedTab(selectedPageIndex);
             navigateToPage(selectedPageIndex);
         }
     }
@@ -179,10 +157,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void onPageSelected(int position) {
-        // only highlight selected tab
-        setTabSelected(selectedPageIndex, false);
-        setTabSelected(position, true);
-
         // only show fab on ActivityFragment
         if (position == 0) {
             fabMenu.showMenuButton(true);
@@ -191,18 +165,6 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         selectedPageIndex = position;
-    }
-
-    private void setupTabs() {
-        tabLayout.setupWithViewPager(viewPager);
-
-        for (int i=0; i<tabLayout.getTabCount(); i++) {
-            tabLayout.getTabAt(i).setIcon(tabIconsUnselected[i]);
-        }
-    }
-
-    private void setTabSelected(int pos, boolean shouldSelect) {
-        tabLayout.getTabAt(pos).setIcon(shouldSelect ? tabIconsSelected[pos] : tabIconsUnselected[pos]);
     }
 
     private void goToLogin() {
@@ -224,12 +186,29 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private class MainPagerAdapter extends FragmentPagerAdapter {
+    private static class MainPagerAdapter extends FragmentPagerAdapter
+            implements TabsView.TabContentProvider {
 
-        private static final int FRAGMENT_COUNT = 5;
+        private static final int FRAGMENT_COUNT = 4;
+        private Context context;
+        private int[] tabIconsUnselected;
+        private int[] tabIconsSelected;
+        private int[] tabTitles;
 
-        public MainPagerAdapter() {
-            super(getSupportFragmentManager());
+        public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
+            super(fragmentManager);
+
+            this.context = context;
+
+            tabIconsUnselected = new int[]{R.drawable.ic_directions_run_unselected,
+                    R.drawable.ic_near_me_unselected, R.drawable.ic_toggle_star_unselected,
+                    R.drawable.ic_social_person_unselected};
+
+            tabIconsSelected = new int[]{R.drawable.ic_directions_run_selected,
+                    R.drawable.ic_near_me_selected, R.drawable.ic_toggle_star_selected,
+                    R.drawable.ic_social_person_selected};
+
+            tabTitles = new int[]{R.string.label_activity, R.string.label_nearby, R.string.favourites, R.string.label_profile};
         }
 
         @Override
@@ -237,9 +216,8 @@ public class HomeActivity extends AppCompatActivity {
             switch (position) {
                 case 0: return new ActivityFragment();
                 case 1: return new NearMeFragment();
-                case 2: return new SearchFragment();
-                case 3: return new SavedStopsFragment();
-                case 4: return new UserProfileFragment();
+                case 2: return new SavedStopsFragment();
+                case 3: return new UserProfileFragment();
                 default: return null;
             }
         }
@@ -247,6 +225,31 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             return FRAGMENT_COUNT;
+        }
+
+        @Override
+        public int getTitle(int position) {
+            return tabTitles[position];
+        }
+
+        @Override
+        public int getSelectedTextColor(int position) {
+            return ContextCompat.getColor(context, R.color.primary);
+        }
+
+        @Override
+        public int getUnselectedTextColor(int position) {
+            return ContextCompat.getColor(context, R.color.black_opaque_60);
+        }
+
+        @Override
+        public int getSelectedIcon(int position) {
+            return tabIconsSelected[position];
+        }
+
+        @Override
+        public int getUnselectedIcon(int position) {
+            return tabIconsUnselected[position];
         }
     }
 }

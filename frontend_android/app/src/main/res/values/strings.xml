@@ -26,9 +26,9 @@
     <string name="label_confirm_password">Confirm password</string>
     <string name="label_loading">Loading…</string>
     <string name="label_activity">Activity</string>
-    <string name="label_user_profile">User Profile</string>
+    <string name="label_profile">Profile</string>
     <string name="label_go">Go</string>
-    <string name="label_nearby_stops">Nearby Stops</string>
+    <string name="label_nearby">Nearby</string>
     <string name="label_nav_open">Open navigation menu</string>
     <string name="label_nav_close">Close navigation menu</string>
     <string name="label_more_options">More options</string>
@@ -141,6 +141,7 @@
     <string name="label_view_departures">View departures</string>
     <string name="label_add_to_favourites">Add to Favourites</string>
     <string name="label_remove_from_favourites">Remove from Favourites</string>
+    <string name="favourites">Favourites</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
