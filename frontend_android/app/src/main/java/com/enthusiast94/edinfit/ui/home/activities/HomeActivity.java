@@ -3,14 +3,20 @@ package com.enthusiast94.edinfit.ui.home.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.enthusiast94.edinfit.R;
@@ -21,10 +27,10 @@ import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
-import com.enthusiast94.edinfit.utils.TabsView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -33,13 +39,16 @@ import de.greenrobot.event.EventBus;
 public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = HomeActivity.class.getSimpleName();
-    private static final String SELECTED_PAGE_INDEX = "selectedPageIndex";
+    private static final String SELECTED_FRAGMENT_INDEX = "selectedFragmentIndex";
 
+    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
     private FloatingActionMenu fabMenu;
     private FloatingActionButton waitOrWalkFab;
     private FloatingActionButton journeyPlannerFab;
-    private TabsView tabsView;
 
+    private ActionBarDrawerToggle actionBarDrawerToggle;
     private Handler handler;
     private ViewPager viewPager;
     private MainPagerAdapter adapter;
@@ -58,11 +67,42 @@ public class HomeActivity extends AppCompatActivity {
             EventBus.getDefault().register(this);
 
             // find views
+            toolbar = (Toolbar) findViewById(R.id.toolbar);
+            drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            navigationView = (NavigationView) findViewById(R.id.navigation_view);
             viewPager = (ViewPager) findViewById(R.id.viewpager);
             fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
             waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
             journeyPlannerFab = (FloatingActionButton) findViewById(R.id.journey_planner_fab);
-            tabsView = (TabsView) findViewById(R.id.tabs_view);
+
+            // setup toolbar with ActionBarDrawerToggle
+            setSupportActionBar(toolbar);
+            actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                    R.string.drawer_close, R.string.drawer_open);
+
+            // handle navigation drawer item clicks to show appropriate fragments
+            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+                @Override
+                public boolean onNavigationItemSelected(final MenuItem item) {
+                    // close drawers after some delay to prevent lag
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawerLayout.closeDrawers();
+                        }
+                    }, 300);
+
+                    int menuItemIndex = getMenuItemIndex(item);
+                    if (menuItemIndex < adapter.getCount()) {
+                        navigateToPage(getMenuItemIndex(item));
+                    } else {
+                        // Todo
+                    }
+
+                    return true;
+                }
+            });
 
             // setup floating action menu item clicks
             waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +131,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
 
-            // setup viewpager and tabs
+            // setup viewpager
             adapter = new MainPagerAdapter(this, getSupportFragmentManager());
             viewPager.setAdapter(adapter);
             viewPager.setOffscreenPageLimit(2);
@@ -109,18 +149,16 @@ public class HomeActivity extends AppCompatActivity {
                 public void onPageScrollStateChanged(int state) {
                 }
             });
-            tabsView.setViewPager(viewPager);
 
             // Navigate to viewpager page based on the page index in saved instance state,
             // ensuring that the correct page is selected after configuration changes.
             if (savedInstanceState == null) {
                 selectedPageIndex = 0; /* default = Activity fragment */
             } else {
-                selectedPageIndex = savedInstanceState.getInt(SELECTED_PAGE_INDEX);
+                selectedPageIndex = savedInstanceState.getInt(SELECTED_FRAGMENT_INDEX);
             }
 
             viewPager.setCurrentItem(selectedPageIndex);
-            tabsView.setSelectedTab(selectedPageIndex);
             navigateToPage(selectedPageIndex);
         }
     }
@@ -134,8 +172,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-
-        savedInstanceState.putInt(SELECTED_PAGE_INDEX, selectedPageIndex);
+        savedInstanceState.putInt(SELECTED_FRAGMENT_INDEX, selectedPageIndex);
     }
 
     @Override
@@ -150,12 +187,52 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        actionBarDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggle
+        actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private int getMenuItemIndex(MenuItem menuItem) {
+        Menu menu = navigationView.getMenu();
+        for (int i=0; i<menu.size(); i++) {
+            if (menuItem == menu.getItem(i)) {
+                return i;
+            }
+        }
+
+        throw new IllegalArgumentException("Provided menuItem does not exist in the menu");
+    }
+
     private void navigateToPage(int position) {
         viewPager.setCurrentItem(position);
         onPageSelected(position);
     }
 
     private void onPageSelected(int position) {
+        // update app bar title
+        setTitle(adapter.getPageTitle(position));
+
+        // highlight selected navigation drawer item
+        navigationView.getMenu().getItem(position).setChecked(true);
+
         // only show fab on ActivityFragment
         if (position == 0) {
             fabMenu.showMenuButton(true);
@@ -185,24 +262,14 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private static class MainPagerAdapter extends FragmentPagerAdapter
-            implements TabsView.TabContentProvider {
+    private static class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 4;
+        private static final int FRAGMENT_COUNT = 5;
         private Context context;
-        private int[] tabIcons;
-        private int[] tabTitles;
 
         public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
             super(fragmentManager);
-
             this.context = context;
-
-            tabIcons = new int[]{R.drawable.ic_directions_run_white_36dp,
-                    R.drawable.ic_near_me_white_36dp, R.drawable.ic_star_white_36dp,
-                    R.drawable.ic_person_pin_white_36dp};
-
-            tabTitles = new int[]{R.string.label_activity, R.string.label_nearby, R.string.favourites, R.string.label_profile};
         }
 
         @Override
@@ -211,44 +278,33 @@ public class HomeActivity extends AppCompatActivity {
                 case 0: return new ActivityFragment();
                 case 1: return new NearMeFragment();
                 case 2: return new SavedStopsFragment();
-                case 3: return new UserProfileFragment();
-                default: return null;
+                case 3: return new SearchFragment();
+                case 4: return new UserProfileFragment();
+                default: throw new IllegalArgumentException("Invalid position: " + position);
+            }
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return context.getString(R.string.activity);
+                case 1:
+                    return context.getString(R.string.nearby_bus_stops);
+                case 2:
+                    return context.getString(R.string.favourites);
+                case 3:
+                    return context.getString(R.string.action_search);
+                case 4:
+                    return context.getString(R.string.user_profile);
+                default:
+                    throw new IllegalArgumentException("Invalid position: " + position);
             }
         }
 
         @Override
         public int getCount() {
             return FRAGMENT_COUNT;
-        }
-
-        @Override
-        public int getTitle(int position) {
-            return tabTitles[position];
-        }
-
-        @Override
-        public int getIcon(int position) {
-            return tabIcons[position];
-        }
-
-        @Override
-        public int getSelectedTitleColor(int position) {
-            return ContextCompat.getColor(context, android.R.color.white);
-        }
-
-        @Override
-        public int getUnselectedTitleColor(int position) {
-            return ContextCompat.getColor(context, R.color.white_opaque_60);
-        }
-
-        @Override
-        public int getSelectedIconColor(int position) {
-            return ContextCompat.getColor(context, android.R.color.white);
-        }
-
-        @Override
-        public int getUnselectedIconColor(int position) {
-            return ContextCompat.getColor(context, R.color.primary_opaque_65);
         }
     }
 }
