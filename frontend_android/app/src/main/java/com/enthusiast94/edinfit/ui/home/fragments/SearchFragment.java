@@ -286,17 +286,21 @@ public class SearchFragment extends Fragment {
 
                 filter = filter.toLowerCase();
 
-                for (Service service : services) {
-                    if (service.getName().toLowerCase().contains(filter) ||
-                            service.getDescription().toLowerCase().contains(filter)) {
+                if (services != null) {
+                    for (Service service : services) {
+                        if (service.getName().toLowerCase().contains(filter) ||
+                                service.getDescription().toLowerCase().contains(filter)) {
 
-                        filteredServices.add(service);
+                            filteredServices.add(service);
+                        }
                     }
                 }
 
-                for (Stop stop : stops) {
-                    if (stop.getName().toLowerCase().contains(filter)) {
-                        filteredStops.add(stop);
+                if (stops != null) {
+                    for (Stop stop : stops) {
+                        if (stop.getName().toLowerCase().contains(filter)) {
+                            filteredStops.add(stop);
+                        }
                     }
                 }
 
