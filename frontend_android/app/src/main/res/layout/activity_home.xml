@@ -14,72 +14,87 @@
         android:orientation="vertical"
         >
 
-
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
             >
 
-            <com.enthusiast94.edinfit.utils.TabsView
-                android:id="@+id/tabs_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/primary"
-                />
+            <include layout="@layout/toolbar" />
 
         </android.support.design.widget.AppBarLayout>
 
-        <FrameLayout
+        <!-- This DrawerLayout has two children at the root  -->
+        <android.support.v4.widget.DrawerLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/drawer_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
-            <android.support.v4.view.ViewPager
-                android:id="@+id/viewpager"
+            <!-- This FrameLayout represents the contents of the screen  -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                />
-
-            <com.github.clans.fab.FloatingActionMenu
-                android:id="@+id/fab_menu"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom|right"
-                android:paddingBottom="8dp"
-                android:paddingRight="8dp"
-                fab:menu_fab_size="normal"
-                fab:menu_showShadow="true"
-                fab:menu_colorNormal="@color/accent"
-                fab:menu_colorPressed="@color/accent"
-                fab:menu_backgroundColor="@color/white_opaque_60"
                 >
 
-                <com.github.clans.fab.FloatingActionButton
-                    android:id="@+id/wait_or_walk_fab"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_timer_white_24dp"
-                    app:fab_size="mini"
-                    app:fab_label="@string/action_wait_or_walk"
-                    app:fab_colorNormal="@color/accent"
-                    app:fab_colorPressed="@color/accent"
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/viewpager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     />
 
-                <com.github.clans.fab.FloatingActionButton
-                    android:id="@+id/journey_planner_fab"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_directions_white_24dp"
-                    app:fab_size="mini"
-                    app:fab_label="@string/action_get_to_somewhere"
-                    app:fab_colorNormal="@color/accent"
-                    app:fab_colorPressed="@color/accent"
-                    />
+                <com.github.clans.fab.FloatingActionMenu
+                    android:id="@+id/fab_menu"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="bottom|right"
+                    android:paddingBottom="8dp"
+                    android:paddingRight="8dp"
+                    fab:menu_fab_size="normal"
+                    fab:menu_showShadow="true"
+                    fab:menu_colorNormal="@color/accent"
+                    fab:menu_colorPressed="@color/accent"
+                    fab:menu_backgroundColor="@color/white_opaque_60"
+                    >
 
-            </com.github.clans.fab.FloatingActionMenu>
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/wait_or_walk_fab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_timer_white_24dp"
+                        app:fab_size="mini"
+                        app:fab_label="@string/action_wait_or_walk"
+                        app:fab_colorNormal="@color/accent"
+                        app:fab_colorPressed="@color/accent"
+                        />
 
-        </FrameLayout>
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/journey_planner_fab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_directions_white_24dp"
+                        app:fab_size="mini"
+                        app:fab_label="@string/action_get_to_somewhere"
+                        app:fab_colorNormal="@color/accent"
+                        app:fab_colorPressed="@color/accent"
+                        />
+
+                </com.github.clans.fab.FloatingActionMenu>
+
+            </FrameLayout>
+
+            <!-- The navigation drawer that comes from the left -->
+            <android.support.design.widget.NavigationView
+                android:id="@+id/navigation_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:background="@android:color/white"
+                app:menu="@menu/menu_navigation_view"
+                app:itemBackground="@android:color/transparent"
+                />
+
+        </android.support.v4.widget.DrawerLayout>
 
     </LinearLayout>
 
