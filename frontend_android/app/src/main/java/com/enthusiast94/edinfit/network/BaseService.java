@@ -2,7 +2,7 @@ package com.enthusiast94.edinfit.network;
 
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.models_2.User;
 import com.loopj.android.http.AsyncHttpClient;
 
 import org.json.JSONException;

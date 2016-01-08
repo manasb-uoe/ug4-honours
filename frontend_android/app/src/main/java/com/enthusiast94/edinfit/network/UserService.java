@@ -4,9 +4,8 @@ import android.content.Context;
 import android.util.Base64;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -25,7 +24,7 @@ import cz.msebera.android.httpclient.Header;
 public class UserService extends BaseService {
 
     public static final String TAG = UserService.class.getSimpleName();
-    private static final String USER_PREFS_KEY = "userPrefKey";
+    private final String USER_ID_KEY = "userIdKey";
     private static UserService instance;
     private String parsingErrorMessage;
     private Context context;
@@ -119,12 +118,18 @@ public class UserService extends BaseService {
                             Base64.DEFAULT));
 
                     // parse the decoded payload and construct new user object
-                    Gson gson = new Gson();
-                    User user = gson.fromJson(decodedPayload, User.class);
-                    user.setAuthToken(token);
+                    JSONObject userJson = new JSONObject(decodedPayload);
+                    User user = new User(
+                            userJson.getString("id"),
+                            null,
+                            null,
+                            0,
+                            token
+                    );
+                    user.save();
 
-                    // persist user object in shared preferences as json string
-                    Helpers.writeToPrefs(context, USER_PREFS_KEY, gson.toJson(user));
+                    // persist currently authenticated user's id
+                    Helpers.writeToPrefs(context, USER_ID_KEY, user.getId().toString());
 
                     // now update the cached user with other user details by sending another request
                     updateCachedUser(new Callback<Void>() {
@@ -159,31 +164,26 @@ public class UserService extends BaseService {
     }
 
     public User getAuthenticatedUser() {
-        String userJson = Helpers.readFromPrefs(context, USER_PREFS_KEY);
-
-        if (userJson != null) {
-            Gson gson = new Gson();
-            return gson.fromJson(userJson, User.class);
-        }
-
-        return null;
+        return User.findById(Long.parseLong(Helpers.readFromPrefs(context, USER_ID_KEY)));
     }
 
     public void updateCachedUser(final Callback<Void> callback) {
         final User user = getAuthenticatedUser();
 
-        AsyncHttpClient cliemt = getAsyncHttpClient(true);
-        cliemt.get(API_BASE + "/users/" + user.getId(), new JsonHttpResponseHandler() {
+        AsyncHttpClient client = getAsyncHttpClient(true);
+        client.get(API_BASE + "/users/" + user.get_id(), new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    Gson gson = new Gson();
-                    User updatedUser = gson.fromJson(response.getJSONObject("data").toString(),
-                            User.class);
-                    updatedUser.setAuthToken(user.getAuthToken());
+                    User userToUpdate = User.findById(Long.parseLong(
+                            Helpers.readFromPrefs(context, USER_ID_KEY)));
 
-                    Helpers.writeToPrefs(context, USER_PREFS_KEY, gson.toJson(updatedUser));
+                    JSONObject userJson = response.getJSONObject("data");
+                    userToUpdate.setName(userJson.getString("name"));
+                    userToUpdate.setEmail(userJson.getString("email"));
+                    userToUpdate.setCreatedAt(userJson.getLong("createdAt"));
+                    userToUpdate.save();
 
                     callback.onSuccess(null);
                 } catch (JSONException e) {
@@ -200,6 +200,6 @@ public class UserService extends BaseService {
     }
 
     public boolean isUserAuthenticated() {
-        return Helpers.readFromPrefs(context, USER_PREFS_KEY) != null;
+        return Helpers.readFromPrefs(context, USER_ID_KEY) != null;
     }
 }

@@ -24,13 +24,8 @@ import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.SavedStopsFragment;
-import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
-import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -109,17 +104,17 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onClick(View v) {
-                    final Intent startActivityIntent =
-                            new Intent(HomeActivity.this, NewActivityActivity.class);
-
-                    fabMenu.close(true);
-
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity(startActivityIntent);
-                        }
-                    }, 300);
+//                    final Intent startActivityIntent =
+//                            new Intent(HomeActivity.this, NewActivityActivity.class);
+//
+//                    fabMenu.close(true);
+//
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            startActivity(startActivityIntent);
+//                        }
+//                    }, 300);
 
                 }
             });

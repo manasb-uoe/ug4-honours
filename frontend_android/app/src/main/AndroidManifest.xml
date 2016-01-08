@@ -78,6 +78,21 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"
             />
+
+        <!-- ActiveAndroid ORM configuration -->
+        <meta-data
+            android:name="AA_DB_NAME"
+            android:value="edinfit.db"
+            />
+        <meta-data
+            android:name="AA_DB_VERSION"
+            android:value="1"
+            />
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="com.enthusiast94.edinfit.models_2.User"
+            />
+
     </application>
 
 </manifest>

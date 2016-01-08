@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 

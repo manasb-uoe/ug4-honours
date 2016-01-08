@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.OnAuthenticatedEvent;
