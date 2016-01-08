@@ -264,7 +264,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private static class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 5;
+        private static final int FRAGMENT_COUNT = 1;
         private Context context;
 
         public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
@@ -275,11 +275,7 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0: return new ActivityFragment();
-                case 1: return new NearMeFragment();
-                case 2: return new SavedStopsFragment();
-                case 3: return new SearchFragment();
-                case 4: return new UserProfileFragment();
+                case 0: return new UserProfileFragment();
                 default: throw new IllegalArgumentException("Invalid position: " + position);
             }
         }
@@ -288,14 +284,6 @@ public class HomeActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return context.getString(R.string.activity);
-                case 1:
-                    return context.getString(R.string.nearby_bus_stops);
-                case 2:
-                    return context.getString(R.string.favourites);
-                case 3:
-                    return context.getString(R.string.action_search);
-                case 4:
                     return context.getString(R.string.user_profile);
                 default:
                     throw new IllegalArgumentException("Invalid position: " + position);
