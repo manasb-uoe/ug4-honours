@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -18,12 +19,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
+import com.enthusiast94.edinfit.ui.home.events.OnStopsAndServicesPopulatedEvent;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.github.clans.fab.FloatingActionButton;
@@ -36,74 +42,76 @@ public class HomeActivity extends AppCompatActivity {
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String SELECTED_FRAGMENT_INDEX = "selectedFragmentIndex";
 
-    private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private FloatingActionMenu fabMenu;
-    private FloatingActionButton waitOrWalkFab;
-    private FloatingActionButton journeyPlannerFab;
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private ProgressDialog progressDialog;
     private Handler handler;
     private ViewPager viewPager;
     private MainPagerAdapter adapter;
     private int selectedPageIndex;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // start login activity if user is not authenticated, else continue with this activity
+        // start login activity if user is not authenticated
         if (!UserService.getInstance().isUserAuthenticated()) {
             goToLogin();
-        } else {
-            setContentView(R.layout.activity_home);
-            handler = new Handler();
-            EventBus.getDefault().register(this);
+            return;
+        }
 
-            // find views
-            toolbar = (Toolbar) findViewById(R.id.toolbar);
-            drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            navigationView = (NavigationView) findViewById(R.id.navigation_view);
-            viewPager = (ViewPager) findViewById(R.id.viewpager);
-            fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
-            waitOrWalkFab = (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
-            journeyPlannerFab = (FloatingActionButton) findViewById(R.id.journey_planner_fab);
+        EventBus.getDefault().register(this);
+        setContentView(R.layout.activity_home);
+        handler = new Handler();
 
-            // setup toolbar with ActionBarDrawerToggle
-            setSupportActionBar(toolbar);
-            actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-                    R.string.drawer_close, R.string.drawer_open);
+        // find views
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        FloatingActionButton waitOrWalkFab =
+                (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
+        FloatingActionButton journeyPlannerFab =
+                (FloatingActionButton) findViewById(R.id.journey_planner_fab);
 
-            // handle navigation drawer item clicks to show appropriate fragments
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        // setup toolbar with ActionBarDrawerToggle
+        setSupportActionBar(toolbar);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                R.string.drawer_close, R.string.drawer_open);
 
-                @Override
-                public boolean onNavigationItemSelected(final MenuItem item) {
-                    // close drawers after some delay to prevent lag
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            drawerLayout.closeDrawers();
-                        }
-                    }, 300);
+        // handle navigation drawer item clicks to show appropriate fragments
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
-                    int menuItemIndex = getMenuItemIndex(item);
-                    if (menuItemIndex < adapter.getCount()) {
-                        navigateToPage(getMenuItemIndex(item));
-                    } else {
-                        // Todo
+            @Override
+            public boolean onNavigationItemSelected(final MenuItem item) {
+                // close drawers after some delay to prevent lag
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        drawerLayout.closeDrawers();
                     }
+                }, 300);
 
-                    return true;
+                int menuItemIndex = getMenuItemIndex(item);
+                if (menuItemIndex < adapter.getCount()) {
+                    navigateToPage(getMenuItemIndex(item));
+                } else {
+                    // Todo
                 }
-            });
 
-            // setup floating action menu item clicks
-            waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
+                return true;
+            }
+        });
 
-                @Override
-                public void onClick(View v) {
+        // setup floating action menu item clicks
+        waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
 //                    final Intent startActivityIntent =
 //                            new Intent(HomeActivity.this, NewActivityActivity.class);
 //
@@ -116,46 +124,37 @@ public class HomeActivity extends AppCompatActivity {
 //                        }
 //                    }, 300);
 
-                }
-            });
-            journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
+            }
+        });
+        journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View v) {
-                    // TODO
-                }
-            });
+            @Override
+            public void onClick(View v) {
+                // TODO
+            }
+        });
 
-            // setup viewpager
-            adapter = new MainPagerAdapter(this, getSupportFragmentManager());
-            viewPager.setAdapter(adapter);
-            viewPager.setOffscreenPageLimit(2);
-            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                }
 
-                @Override
-                public void onPageSelected(int position) {
-                    HomeActivity.this.onPageSelected(position);
-                }
+        // populate database with stops and services
+        setEnabledSettingThingsUpDialog(true);
 
-                @Override
-                public void onPageScrollStateChanged(int state) {
-                }
-            });
+        StopService.getInstance().populateStops(new BaseService.Callback<Void>() {
 
-            // Navigate to viewpager page based on the page index in saved instance state,
-            // ensuring that the correct page is selected after configuration changes.
-            if (savedInstanceState == null) {
-                selectedPageIndex = 0; /* default = Activity fragment */
-            } else {
-                selectedPageIndex = savedInstanceState.getInt(SELECTED_FRAGMENT_INDEX);
+            @Override
+            public void onSuccess(Void data) {
+                EventBus.getDefault().post(new OnStopsAndServicesPopulatedEvent(savedInstanceState));
             }
 
-            viewPager.setCurrentItem(selectedPageIndex);
-            navigateToPage(selectedPageIndex);
-        }
+            @Override
+            public void onFailure(String message) {
+                if (this == null) {
+                    return;
+                }
+
+                setEnabledSettingThingsUpDialog(false);
+                Toast.makeText(HomeActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -203,6 +202,20 @@ public class HomeActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggle
         actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private void setEnabledSettingThingsUpDialog(boolean shouldEnable) {
+        if (shouldEnable) {
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage(getString(R.string.setting_things_up));
+                progressDialog.setCancelable(false);
+            }
+
+            progressDialog.show();
+        } else {
+            progressDialog.dismiss();
+        }
     }
 
     private int getMenuItemIndex(MenuItem menuItem) {
@@ -257,9 +270,43 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
+    public void onEventMainThread(OnStopsAndServicesPopulatedEvent event) {
+        setEnabledSettingThingsUpDialog(false);
+
+        // setup viewpager
+        adapter = new MainPagerAdapter(this, getSupportFragmentManager());
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                HomeActivity.this.onPageSelected(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
+
+        // Navigate to viewpager page based on the page index in saved instance state,
+        // ensuring that the correct page is selected after configuration changes.
+        if (event.getSavedInstanceState()== null) {
+            selectedPageIndex = 0; /* default = Activity fragment */
+        } else {
+            selectedPageIndex = event.getSavedInstanceState().getInt(SELECTED_FRAGMENT_INDEX);
+        }
+
+        viewPager.setCurrentItem(selectedPageIndex);
+        navigateToPage(selectedPageIndex);
+    }
+
     private static class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 1;
+        private static final int FRAGMENT_COUNT = 2;
         private Context context;
 
         public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
@@ -270,7 +317,8 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0: return new UserProfileFragment();
+                case 0: return new NearMeFragment();
+                case 1: return new UserProfileFragment();
                 default: throw new IllegalArgumentException("Invalid position: " + position);
             }
         }
@@ -278,8 +326,9 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 0:
-                    return context.getString(R.string.user_profile);
+                case 1:
+                    return context.getString(R.string.nearby_bus_stops);
+                case 0: return context.getString(R.string.user_profile);
                 default:
                     throw new IllegalArgumentException("Invalid position: " + position);
             }

@@ -17,11 +17,16 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -261,6 +266,21 @@ public class Helpers {
             return "1 min walk";
         } else {
             return String.format("%.0f", walkingDurationInMin) + " min walk";
+        }
+    }
+
+    public static List<String> getListFromJsonString(String json) {
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            List<String> list = new ArrayList<>();
+            for (int i=0; i<jsonArray.length(); i++) {
+                list.add(jsonArray.getString(i));
+            }
+
+            return list;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

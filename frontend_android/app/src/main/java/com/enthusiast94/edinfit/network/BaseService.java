@@ -1,9 +1,14 @@
 package com.enthusiast94.edinfit.network;
 
+import android.content.Context;
+import android.telecom.Call;
+
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.User;
 import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +19,7 @@ import org.json.JSONObject;
 public class BaseService {
 
     protected static final String API_BASE = "http://ec2-52-28-155-29.eu-central-1.compute.amazonaws.com:4000/api";
+    protected static final String TFE_API_BASE = "https://tfe-opendata.com/api/v1";
     private static final String USER_AGENT = "android:com.enthusiast94.edinfit";
 
     protected static AsyncHttpClient getAsyncHttpClient(boolean isAuthenticationRequired) {
@@ -34,6 +40,15 @@ public class BaseService {
         return client;
     }
 
+    protected static AsyncHttpClient getTfeSyncHttpClient(Context context) {
+        SyncHttpClient client = new SyncHttpClient();
+        client.setUserAgent(USER_AGENT);
+        client.setLoggingEnabled(false);
+        client.addHeader("Authorization", "Token " + context.getString(R.string.api_key_tfe));
+
+        return client;
+    }
+
     /**
      * Common onFailure method for all API responses.
      */
@@ -50,6 +65,37 @@ public class BaseService {
                 callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
             }
         }
+    }
+
+    protected void onFailureMainThread(final int statusCode, final JSONObject errorResponse,
+                                       final Callback callback) {
+        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+
+            @Override
+            public void doInUIThread() {
+                onFailureCommon(statusCode, errorResponse, callback);
+            }
+        });
+    }
+
+    protected void onFailureMainThread(final String error, final Callback callback) {
+        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+
+            @Override
+            public void doInUIThread() {
+                callback.onFailure(error);
+            }
+        });
+    }
+
+    protected void onSuccessMainThread(final Object object, final Callback callback) {
+        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+
+            @Override
+            public void doInUIThread() {
+                callback.onSuccess(object);
+            }
+        });
     }
 
     public interface Callback<T> {

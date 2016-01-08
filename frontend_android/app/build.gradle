@@ -40,4 +40,5 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:4.6.0'
     compile 'com.cocosw:bottomsheet:1.+@aar'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    compile 'com.arasthel:asyncjob-library:1.0.3'
 }

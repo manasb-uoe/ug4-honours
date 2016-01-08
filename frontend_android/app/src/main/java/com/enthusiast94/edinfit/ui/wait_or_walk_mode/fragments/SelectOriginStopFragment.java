@@ -162,7 +162,7 @@
 //    private void loadStops(final LatLng userLocationLatLng) {
 //        setRefreshIndicatorVisiblity(true);
 //
-//        StopService.getInstance().getNearbyStops(userLocationLatLng.latitude,
+//        StopService.getInstance().getNearby(userLocationLatLng.latitude,
 //                userLocationLatLng.longitude, MAX_DISTANCE, NEAR_DISTANCE, NEARBY_STOPS_LIMIT,
 //                new BaseService.Callback<List<Stop>>() {
 //

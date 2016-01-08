@@ -9,7 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models_2.Stop;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by manas on 04-01-2016.
@@ -41,7 +42,7 @@ public class StopView extends CardView {
         starImageView = (ImageView) view.findViewById(R.id.star_imageview);
     }
 
-    public void bindItem(Stop stop, boolean isFavourite) {
+    public void bindItem(Stop stop, boolean isFavourite, LatLng latLng) {
         stopNameTextView.setText(String.format(context.getString(
                 R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
 
@@ -69,11 +70,14 @@ public class StopView extends CardView {
         }
         destinationsTextView.setText(destinations);
 
-        idTextView.setText(stop.getId());
+        idTextView.setText(stop.get_id());
 
-        if (stop.getDistanceAway() != null) {
+        if (latLng != null) {
+            LatLng stopLatLng = stop.getPosition();
+            Double distanceAway = Helpers.getDistanceBetweenPoints(stopLatLng.latitude,
+                    stopLatLng.longitude, latLng.latitude, latLng.longitude) / 1000.0;
             walkDurationTextView.setVisibility(View.VISIBLE);
-            walkDurationTextView.setText(Helpers.getWalkingDurationFromDistance(stop.getDistanceAway()));
+            walkDurationTextView.setText(Helpers.getWalkingDurationFromDistance(distanceAway));
         } else {
             walkDurationTextView.setVisibility(View.GONE);
         }
