@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit;
 import android.app.Application;
 import android.content.Context;
 
+import com.activeandroid.ActiveAndroid;
 import com.enthusiast94.edinfit.network.ActivityService;
 import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.LiveBusService;
@@ -33,6 +34,9 @@ public class App extends Application {
         LiveBusService.init(this);
         WaitOrWalkService.init(this);
         ActivityService.init(this);
+
+        // init orm
+        ActiveAndroid.initialize(this);
     }
 
     public static Context getAppContext() {
