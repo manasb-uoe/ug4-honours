@@ -59,7 +59,7 @@ public class CountdownNotificationService extends android.app.Service {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         locationProvider = new LocationProvider(this, new CheckIfUserReachedDestinationOnLocationUpdateCallback(),
-                LOCATION_UPDATE_INTERVAL);
+                1000);
         locationProvider.connect();
 
         receiver = new NotificationBroadcastReceiver();
@@ -79,6 +79,7 @@ public class CountdownNotificationService extends android.app.Service {
         unregisterReceiver(receiver);
 
         countDownTimer.cancel();
+        EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
 
         notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
 
@@ -201,7 +202,6 @@ public class CountdownNotificationService extends android.app.Service {
         @Override
         public void onFinish() {
             EventBus.getDefault().post(new OnCountdownTickEvent(getString(R.string.label_none)));
-            EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
 
             if (selectedWaitOrWalkSuggestion.getType() ==
                     WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
@@ -218,7 +218,6 @@ public class CountdownNotificationService extends android.app.Service {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_STOP:
-                    EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
                     stopSelf();
                     break;
             }
@@ -230,12 +229,16 @@ public class CountdownNotificationService extends android.app.Service {
 
         @Override
         public void onLocationUpdateSuccess(Location location) {
+            Log.d(TAG, "onLocationUpdateSuccess");
             if (selectedWaitOrWalkSuggestion.getType() !=
                     WaitOrWalkService.WaitOrWalkSuggestionType.WALK) {
                 return;
             }
 
             List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
+
+            Log.d(TAG, "distance to dest: " + Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
+                    stopLocation.get(1), stopLocation.get(0)));
 
             if (Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
                     stopLocation.get(1), stopLocation.get(0)) <= 20 /* 20 meters */) {
