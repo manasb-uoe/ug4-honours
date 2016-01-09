@@ -8,8 +8,8 @@
         android:icon="@drawable/ic_action_content_filter_list"
         />
     <item
-        android:id="@+id/action_save_or_unsave"
-        android:title="@string/label_save"
+        android:id="@+id/action_add_or_remove_from_favourites"
+        android:title="@string/label_add_to_favourites"
         app:showAsAction="always"
         />
 </menu>

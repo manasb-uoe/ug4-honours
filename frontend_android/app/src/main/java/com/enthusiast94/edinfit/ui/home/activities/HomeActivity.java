@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models_2.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
@@ -30,6 +31,7 @@ import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnStopsAndServicesPopulatedEvent;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
@@ -135,9 +137,15 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        // populate database with stops
+        // no need to proceed if stops already exist
+        if (Stop.getCount() > 0) {
+            EventBus.getDefault().post(
+                    new OnStopsAndServicesPopulatedEvent(savedInstanceState));
+            return;
+        }
 
-        // populate database with stops and services
-        setEnabledSettingThingsUpDialog(true);
+        setSettingThingsUpDialogEnabled(true);
 
         new AsyncJob.AsyncJobBuilder<BaseService.Response<Void>>()
                 .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<Void>>() {
@@ -149,7 +157,7 @@ public class HomeActivity extends AppCompatActivity {
                 .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<Void>>() {
                     @Override
                     public void onResult(BaseService.Response<Void> response) {
-                        setEnabledSettingThingsUpDialog(false);
+                        setSettingThingsUpDialogEnabled(false);
 
                         if (!response.isSuccessfull()) {
                             Toast.makeText(HomeActivity.this, response.getError(),
@@ -210,14 +218,14 @@ public class HomeActivity extends AppCompatActivity {
         actionBarDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private void setEnabledSettingThingsUpDialog(boolean shouldEnable) {
-        if (shouldEnable) {
-            if (progressDialog == null) {
-                progressDialog = new ProgressDialog(this);
-                progressDialog.setMessage(getString(R.string.setting_things_up));
-                progressDialog.setCancelable(false);
-            }
+    private void setSettingThingsUpDialogEnabled(boolean shouldEnable) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage(getString(R.string.setting_things_up));
+            progressDialog.setCancelable(false);
+        }
 
+        if (shouldEnable) {
             progressDialog.show();
         } else {
             progressDialog.dismiss();
@@ -277,7 +285,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void onEventMainThread(OnStopsAndServicesPopulatedEvent event) {
-        setEnabledSettingThingsUpDialog(false);
+        setSettingThingsUpDialogEnabled(false);
 
         // setup viewpager
         adapter = new MainPagerAdapter(this, getSupportFragmentManager());
@@ -312,7 +320,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private static class MainPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int FRAGMENT_COUNT = 2;
+        private static final int FRAGMENT_COUNT = 3;
         private Context context;
 
         public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
@@ -324,7 +332,8 @@ public class HomeActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0: return new NearMeFragment();
-                case 1: return new UserProfileFragment();
+                case 1: return new FavouriteStopsFragment();
+                case 2: return new UserProfileFragment();
                 default: throw new IllegalArgumentException("Invalid position: " + position);
             }
         }
@@ -332,9 +341,9 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 0:
-                    return context.getString(R.string.nearby_bus_stops);
-                case 1: return context.getString(R.string.user_profile);
+                case 0:return context.getString(R.string.nearby_bus_stops);
+                case 1: return context.getString(R.string.favourites);
+                case 2: return context.getString(R.string.user_profile);
                 default:
                     throw new IllegalArgumentException("Invalid position: " + position);
             }

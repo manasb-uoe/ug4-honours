@@ -1,17 +1,22 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
-import android.util.Log;
+import android.util.Pair;
 
 import com.enthusiast94.edinfit.models_2.Departure;
+import com.enthusiast94.edinfit.models_2.FavouriteStop;
 import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.utils.Helpers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -47,83 +52,8 @@ public class StopService {
         return instance;
     }
 
-    public void saveOrUnsaveStop(String stopId, boolean shouldSave) {
-//        String url = API_BASE + "/stops/" + stopId + "/save";
-//
-//        JsonHttpResponseHandler responseHandler = new JsonHttpResponseHandler() {
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                UserService.getInstance().updateCachedUser(new Callback<Void>() {
-//
-//                    @Override
-//                    public void onSuccess(Void data) {
-//                        callback.onSuccess(null);
-//                    }
-//
-//                    @Override
-//                    public void onFailure(String message) {
-//                        callback.onFailure(message);
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-//                onFailureCommon(statusCode, errorResponse, callback);
-//            }
-//        };
-//
-//        AsyncHttpClient client = getAsyncHttpClient(true);
-//
-//        if (shouldSave) {
-//            client.post(url, responseHandler);
-//        } else {
-//            client.delete(url, responseHandler);
-//        }
-    }
-
-    public void getSavedStops(int departuresLimit) {
-//        callback.onSuccess(new ArrayList<Stop>());
-
-//        AsyncHttpClient client = getAsyncHttpClient(true);
-//
-//        RequestParams requestParams = new RequestParams();
-//        requestParams.add("time", Helpers.getCurrentTime24h());
-//        requestParams.add("departures_limit", String.valueOf(departuresLimit));
-//
-//        client.get(API_BASE + "/stops/saved", requestParams, new JsonHttpResponseHandler() {
-//
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                try {
-//                    Gson gson = new Gson();
-//                    Stop[] stopsArray = gson.fromJson(
-//                            response.getJSONArray("data").toString(), Stop[].class
-//                    );
-//                    // return mutable list
-//                    List<Stop> stopsList = new ArrayList<>(Arrays.asList(stopsArray));
-//
-//                    callback.onSuccess(stopsList);
-//
-//                } catch (JSONException e) {
-//                        callback.onFailure(parsingErrorMessage);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-//                onFailureCommon(statusCode, errorResponse, callback);
-//            }
-//        });
-    }
-
     public BaseService.Response<Void> populateStops() {
         BaseService.Response<Void> response = new BaseService.Response<>();
-
-        // no need to proceed if stops already exist
-        if (Stop.getCount() > 0) {
-            return response;
-        }
 
         Request request = baseService.createTfeGetRequest("stops");
 
@@ -208,5 +138,30 @@ public class StopService {
             response.setError(e.getMessage());
             return response;
         }
+    }
+
+    public BaseService.Response<List<Pair<FavouriteStop, List<Departure>>>> getDeparturesForFavouriteStops(
+            List<FavouriteStop> favouriteStops) {
+
+        BaseService.Response<List<Pair<FavouriteStop, List<Departure>>>> response =
+                new BaseService.Response<>();
+
+        List<Pair<FavouriteStop, List<Departure>>> listOfPairs = new ArrayList<>();
+
+        for (FavouriteStop favouriteStop : favouriteStops) {
+            BaseService.Response<List<Departure>> departuresResponse =
+                    StopService.getInstance().getDepartures(favouriteStop.getStop(),
+                            Helpers.getDayCode(Helpers.getCurrentDay()), Helpers.getCurrentTime24h());
+
+            if (departuresResponse.isSuccessfull()) {
+                listOfPairs.add(new Pair<>(favouriteStop, departuresResponse.getBody()));
+            } else {
+                response.setError(departuresResponse.getError());
+                return response;
+            }
+        }
+
+        response.setBody(listOfPairs);
+        return response;
     }
 }

@@ -9,7 +9,7 @@
     <string name="action_signup">Sign up</string>
     <string name="action_dont_have_account_sign_up">Don\'t have an account? Sign up now.</string>
     <string name="action_logout">Log out</string>
-    <string name="action_filter_departures">Select time</string>
+    <string name="action_filter_departures">Filter</string>
     <string name="action_wait_or_walk">Wait or Walk?</string>
     <string name="action_get_to_somewhere">Get to Somewhere</string>
     <string name="action_select_origin">Select Origin</string>
@@ -109,7 +109,6 @@
     <string name="label_calories_burned_format">%1$s calories burned</string>
     <string name="label_calories_format">%1$s calories</string>
     <string name="label_steps_format">%1$s steps</string>
-    <string name="label_saved_stops">Saved Stops</string>
     <string name="label_home_navigation">Home Navigation</string>
     <string name="label_reset">Reset</string>
     <string name="label_previous">Previous</string>
@@ -147,8 +146,8 @@
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
-    <string name="success_stop_saved">\'%1$s\' added to saved stops.</string>
-    <string name="success_stop_unsaved">\'%1$s\' removed from saved stops.</string>
+    <string name="success_stop_added_to_favourites">\'%1$s\' added to favourites.</string>
+    <string name="success_stop_removed_from_favourites">\'%1$s\' removed from favourites.</string>
     <string name="success_reached_destination_in_time">You reached your destination in time.</string>
 
     <!-- Error messages -->

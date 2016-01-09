@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,15 +23,18 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.query.Select;
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Point;
 import com.enthusiast94.edinfit.models_2.Departure;
+import com.enthusiast94.edinfit.models_2.FavouriteStop;
 import com.enthusiast94.edinfit.models_2.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.utils.DepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LiveDepartureView;
@@ -205,14 +209,18 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        // set save/unsave button icon depending on whether the current stop is saved or not
-        MenuItem saveOrUnsaveItem = menu.findItem(R.id.action_save_or_unsave);
+        // set favourite/unfavourite button icon depending on whether the current stop
+        // is favourited or not
+        MenuItem saveOrUnsaveItem = menu.findItem(R.id.action_add_or_remove_from_favourites);
 
-//        if (UserService.getInstance().getAuthenticatedUser().getSavedStops().contains(stop.getId())) {
-//            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star);
-//        } else {
-//            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star_outline);
-//        }
+        if (isStopFavourite(stop)) {
+            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star);
+            saveOrUnsaveItem.setTitle(getString(R.string.label_remove_from_favourites));
+
+        } else {
+            saveOrUnsaveItem.setIcon(R.drawable.ic_action_toggle_star_outline);
+            saveOrUnsaveItem.setTitle(getString(R.string.label_add_to_favourites));
+        }
 
         super.onPrepareOptionsMenu(menu);
     }
@@ -224,44 +232,45 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                 showServiceSelectorDialog();
                 return true;
 
-            case R.id.action_save_or_unsave:
-//                final boolean shouldSave = !UserService.getInstance().getAuthenticatedUser().
-//                        getSavedStops().contains(stop.getId());
-//
-//                StopService.getInstance().saveOrUnsaveStop(stop.getId(), shouldSave,
-//                        new BaseService.Callback<Void>() {
-//
-//                            @Override
-//                            public void onSuccess(Void data) {
-//                                if (getActivity() != null) {
-//                                    if (shouldSave) {
-//                                        Toast.makeText(getActivity(), String.format(
-//                                                getActivity().getString(R.string.success_stop_saved),
-//                                                stop.getName()), Toast.LENGTH_SHORT).show();
-//                                    } else {
-//                                        Toast.makeText(getActivity(), String.format(
-//                                                getActivity().getString(R.string.success_stop_unsaved),
-//                                                stop.getName()), Toast.LENGTH_SHORT).show();
-//                                    }
-//
-//                                    // invalidate options menu so that it can be redrawn and therefore change
-//                                    // save/unsave button icon accordingly
-//                                    getActivity().invalidateOptionsMenu();
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onFailure(String message) {
-//                                if (getActivity() != null) {
-//                                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-//                                }
-//                            }
-//                        });
+            case R.id.action_add_or_remove_from_favourites:
+                if (isStopFavourite(stop)) {
+                    FavouriteStop.find(stop, UserService.getInstance().getAuthenticatedUser())
+                            .delete();
+
+                    Toast.makeText(getActivity(), String.format(
+                            getActivity().getString(R.string.success_stop_removed_from_favourites),
+                            stop.getName()), Toast.LENGTH_SHORT).show();
+                } else {
+                    FavouriteStop favouriteStop = new FavouriteStop(stop,
+                            UserService.getInstance().getAuthenticatedUser());
+                    favouriteStop.save();
+
+                    Toast.makeText(getActivity(), String.format(
+                            getActivity().getString(R.string.success_stop_added_to_favourites),
+                            stop.getName()), Toast.LENGTH_SHORT).show();
+                }
+
+                // invalidate options menu so that it can be redrawn and therefore change
+                // save/unsave button icon accordingly
+                getActivity().invalidateOptionsMenu();
+
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isStopFavourite(Stop stop) {
+        List<FavouriteStop> favouriteStops =
+                FavouriteStop.getFavouriteStops(UserService.getInstance().getAuthenticatedUser());
+        for (FavouriteStop favouriteStop : favouriteStops) {
+            if (favouriteStop.getStop().getId().equals(stop.getId())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void loadDepartures(final LatLng userLocationLatLng) {
