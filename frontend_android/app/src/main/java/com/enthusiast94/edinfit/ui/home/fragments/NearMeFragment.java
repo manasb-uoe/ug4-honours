@@ -21,9 +21,9 @@ import android.widget.Toast;
 import com.arasthel.asyncjob.AsyncJob;
 import com.cocosw.bottomsheet.BottomSheet;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models_2.FavouriteStop;
 import com.enthusiast94.edinfit.models_2.Stop;
-import com.enthusiast94.edinfit.network.BaseService;
-import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -181,7 +182,8 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
             locationProvider.connect();
         } else {
             // reuse previously loaded nearby stops
-            nearbyStopsAdapter.notifyStopsChanged(stops, userLocationLatLng);
+            nearbyStopsAdapter.notifyStopsChanged(stops, userLocationLatLng,
+                    FavouriteStop.getFavouriteStops(UserService.getInstance().getAuthenticatedUser()));
             userLocationMarker = null; // set to null so that it is redrawn after config change
             updateSlidingMapPanel(userLocationName);
         }
@@ -247,7 +249,10 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                             setRefreshIndicatorVisiblity(false);
                             setMapProgressBarEnabled(false);
 
-                            nearbyStopsAdapter.notifyStopsChanged(stops, userLocationLatLng);
+                            nearbyStopsAdapter.notifyStopsChanged(stops, userLocationLatLng,
+                                    FavouriteStop.getFavouriteStops(UserService.getInstance()
+                                            .getAuthenticatedUser()));
+
 
                             updateSlidingMapPanel(userLocationName);
                         }
@@ -373,15 +378,14 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         private android.app.Activity context;
         private LayoutInflater inflater;
         private List<Stop> nearbyStops;
-        private List<String> savedStopIds;
         private LatLng userLocationLatLng;
+        private List<FavouriteStop> favouriteStops;
 
         public NearbyStopsAdapter(android.app.Activity context /* BottomSheet only seems to work with Activity and not just Context */) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             nearbyStops = new ArrayList<>();
-//            savedStopIds = UserService.getInstance().getAuthenticatedUser().getSavedStops();
-            savedStopIds = new ArrayList<>();
+            favouriteStops = new ArrayList<>();
         }
 
         @Override
@@ -399,10 +403,12 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
             return nearbyStops.size();
         }
 
-        private void notifyStopsChanged(List<Stop> nearbyStops, LatLng userLocationLatLng) {
+        private void notifyStopsChanged(List<Stop> nearbyStops, LatLng userLocationLatLng,
+                                        List<FavouriteStop> favouriteStops) {
             this.nearbyStops = nearbyStops;
             this.userLocationLatLng = userLocationLatLng;
             this.notifyDataSetChanged();
+            this.favouriteStops = favouriteStops;
         }
 
         private class StopViewHolder extends RecyclerView.ViewHolder
@@ -422,7 +428,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopView.bindItem(stop, savedStopIds.contains(stop.get_id()), userLocationLatLng);
+                stopView.bindItem(stop, isStopFavourite(stop), userLocationLatLng);
             }
 
             @Override
@@ -430,7 +436,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                 int id = v.getId();
 
                 if (id == stopView.getId()) {
-                    if (!savedStopIds.contains(stop.get_id())) {
+                    if (!isStopFavourite(stop)) {
                         new BottomSheet.Builder(context)
                                 .title(String.format(context.getString(R.string.label_stop_name_with_direction),
                                         stop.getName(), stop.getDirection()))
@@ -446,29 +452,17 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                                                 startStopActivity(stop);
                                                 break;
                                             case R.id.action_add_to_favourites:
-//                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(),
-//                                                        true, new BaseService.Callback<Void>() {
-//
-//                                                            @Override
-//                                                            public void onSuccess(Void data) {
-//                                                                savedStopIds.add(stop.get_id());
-//
-//                                                                notifyItemChanged(getAdapterPosition());
-//
-//                                                                if (context != null) {
-//                                                                    Toast.makeText(context, String.format(
-//                                                                            context.getString(R.string.success_stop_saved),
-//                                                                            stop.getName()), Toast.LENGTH_SHORT).show();
-//                                                                }
-//                                                            }
-//
-//                                                            @Override
-//                                                            public void onFailure(String message) {
-//                                                                if (context != null) {
-//                                                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-//                                                                }
-//                                                            }
-//                                                        });
+                                                FavouriteStop favouriteStop = new FavouriteStop(stop,
+                                                        UserService.getInstance().getAuthenticatedUser());
+                                                favouriteStop.save();
+
+                                                favouriteStops.add(favouriteStop);
+
+                                                notifyItemChanged(getAdapterPosition());
+
+                                                Toast.makeText(context, String.format(
+                                                        context.getString(R.string.success_stop_added_to_favourites),
+                                                        stop.getName()), Toast.LENGTH_SHORT).show();
                                                 break;
                                         }
                                     }
@@ -489,27 +483,22 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                                                 startStopActivity(stop);
                                                 break;
                                             case R.id.action_remove_from_favourites:
-//                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(), false, new BaseService.Callback<Void>() {
-//
-//                                                    @Override
-//                                                    public void onSuccess(Void data) {
-//                                                        savedStopIds.remove(stop.get_id());
-//
-//                                                        if (context != null) {
-//                                                            notifyItemChanged(getAdapterPosition());
-//                                                            Toast.makeText(context, String.format(
-//                                                                    context.getString(R.string.success_stop_unsaved),
-//                                                                    stop.getName()), Toast.LENGTH_SHORT).show();
-//                                                        }
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onFailure(String message) {
-//                                                        if (context != null) {
-//                                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-//                                                        }
-//                                                    }
-//                                                });
+                                                Iterator<FavouriteStop> iterator = favouriteStops.iterator();
+
+                                                while (iterator.hasNext()) {
+                                                    FavouriteStop favouriteStop = iterator.next();
+                                                    if (favouriteStop.getStop().getId().equals(stop.getId())) {
+                                                        favouriteStop.delete();
+                                                        iterator.remove();
+
+                                                        Toast.makeText(context, String.format(
+                                                                context.getString(R.string.label_remove_from_favourites),
+                                                                stop.getName()), Toast.LENGTH_SHORT).show();
+
+                                                        notifyItemChanged(getAdapterPosition());
+                                                        break;
+                                                    }
+                                                }
                                                 break;
                                         }
                                     }
@@ -520,9 +509,19 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         }
 
         private void startStopActivity(Stop stop) {
-                Intent startActivityIntent = new Intent(context, StopActivity.class);
-                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.get_id());
-                context.startActivity(startActivityIntent);
+            Intent startActivityIntent = new Intent(context, StopActivity.class);
+            startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.get_id());
+            context.startActivity(startActivityIntent);
+        }
+
+        private boolean isStopFavourite(Stop stop) {
+            for (FavouriteStop favouriteStop : favouriteStops) {
+                if (favouriteStop.getStop().getId().equals(stop.getId())) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public abstract void onShowStopOnMapOptionSelected(Stop stop);
