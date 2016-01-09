@@ -22,6 +22,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Point;
@@ -266,36 +267,41 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     private void loadDepartures(final LatLng userLocationLatLng) {
         setRefreshIndicatorVisiblity(true);
 
-        StopService.getInstance().getDeparturesAsync(stop, null, null,
-                new BaseService.Callback<List<Departure>>() {
-
+        new AsyncJob.AsyncJobBuilder<BaseService.Response<List<Departure>>>()
+                .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<List<Departure>>>() {
                     @Override
-                    public void onSuccess(List<Departure> departures) {
-                        StopFragment.this.departures = departures;
+                    public BaseService.Response<List<Departure>> doAsync() {
+                        return StopService.getInstance().getDepartures(stop, null, null);
+
+                    }
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<List<Departure>>>() {
+                    @Override
+                    public void onResult(BaseService.Response<List<Departure>> response) {
+                        if (getActivity() == null) {
+                            return;
+                        }
+
+                        setRefreshIndicatorVisiblity(false);
+
+                        if (!response.isSuccessfull()) {
+                            Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_SHORT)
+                                    .show();
+                            return;
+                        }
+
+                        StopFragment.this.departures = response.getBody();
 
                         if (selectedServices == null) {
                             selectedServices = stop.getServices();
                         }
 
-                        if (getActivity() != null) {
-                            setRefreshIndicatorVisiblity(false);
+                        departuresAdapter.notifyDeparturesChanged(stop, departures,
+                                selectedServices, selectedDay, selectedTime);
 
-                            departuresAdapter.notifyDeparturesChanged(stop, departures,
-                                    selectedServices, selectedDay, selectedTime);
-
-                            addWalkingDirectionsToMap(userLocationLatLng);
-                        }
+                        addWalkingDirectionsToMap(userLocationLatLng);
                     }
-
-                    @Override
-                    public void onFailure(String message) {
-                        if (getActivity() != null) {
-                            setRefreshIndicatorVisiblity(false);
-
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                }).create().start();
     }
 
     private void showTimePickerDialog() {
@@ -393,39 +399,49 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
     }
 
     private void addWalkingDirectionsToMap(final LatLng userLocationLatLng) {
-        LatLng stopLatLng = stopMarker.getPosition();
 
-        DirectionsService.getInstance().getWalkingDirections(userLocationLatLng, stopLatLng,
-                new BaseService.Callback<Directions>() {
+        final LatLng stopLatLng = stopMarker.getPosition();
 
+        new AsyncJob.AsyncJobBuilder<BaseService.Response<Directions>>()
+                .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<Directions>>() {
                     @Override
-                    public void onSuccess(Directions directions) {
-                        if (getActivity() != null) {
-                            // add walking route from user to stop
-                            PolylineOptions polylineOptions = new PolylineOptions();
-
-                            for (Point point : directions.getOverviewPoints()) {
-                                polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
-                            }
-
-                            polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
-                            polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
-
-                            map.addPolyline(polylineOptions);
-
-                            stopMarker.setSnippet(String.format(getString(
-                                    R.string.label_walk_duration_format), directions.getDurationText()));
-                            stopMarker.showInfoWindow(); // refresh info window since text was changed
-                        }
+                    public BaseService.Response<Directions> doAsync() {
+                        return DirectionsService.getInstance().getWalkingDirections(userLocationLatLng,
+                                stopLatLng);
                     }
-
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<Directions>>() {
                     @Override
-                    public void onFailure(String message) {
-                        if (getActivity() != null) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    public void onResult(BaseService.Response<Directions> response) {
+                        if (getActivity() == null) {
+                            return;
                         }
+
+                        if (!response.isSuccessfull()) {
+                            Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+
+                        // add walking route from user to stop
+                        Directions directions = response.getBody();
+                        PolylineOptions polylineOptions = new PolylineOptions();
+
+                        for (Point point : directions.getOverviewPoints()) {
+                            polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                        }
+
+                        polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
+                        polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
+
+                        map.addPolyline(polylineOptions);
+
+                        stopMarker.setSnippet(String.format(getString(
+                                R.string.label_walk_duration_format), directions.getDurationText()));
+                        stopMarker.showInfoWindow(); // refresh info window since text was changed
                     }
-                });
+                }).create().start();
+
     }
 
     private void setRefreshIndicatorVisiblity(final boolean visiblity) {

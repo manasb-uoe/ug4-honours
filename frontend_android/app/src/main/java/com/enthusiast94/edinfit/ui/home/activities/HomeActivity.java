@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
@@ -138,23 +139,28 @@ public class HomeActivity extends AppCompatActivity {
         // populate database with stops and services
         setEnabledSettingThingsUpDialog(true);
 
-        StopService.getInstance().populateStops(new BaseService.Callback<Void>() {
+        new AsyncJob.AsyncJobBuilder<BaseService.Response<Void>>()
+                .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<Void>>() {
+                    @Override
+                    public BaseService.Response<Void> doAsync() {
+                        return StopService.getInstance().populateStops();
+                    }
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<Void>>() {
+                    @Override
+                    public void onResult(BaseService.Response<Void> response) {
+                        setEnabledSettingThingsUpDialog(false);
 
-            @Override
-            public void onSuccess(Void data) {
-                EventBus.getDefault().post(new OnStopsAndServicesPopulatedEvent(savedInstanceState));
-            }
+                        if (!response.isSuccessfull()) {
+                            Toast.makeText(HomeActivity.this, response.getError(),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
-            @Override
-            public void onFailure(String message) {
-                if (this == null) {
-                    return;
-                }
-
-                setEnabledSettingThingsUpDialog(false);
-                Toast.makeText(HomeActivity.this, message, Toast.LENGTH_LONG).show();
-            }
-        });
+                        EventBus.getDefault().post(
+                                new OnStopsAndServicesPopulatedEvent(savedInstanceState));
+                    }
+                }).create().start();
     }
 
     @Override
@@ -326,9 +332,9 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 1:
+                case 0:
                     return context.getString(R.string.nearby_bus_stops);
-                case 0: return context.getString(R.string.user_profile);
+                case 1: return context.getString(R.string.user_profile);
                 default:
                     throw new IllegalArgumentException("Invalid position: " + position);
             }

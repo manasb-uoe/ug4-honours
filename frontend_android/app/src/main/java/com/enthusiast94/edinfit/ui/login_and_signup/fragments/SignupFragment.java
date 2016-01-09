@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.network.BaseService;
@@ -51,8 +52,8 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
         progressDialog.setMessage(getString(R.string.label_please_waitt));
         progressDialog.setCancelable(false);
 
-         // Start or stop loading based on the value of isLoading, which is retained on config
-         // change.
+        // Start or stop loading based on the value of isLoading, which is retained on config
+        // change.
         setLoading(isLoading);
 
         return view;
@@ -81,9 +82,9 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
             case R.id.signup_button:
                 Helpers.hideSoftKeyboard(getActivity(), signupButton.getWindowToken());
 
-                String name = nameEditText.getText().toString().trim();
-                String email = emailEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
+                final String name = nameEditText.getText().toString().trim();
+                final String email = emailEditText.getText().toString().trim();
+                final String password = passwordEditText.getText().toString().trim();
                 String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
                 String nameError = Helpers.validateName(name, getResources());
@@ -117,25 +118,31 @@ public class SignupFragment extends Fragment implements View.OnClickListener {
                 if (nameError == null && emailError == null && passwordError == null && doPasswordsMatch) {
                     setLoading(true);
 
-                    UserService.getInstance().createUser(name, email, password, new BaseService.Callback<User>() {
+                    new AsyncJob.AsyncJobBuilder<BaseService.Response<User>>()
+                            .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<User>>() {
+                                @Override
+                                public BaseService.Response<User> doAsync() {
+                                    return UserService.getInstance().createUser(name, email, password);
+                                }
+                            })
+                            .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<User>>() {
+                                @Override
+                                public void onResult(BaseService.Response<User> response) {
+                                    if (getActivity() == null) {
+                                        return;
+                                    }
 
-                        @Override
-                        public void onSuccess(User data) {
-                            if (getActivity() != null) {
-                                setLoading(false);
-                            }
+                                    setLoading(false);
 
-                            EventBus.getDefault().post(new OnAuthenticatedEvent(data));
-                        }
+                                    if (!response.isSuccessfull()) {
+                                        Toast.makeText(getActivity(), response.getError(),
+                                                Toast.LENGTH_SHORT).show();
+                                        return;
+                                    }
 
-                        @Override
-                        public void onFailure(String message) {
-                            if (getActivity() != null) {
-                                setLoading(false);
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+                                    EventBus.getDefault().post(new OnAuthenticatedEvent(response.getBody()));
+                                }
+                            }).create().start();
                 }
                 break;
         }

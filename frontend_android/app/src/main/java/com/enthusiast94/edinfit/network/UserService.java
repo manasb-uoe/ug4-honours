@@ -3,36 +3,33 @@ package com.enthusiast94.edinfit.network;
 import android.content.Context;
 import android.util.Base64;
 
-import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
-import cz.msebera.android.httpclient.Header;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by manas on 26-09-2015.
  */
-public class UserService extends BaseService {
+public class UserService {
 
     public static final String TAG = UserService.class.getSimpleName();
     private final String USER_ID_KEY = "userIdKey";
     private static UserService instance;
-    private String parsingErrorMessage;
     private Context context;
+    private BaseService baseService;
 
     private UserService(Context context) {
         this.context = context;
-
-        this.parsingErrorMessage = context.getString(R.string.error_parsing);
+        baseService = BaseService.getInstance();
     }
 
     public static void init(Context context) {
@@ -55,108 +52,103 @@ public class UserService extends BaseService {
      * POST api/authenticate
      */
 
-    public void authenticate(String email, final String password, final Callback<User> callback) {
-        Map<String, String> userDetails = new HashMap<>();
-        userDetails.put("email", email);
-        userDetails.put("password", password);
+    public BaseService.Response<User> authenticate(String email, final String password) {
+        FormBody formBody = new FormBody.Builder()
+                .add("email", email)
+                .add("password", password)
+                .build();
 
-        createOrAuthenticateUser(API_BASE + "/authenticate", userDetails, callback);
+        return createOrAuthenticateUser("/authenticate", formBody);
     }
 
     /**
      * POST api/authenticate/google
      */
 
-    public void authenticateViaGoogle(String idToken, final Callback<User> callback) {
-        Map<String, String> postData = new HashMap<>();
-        postData.put("id_token", idToken);
+    public BaseService.Response<User> authenticateViaGoogle(String idToken) {
+        FormBody formBody = new FormBody.Builder()
+                .add("id_token", idToken)
+                .build();
 
-        createOrAuthenticateUser(API_BASE + "/authenticate/google", postData, callback);
+        return createOrAuthenticateUser("authenticate/facebook", formBody);
     }
 
     /**
      * POST api/authenticate/facebook
      */
 
-    public void authentivateViaFacebook(String accessToken, Callback<User> callback) {
-        Map<String, String> postDate = new HashMap<>();
-        postDate.put("access_token", accessToken);
+    public BaseService.Response<User> authentivateViaFacebook(String accessToken) {
+        FormBody formBody = new FormBody.Builder()
+                .add("access_token", accessToken)
+                .build();
 
-        createOrAuthenticateUser(API_BASE + "/authenticate/facebook", postDate, callback);
+        return createOrAuthenticateUser("authenticate/facebook", formBody);
     }
 
     /**
      * POST api/users
      */
 
-    public void createUser(String name, String email, String password, Callback<User> callback) {
-        Map<String, String> userDetails = new HashMap<>();
-        userDetails.put("name", name);
-        userDetails.put("email", email);
-        userDetails.put("password", password);
+    public BaseService.Response<User> createUser(String name, String email, String password) {
+        FormBody formBody = new FormBody.Builder()
+                .add("name", name)
+                .add("email", email)
+                .add("password", password)
+                .build();
 
-        createOrAuthenticateUser(API_BASE + "/users", userDetails, callback);
+        return createOrAuthenticateUser("users", formBody);
     }
 
     /**
      * Common method for creating/authenticating users.
      */
 
-    private void createOrAuthenticateUser(String url, Map<String, String> userDetails,
-                                          final Callback<User> callback) {
-        RequestParams requestParams = new RequestParams(userDetails);
+    private BaseService.Response<User> createOrAuthenticateUser(String path, RequestBody requestBody) {
+        Request request = baseService.createEdinfitPostRequest(path, requestBody);
+        BaseService.Response<User> response = new BaseService.Response<>();
 
-        AsyncHttpClient client = getAsyncHttpClient(false);
-        client.post(url, requestParams, new JsonHttpResponseHandler() {
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    // Decode JWT token's payload in order to retrieve user id as json
-                    String token = response.getJSONObject("data").getString("token");
-                    String decodedPayload = new String(Base64.decode(token.split("\\.")[1].getBytes(),
-                            Base64.DEFAULT));
-
-                    // parse the decoded payload and construct new user object
-                    JSONObject userJson = new JSONObject(decodedPayload);
-                    User user = new User(
-                            userJson.getString("id"),
-                            null,
-                            null,
-                            0,
-                            token
-                    );
-                    user.save();
-
-                    // persist currently authenticated user's id
-                    Helpers.writeToPrefs(context, USER_ID_KEY, user.getId().toString());
-
-                    // now update the cached user with other user details by sending another request
-                    updateCachedUser(new Callback<Void>() {
-
-                        @Override
-                        public void onSuccess(Void data) {
-                            if (callback != null) callback.onSuccess(getAuthenticatedUser());
-                        }
-
-                        @Override
-                        public void onFailure(String message) {
-                            if (callback != null)
-                                callback.onFailure(message);
-                        }
-                    });
-                } catch (JSONException e) {
-                    if (callback != null)
-                        callback.onFailure(parsingErrorMessage);
-                }
+            if (!okHttpResponse.isSuccessful()) {
+                response.setError(baseService.extractEdinfitErrorMessage(okHttpResponse));
+                return response;
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable,
-                                  JSONObject errorResponse) {
-                onFailureCommon(statusCode, errorResponse, callback);
+            // Decode JWT token's payload in order to retrieve user id as json
+            String token = new JSONObject(okHttpResponse.body().string()).getJSONObject("data").getString("token");
+            String decodedPayload = new String(Base64.decode(token.split("\\.")[1].getBytes(),
+                    Base64.DEFAULT));
+
+            // parse the decoded payload and construct new user object
+            JSONObject userJson = new JSONObject(decodedPayload);
+            User user = new User(
+                    userJson.getString("id"),
+                    null,
+                    null,
+                    0,
+                    token
+            );
+            user.save();
+
+            // persist currently authenticated user's id
+            Helpers.writeToPrefs(context, USER_ID_KEY, user.getId().toString());
+
+            // now update the cached user with other user details by sending another request
+            BaseService.Response<Void> updateUserResponse = updateCachedUser();
+            if (!updateUserResponse.isSuccessfull()) {
+                response.setError(updateUserResponse.getError());
+                return response;
             }
-        });
+
+            response.setBody(getAuthenticatedUser());
+            return response;
+
+        } catch (IOException | JSONException e) {
+            response.setError(e.getMessage());
+            return response;
+        }
+
     }
 
     public void deauthenticate() {
@@ -164,39 +156,43 @@ public class UserService extends BaseService {
     }
 
     public User getAuthenticatedUser() {
-        return User.findById(Long.parseLong(Helpers.readFromPrefs(context, USER_ID_KEY)));
+        String userId = Helpers.readFromPrefs(context, USER_ID_KEY);
+        if (userId == null) {
+            return null;
+        }
+
+        return User.findById(Long.parseLong(userId));
     }
 
-    public void updateCachedUser(final Callback<Void> callback) {
+    public BaseService.Response<Void> updateCachedUser() {
         final User user = getAuthenticatedUser();
 
-        AsyncHttpClient client = getAsyncHttpClient(true);
-        client.get(API_BASE + "/users/" + user.get_id(), new JsonHttpResponseHandler() {
+        Request request = baseService.createEdinfitGetRequest("users/" + user.get_id());
+        BaseService.Response<Void> response = new BaseService.Response<>();
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    User userToUpdate = User.findById(Long.parseLong(
-                            Helpers.readFromPrefs(context, USER_ID_KEY)));
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
 
-                    JSONObject userJson = response.getJSONObject("data");
-                    userToUpdate.setName(userJson.getString("name"));
-                    userToUpdate.setEmail(userJson.getString("email"));
-                    userToUpdate.setCreatedAt(userJson.getLong("createdAt"));
-                    userToUpdate.save();
-
-                    callback.onSuccess(null);
-                } catch (JSONException e) {
-                    callback.onFailure(parsingErrorMessage);
-                }
+            if (!response.isSuccessfull()) {
+                response.setError(baseService.extractEdinfitErrorMessage(okHttpResponse));
+                return response;
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable,
-                                  JSONObject errorResponse) {
-                onFailureCommon(statusCode, errorResponse, callback);
-            }
-        });
+            User userToUpdate = User.findById(Long.parseLong(
+                    Helpers.readFromPrefs(context, USER_ID_KEY)));
+
+            JSONObject userJson = new JSONObject(okHttpResponse.body().string()).getJSONObject("data");
+            userToUpdate.setName(userJson.getString("name"));
+            userToUpdate.setEmail(userJson.getString("email"));
+            userToUpdate.setCreatedAt(userJson.getLong("createdAt"));
+            userToUpdate.save();
+
+            return response;
+
+        } catch (IOException | JSONException e) {
+            response.setError(e.getMessage());
+            return response;
+        }
     }
 
     public boolean isUserAuthenticated() {

@@ -355,7 +355,7 @@
 //                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 //
 //                Intent startActivityIntent = new Intent(getActivity(), StopActivity.class);
-//                startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
+//                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop);
 //                startActivity(startActivityIntent);
 //
 //                return true;

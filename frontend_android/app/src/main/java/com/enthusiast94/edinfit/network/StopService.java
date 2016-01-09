@@ -1,36 +1,34 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
+import android.util.Log;
 
-import com.arasthel.asyncjob.AsyncJob;
-import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.Departure;
 import com.enthusiast94.edinfit.models_2.Stop;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
-import cz.msebera.android.httpclient.Header;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by manas on 01-10-2015.
  */
-public class StopService extends BaseService {
+public class StopService {
 
     public static final String TAG = StopService.class.getSimpleName();
     private static StopService instance;
     private Context context;
-    private String parsingErrorMessage;
+    private BaseService baseService;
 
     private StopService(Context context) {
         this.context = context;
-        this.parsingErrorMessage = context.getString(R.string.error_parsing);
+        baseService = BaseService.getInstance();
     }
 
     public static void init(Context context) {
@@ -49,13 +47,7 @@ public class StopService extends BaseService {
         return instance;
     }
 
-    public void getAllStops(final Callback<List<Stop>> callback) {
-        callback.onSuccess(Stop.getAll());
-    }
-
-    public void saveOrUnsaveStop(String stopId, boolean shouldSave, final Callback<Void> callback) {
-        callback.onSuccess(null);
-
+    public void saveOrUnsaveStop(String stopId, boolean shouldSave) {
 //        String url = API_BASE + "/stops/" + stopId + "/save";
 //
 //        JsonHttpResponseHandler responseHandler = new JsonHttpResponseHandler() {
@@ -90,8 +82,8 @@ public class StopService extends BaseService {
 //        }
     }
 
-    public void getSavedStops(int departuresLimit, final Callback<List<Stop>> callback) {
-        callback.onSuccess(new ArrayList<Stop>());
+    public void getSavedStops(int departuresLimit) {
+//        callback.onSuccess(new ArrayList<Stop>());
 
 //        AsyncHttpClient client = getAsyncHttpClient(true);
 //
@@ -125,99 +117,96 @@ public class StopService extends BaseService {
 //        });
     }
 
-    public void populateStops(final Callback<Void> callback) {
-        AsyncJob.doInBackground(new AsyncJob.OnBackgroundJob() {
+    public BaseService.Response<Void> populateStops() {
+        BaseService.Response<Void> response = new BaseService.Response<>();
 
-            @Override
-            public void doOnBackground() {
-                // no need to proceed if stops already exist
-                if (Stop.getCount() > 0) {
-                    onSuccessMainThread(null, callback);
-                    return;
-                }
+        // no need to proceed if stops already exist
+        if (Stop.getCount() > 0) {
+            return response;
+        }
 
-                SyncHttpClient client = getTfeSyncHttpClient(context);
-                client.get(TFE_API_BASE + "/stops", new JsonHttpResponseHandler() {
+        Request request = baseService.createTfeGetRequest("stops");
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        try {
-                            JSONArray stopsJsonArray = response.getJSONArray("stops");
-                            for (int i=0; i<stopsJsonArray.length(); i++) {
-                                JSONObject stopJson = stopsJsonArray.getJSONObject(i);
-                                Stop stop = new Stop(
-                                        stopJson.getString("stop_id"),
-                                        stopJson.getString("name"),
-                                        stopJson.getDouble("latitude"),
-                                        stopJson.getDouble("longitude"),
-                                        stopJson.getString("direction"),
-                                        stopJson.getString("destinations"),
-                                        stopJson.getString("services")
-                                );
-                                stop.save();
-                            }
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
 
-                            onSuccessMainThread(null, callback);
-                        } catch (JSONException e) {
-                            onFailureMainThread(parsingErrorMessage, callback);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(final int statusCode, Header[] headers, Throwable throwable,
-                                          final JSONObject errorResponse) {
-                        onFailureMainThread(statusCode, errorResponse, callback);
-                    }
-                });
+            if (!okHttpResponse.isSuccessful()) {
+                response.setError(okHttpResponse.message());
+                return response;
             }
-        });
+
+            JSONArray stopsJsonArray =
+                    new JSONObject(okHttpResponse.body().string()).getJSONArray("stops");
+
+            for (int i = 0; i < stopsJsonArray.length(); i++) {
+                JSONObject stopJson = stopsJsonArray.getJSONObject(i);
+                Stop stop = new Stop(
+                        stopJson.getString("stop_id"),
+                        stopJson.getString("name"),
+                        stopJson.getDouble("latitude"),
+                        stopJson.getDouble("longitude"),
+                        stopJson.getString("direction"),
+                        stopJson.getString("destinations"),
+                        stopJson.getString("services")
+                );
+
+                stop.save();
+            }
+
+            return response;
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            response.setError(e.getMessage());
+            return response;
+        }
     }
 
-    public void getDeparturesAsync(final Stop stop, final Integer dayCode, final String time,
-                                   final Callback<List<Departure>> callback) {
-        AsyncJob.doInBackground(new AsyncJob.OnBackgroundJob() {
+    public BaseService.Response<List<Departure>> getDepartures(
+            final Stop stop,
+            final Integer dayCode,
+            final String time) {
 
-            @Override
-            public void doOnBackground() {
-                List<Departure> departures = stop.getDepartures(dayCode, time);
-                if (departures != null) {
-                    onSuccessMainThread(departures, callback);
-                    return;
-                }
+        Request request = baseService.createTfeGetRequest("timetables/" + stop.get_id());
+        BaseService.Response<List<Departure>> response = new BaseService.Response<>();
 
-                SyncHttpClient client = getTfeSyncHttpClient(context);
-                client.get(TFE_API_BASE + "/timetables/" + stop.get_id(), new JsonHttpResponseHandler() {
+        List<Departure> departures = stop.getDepartures(dayCode, time);
+        if (departures != null) {
+            response.setBody(departures);
+            return response;
+        }
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        try {
-                            JSONArray departuresJsonArray = response.getJSONArray("departures");
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
 
-                            for (int i = 0; i < departuresJsonArray.length(); i++) {
-                                JSONObject departureJson = departuresJsonArray.getJSONObject(i);
-                                Departure departure = new Departure(
-                                        stop,
-                                        departureJson.getString("service_name"),
-                                        departureJson.getString("time"),
-                                        departureJson.getString("destination"),
-                                        departureJson.getInt("day")
-                                );
-                                departure.save();
-                            }
-
-                            onSuccessMainThread(stop.getDepartures(dayCode, time), callback);
-                        } catch (JSONException e) {
-                            onFailureMainThread(parsingErrorMessage, callback);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable,
-                                          JSONObject errorResponse) {
-                        onFailureMainThread(statusCode, errorResponse, callback);
-                    }
-                });
+            if (!okHttpResponse.isSuccessful()) {
+                response.setError(okHttpResponse.message());
+                return response;
             }
-        });
+
+            JSONArray departuresJsonArray =
+                    new JSONObject(okHttpResponse.body().string()).getJSONArray("departures");
+
+            for (int i = 0; i < departuresJsonArray.length(); i++) {
+                JSONObject departureJson = departuresJsonArray.getJSONObject(i);
+                Departure departure = new Departure(
+                        stop,
+                        departureJson.getString("service_name"),
+                        departureJson.getString("time"),
+                        departureJson.getString("destination"),
+                        departureJson.getInt("day")
+                );
+
+                departure.save();
+            }
+
+            response.setBody(stop.getDepartures(dayCode, time));
+            return response;
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            response.setError(e.getMessage());
+            return response;
+        }
     }
 }

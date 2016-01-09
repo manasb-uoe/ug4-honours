@@ -446,29 +446,29 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                                                 startStopActivity(stop);
                                                 break;
                                             case R.id.action_add_to_favourites:
-                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(),
-                                                        true, new BaseService.Callback<Void>() {
-
-                                                            @Override
-                                                            public void onSuccess(Void data) {
-                                                                savedStopIds.add(stop.get_id());
-
-                                                                notifyItemChanged(getAdapterPosition());
-
-                                                                if (context != null) {
-                                                                    Toast.makeText(context, String.format(
-                                                                            context.getString(R.string.success_stop_saved),
-                                                                            stop.getName()), Toast.LENGTH_SHORT).show();
-                                                                }
-                                                            }
-
-                                                            @Override
-                                                            public void onFailure(String message) {
-                                                                if (context != null) {
-                                                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                                                                }
-                                                            }
-                                                        });
+//                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(),
+//                                                        true, new BaseService.Callback<Void>() {
+//
+//                                                            @Override
+//                                                            public void onSuccess(Void data) {
+//                                                                savedStopIds.add(stop.get_id());
+//
+//                                                                notifyItemChanged(getAdapterPosition());
+//
+//                                                                if (context != null) {
+//                                                                    Toast.makeText(context, String.format(
+//                                                                            context.getString(R.string.success_stop_saved),
+//                                                                            stop.getName()), Toast.LENGTH_SHORT).show();
+//                                                                }
+//                                                            }
+//
+//                                                            @Override
+//                                                            public void onFailure(String message) {
+//                                                                if (context != null) {
+//                                                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+//                                                                }
+//                                                            }
+//                                                        });
                                                 break;
                                         }
                                     }
@@ -489,27 +489,27 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
                                                 startStopActivity(stop);
                                                 break;
                                             case R.id.action_remove_from_favourites:
-                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(), false, new BaseService.Callback<Void>() {
-
-                                                    @Override
-                                                    public void onSuccess(Void data) {
-                                                        savedStopIds.remove(stop.get_id());
-
-                                                        if (context != null) {
-                                                            notifyItemChanged(getAdapterPosition());
-                                                            Toast.makeText(context, String.format(
-                                                                    context.getString(R.string.success_stop_unsaved),
-                                                                    stop.getName()), Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(String message) {
-                                                        if (context != null) {
-                                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-                                                });
+//                                                StopService.getInstance().saveOrUnsaveStop(stop.get_id(), false, new BaseService.Callback<Void>() {
+//
+//                                                    @Override
+//                                                    public void onSuccess(Void data) {
+//                                                        savedStopIds.remove(stop.get_id());
+//
+//                                                        if (context != null) {
+//                                                            notifyItemChanged(getAdapterPosition());
+//                                                            Toast.makeText(context, String.format(
+//                                                                    context.getString(R.string.success_stop_unsaved),
+//                                                                    stop.getName()), Toast.LENGTH_SHORT).show();
+//                                                        }
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onFailure(String message) {
+//                                                        if (context != null) {
+//                                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+//                                                        }
+//                                                    }
+//                                                });
                                                 break;
                                         }
                                     }

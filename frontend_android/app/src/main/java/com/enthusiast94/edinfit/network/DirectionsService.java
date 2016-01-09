@@ -6,23 +6,24 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import cz.msebera.android.httpclient.Header;
+import java.io.IOException;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by manas on 10-10-2015.
  */
-public class DirectionsService extends BaseService {
+public class DirectionsService {
 
     public static final String TAG = DirectionsService.class.getSimpleName();
     private static DirectionsService instance;
     private Context context;
+    private BaseService baseService = BaseService.getInstance();
 
     private DirectionsService(Context context) {
         this.context = context;
@@ -44,33 +45,31 @@ public class DirectionsService extends BaseService {
         return instance;
     }
 
-    public void getWalkingDirections(LatLng origin, LatLng destination,
-                                     final Callback<Directions> callback) {
+    public BaseService.Response<Directions> getWalkingDirections(LatLng origin, LatLng destination) {
 
-        RequestParams requestParams = new RequestParams();
-        requestParams.put("origin", origin.latitude + "," + origin.longitude);
-        requestParams.put("destination", destination.latitude + "," + destination.longitude);
+        Request request = baseService.createEdinfitGetRequest("/walking-directions?origin=" +
+                origin.latitude + "," + origin.longitude + "&destination=" + destination.latitude +
+                "," + destination.longitude);
+        BaseService.Response<Directions> response = new BaseService.Response<>();
 
-        AsyncHttpClient client = getAsyncHttpClient(true);
-        client.get(API_BASE + "/walking-directions", requestParams, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    Gson gson = new Gson();
-                    Directions directions = gson.fromJson(response.getJSONObject("data").toString(),
-                            Directions.class);
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
 
-                    callback.onSuccess(directions);
-
-                } catch (JSONException e) {
-                    callback.onFailure(context.getString(R.string.error_parsing));
-                }
+            if (!response.isSuccessfull()) {
+                response.setError(baseService.extractEdinfitErrorMessage(okHttpResponse));
+                return response;
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                onFailureCommon(statusCode, errorResponse, callback);
-            }
-        });
+            Gson gson = new Gson();
+            Directions directions = gson.fromJson(new JSONObject(okHttpResponse.body().string())
+                    .getJSONObject("data").toString(), Directions.class);
+
+            response.setBody(directions);
+            return response;
+
+        } catch (IOException | JSONException e) {
+            response.setError(e.getMessage());
+            return response;
+        }
     }
 }

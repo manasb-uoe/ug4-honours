@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.User;
 import com.enthusiast94.edinfit.network.BaseService;
@@ -82,12 +83,24 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(final LoginResult loginResult) {
                 if (getActivity() != null) {
                     setLoading(true);
 
-                    UserService.getInstance().authentivateViaFacebook(
-                            loginResult.getAccessToken().getToken(), new UserCallback());
+                    new AsyncJob.AsyncJobBuilder<BaseService.Response<User>>()
+                            .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<User>>() {
+                                @Override
+                                public BaseService.Response<User> doAsync() {
+                                    return UserService.getInstance().authentivateViaFacebook(
+                                            loginResult.getAccessToken().getToken());
+                                }
+                            })
+                            .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<User>>() {
+                                @Override
+                                public void onResult(BaseService.Response<User> response) {
+                                    onLoginResponse(response);
+                                }
+                            }).create().start();
                 }
             }
 
@@ -159,8 +172,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             case R.id.login_button:
                 Helpers.hideSoftKeyboard(getActivity(), loginButton.getWindowToken());
 
-                String email = emailEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
+                final String email = emailEditText.getText().toString().trim();
+                final String password = passwordEditText.getText().toString().trim();
 
                 String requiredFieldErrorMessage = getString(R.string.error_required_field);
 
@@ -179,7 +192,19 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 if (emailError == null && passwordError == null) {
                     setLoading(true);
 
-                    UserService.getInstance().authenticate(email, password, new UserCallback());
+                    new AsyncJob.AsyncJobBuilder<BaseService.Response<User>>()
+                            .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<User>>() {
+                                @Override
+                                public BaseService.Response<User> doAsync() {
+                                    return UserService.getInstance().authenticate(email, password);
+                                }
+                            })
+                            .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<User>>() {
+                                @Override
+                                public void onResult(BaseService.Response<User> response) {
+                                    onLoginResponse(response);
+                                }
+                            }).create().start();
                 }
                 break;
 
@@ -205,14 +230,25 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_GOOGLE_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            final GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
             if (result.isSuccess()) {
                 setLoading(true);
 
-                UserService.getInstance().authenticateViaGoogle(
-                        result.getSignInAccount().getIdToken(), new UserCallback());
-
+                new AsyncJob.AsyncJobBuilder<BaseService.Response<User>>()
+                        .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<User>>() {
+                            @Override
+                            public BaseService.Response<User> doAsync() {
+                                return UserService.getInstance().authenticateViaGoogle(
+                                        result.getSignInAccount().getIdToken());
+                            }
+                        })
+                        .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<User>>() {
+                            @Override
+                            public void onResult(BaseService.Response<User> response) {
+                                onLoginResponse(response);
+                            }
+                        }).create().start();
             } else {
                 Toast.makeText(getActivity(), getString(R.string.error_google_login),
                         Toast.LENGTH_SHORT).show();
@@ -223,24 +259,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private class UserCallback implements BaseService.Callback<User> {
-
-        @Override
-        public void onSuccess(User data) {
-            if (getActivity() != null) {
-                setLoading(false);
-            }
-
-            EventBus.getDefault().post(new OnAuthenticatedEvent(data));
+    private void onLoginResponse(BaseService.Response<User> response) {
+        if (getActivity() == null) {
+            return;
         }
 
-        @Override
-        public void onFailure(String message) {
-            if (getActivity() != null) {
-                setLoading(false);
-            }
+        setLoading(false);
 
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+        if (!response.isSuccessfull()) {
+            Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        EventBus.getDefault().post(new OnAuthenticatedEvent(response.getBody()));
     }
 }

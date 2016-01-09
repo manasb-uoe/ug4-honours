@@ -1,105 +1,124 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
-import android.telecom.Call;
 
-import com.arasthel.asyncjob.AsyncJob;
-import com.enthusiast94.edinfit.App;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.User;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Created by manas on 26-09-2015.
  */
 public class BaseService {
 
-    protected static final String API_BASE = "http://ec2-52-28-155-29.eu-central-1.compute.amazonaws.com:4000/api";
-    protected static final String TFE_API_BASE = "https://tfe-opendata.com/api/v1";
-    private static final String USER_AGENT = "android:com.enthusiast94.edinfit";
+    private static final String TAG = BaseService.class.getSimpleName();
+    public static final String API_BASE = "http://ec2-52-28-155-29.eu-central-1.compute.amazonaws.com:4000/api";
+    public static final String TFE_API_BASE = "https://tfe-opendata.com/api/v1";
+    public static final String USER_AGENT = "android:com.enthusiast94.edinfit";
 
-    protected static AsyncHttpClient getAsyncHttpClient(boolean isAuthenticationRequired) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setUserAgent(USER_AGENT);
-        client.setLoggingEnabled(false);
+    private static BaseService instance;
+    private Context context;
+    private OkHttpClient client;
 
-        if (isAuthenticationRequired) {
-            // add authorization header if user is authenticated
-            if (UserService.getInstance().isUserAuthenticated()) {
-                User user = UserService.getInstance().getAuthenticatedUser();
-                if (user != null) {
-                    client.addHeader("Authorization", "Bearer " + user.getAuthToken());
-                }
-            }
+    private BaseService(Context context) {
+        this.context = context;
+        client = new OkHttpClient();
+    }
+
+    public static void init(Context context) {
+        if (instance != null) {
+            throw new IllegalStateException(TAG + " has already been initialized.");
         }
 
+        instance = new BaseService(context);
+    }
+
+    public static BaseService getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(TAG + " has not been initialized yet.");
+        }
+
+        return instance;
+    }
+
+    public OkHttpClient getHttpClient() {
         return client;
     }
 
-    protected static SyncHttpClient getTfeSyncHttpClient(Context context) {
-        SyncHttpClient client = new SyncHttpClient();
-        client.setUserAgent(USER_AGENT);
-        client.setLoggingEnabled(false);
-        client.addHeader("Authorization", "Token " + context.getString(R.string.api_key_tfe));
-
-        return client;
+    public Request createTfeGetRequest(String path) {
+        return new Request.Builder()
+                .url(TFE_API_BASE + "/" + path)
+                .addHeader("Authorization", "Token " + context.getString(R.string.api_key_tfe))
+                .build();
     }
 
-    /**
-     * Common onFailure method for all API responses.
-     */
+    public Request createEdinfitGetRequest(String path) {
+        return createEdinfitRequestBuilder(path).build();
+    }
 
-    protected static void onFailureCommon(int statusCode, JSONObject errorResponse, Callback callback) {
-        if (callback != null) {
-            try {
-                if (statusCode != 0) {
-                    callback.onFailure(errorResponse.getJSONObject("error").getString("message"));
-                } else {
-                    callback.onFailure(App.getAppContext().getString(R.string.error_request_time_out));
-                }
-            } catch (JSONException e) {
-                callback.onFailure(App.getAppContext().getString(R.string.error_parsing));
-            }
+    public Request createEdinfitPostRequest(String path, RequestBody requestBody) {
+        return createEdinfitRequestBuilder(path).post(requestBody).build();
+    }
+
+    private Request.Builder createEdinfitRequestBuilder(String path) {
+        Request.Builder builder = new Request.Builder();
+        builder.url(API_BASE + "/" + path);
+
+        User user = UserService.getInstance().getAuthenticatedUser();
+        if (user != null) {
+            builder.addHeader("Authorization", "Bearer " + user.getAuthToken());
+        }
+
+        return builder;
+    }
+
+    public String extractEdinfitErrorMessage(okhttp3.Response response) {
+        try {
+            return new JSONObject(response.body().string()).getJSONObject("error").getString("message");
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    protected void onFailureMainThread(final int statusCode, final JSONObject errorResponse,
-                                       final Callback callback) {
-        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+    public static class Response<Type> {
 
-            @Override
-            public void doInUIThread() {
-                onFailureCommon(statusCode, errorResponse, callback);
-            }
-        });
-    }
+        private Type body;
+        private String error;
 
-    protected void onFailureMainThread(final String error, final Callback callback) {
-        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+        public Response() {}
 
-            @Override
-            public void doInUIThread() {
-                callback.onFailure(error);
-            }
-        });
-    }
+        public Response(Type body, String error) {
+            this.body = body;
+            this.error = error;
+        }
 
-    protected void onSuccessMainThread(final Object object, final Callback callback) {
-        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+        public Type getBody() {
+            return body;
+        }
 
-            @Override
-            public void doInUIThread() {
-                callback.onSuccess(object);
-            }
-        });
-    }
+        public void setBody(Type body) {
+            this.body = body;
+        }
 
-    public interface Callback<T> {
-        void onSuccess(T data);
-        void onFailure(String message);
+        public String getError() {
+            return error;
+        }
+
+        public void setError(String error) {
+            this.error = error;
+        }
+
+        public boolean isSuccessfull() {
+            return error == null;
+        }
     }
 }
