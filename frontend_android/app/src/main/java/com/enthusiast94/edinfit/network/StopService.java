@@ -4,9 +4,10 @@ import android.content.Context;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models_2.Departure;
 import com.enthusiast94.edinfit.models_2.Stop;
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,38 +51,6 @@ public class StopService extends BaseService {
 
     public void getAllStops(final Callback<List<Stop>> callback) {
         callback.onSuccess(Stop.getAll());
-    }
-
-    public void getStop(String stopId, Integer dayCode, String time,  final Callback<Stop> callback) {
-        callback.onSuccess(Stop.findById(stopId));
-//        RequestParams requestParams = new RequestParams();
-//        requestParams.put("day", dayCode);
-//        requestParams.put("time", time);
-//
-//        AsyncHttpClient client = getAsyncHttpClient(true);
-//        client.get(API_BASE + "/stops/" + stopId, requestParams, new JsonHttpResponseHandler() {
-//
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                try {
-//                    Gson gson = new Gson();
-//                    Stop stop = gson.fromJson(response.getJSONObject("data").toString(), Stop.class);
-//
-//                    if (callback != null) callback.onSuccess(stop);
-//
-//                } catch (JSONException e) {
-//                    if (callback != null)
-//                        callback.onFailure(parsingErrorMessage);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-//                onFailureCommon(statusCode, errorResponse, callback);
-//            }
-//        });
-
-
     }
 
     public void saveOrUnsaveStop(String stopId, boolean shouldSave, final Callback<Void> callback) {
@@ -167,7 +136,7 @@ public class StopService extends BaseService {
                     return;
                 }
 
-                AsyncHttpClient client = getTfeSyncHttpClient(context);
+                SyncHttpClient client = getTfeSyncHttpClient(context);
                 client.get(TFE_API_BASE + "/stops", new JsonHttpResponseHandler() {
 
                     @Override
@@ -197,6 +166,54 @@ public class StopService extends BaseService {
                     @Override
                     public void onFailure(final int statusCode, Header[] headers, Throwable throwable,
                                           final JSONObject errorResponse) {
+                        onFailureMainThread(statusCode, errorResponse, callback);
+                    }
+                });
+            }
+        });
+    }
+
+    public void getDeparturesAsync(final Stop stop, final Integer dayCode, final String time,
+                                   final Callback<List<Departure>> callback) {
+        AsyncJob.doInBackground(new AsyncJob.OnBackgroundJob() {
+
+            @Override
+            public void doOnBackground() {
+                List<Departure> departures = stop.getDepartures(dayCode, time);
+                if (departures != null) {
+                    onSuccessMainThread(departures, callback);
+                    return;
+                }
+
+                SyncHttpClient client = getTfeSyncHttpClient(context);
+                client.get(TFE_API_BASE + "/timetables/" + stop.get_id(), new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        try {
+                            JSONArray departuresJsonArray = response.getJSONArray("departures");
+
+                            for (int i = 0; i < departuresJsonArray.length(); i++) {
+                                JSONObject departureJson = departuresJsonArray.getJSONObject(i);
+                                Departure departure = new Departure(
+                                        stop,
+                                        departureJson.getString("service_name"),
+                                        departureJson.getString("time"),
+                                        departureJson.getString("destination"),
+                                        departureJson.getInt("day")
+                                );
+                                departure.save();
+                            }
+
+                            onSuccessMainThread(stop.getDepartures(dayCode, time), callback);
+                        } catch (JSONException e) {
+                            onFailureMainThread(parsingErrorMessage, callback);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable,
+                                          JSONObject errorResponse) {
                         onFailureMainThread(statusCode, errorResponse, callback);
                     }
                 });

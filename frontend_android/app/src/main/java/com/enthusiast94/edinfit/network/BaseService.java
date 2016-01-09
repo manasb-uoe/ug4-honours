@@ -40,7 +40,7 @@ public class BaseService {
         return client;
     }
 
-    protected static AsyncHttpClient getTfeSyncHttpClient(Context context) {
+    protected static SyncHttpClient getTfeSyncHttpClient(Context context) {
         SyncHttpClient client = new SyncHttpClient();
         client.setUserAgent(USER_AGENT);
         client.setLoggingEnabled(false);

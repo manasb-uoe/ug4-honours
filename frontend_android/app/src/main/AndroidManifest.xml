@@ -91,7 +91,7 @@
         <meta-data
             android:name="AA_MODELS"
             android:value="com.enthusiast94.edinfit.models_2.User,
-             com.enthusiast94.edinfit.models_2.Stop"
+             com.enthusiast94.edinfit.models_2.Stop, com.enthusiast94.edinfit.models_2.Departure"
             />
 
     </application>

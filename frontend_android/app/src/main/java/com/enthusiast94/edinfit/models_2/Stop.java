@@ -66,6 +66,31 @@ public class Stop extends Model {
         return Helpers.getListFromJsonString(services);
     }
 
+    public List<Departure> getDepartures(Integer dayCode, String time) {
+        // return null if no departures exist for this stop
+        boolean doDeparturesExist = new Select()
+                .from(Departure.class)
+                .where("stop = ?" , this.getId())
+                .limit(1)
+                .exists();
+        if (!doDeparturesExist) {
+            return null;
+        }
+
+        if (dayCode != null && time != null) {
+            return new Select()
+                    .from(Departure.class)
+                    .where("stop = ? AND day = ? AND datetime(time) >= datetime(?)", this.getId(), dayCode,
+                            time)
+                    .execute();
+        } else {
+            return new Select()
+                    .from(Departure.class)
+                    .where("stop = ?", this.getId())
+                    .execute();
+        }
+    }
+
     /**
      * Statics
      */

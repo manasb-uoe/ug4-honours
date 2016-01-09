@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
+import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.enthusiast94.edinfit.utils.ReverseGeocoder;
@@ -518,9 +520,9 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         }
 
         private void startStopActivity(Stop stop) {
-//                Intent startActivityIntent = new Intent(context, StopActivity.class);
-//                startActivityIntent.putExtra(StopActivity.EXTRA_STOP, stop);
-//                context.startActivity(startActivityIntent);
+                Intent startActivityIntent = new Intent(context, StopActivity.class);
+                startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.get_id());
+                context.startActivity(startActivityIntent);
         }
 
         public abstract void onShowStopOnMapOptionSelected(Stop stop);

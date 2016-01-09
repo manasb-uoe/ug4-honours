@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Departure;
+import com.enthusiast94.edinfit.models_2.Departure;
 
 /**
  * Created by manas on 04-01-2016.
