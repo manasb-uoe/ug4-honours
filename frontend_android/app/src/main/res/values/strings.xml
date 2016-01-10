@@ -143,6 +143,7 @@
     <string name="favourites">Favourites</string>
     <string name="settings">Settings</string>
     <string name="setting_things_up">Setting things up…</string>
+    <string name="search_for_stops_and_services">Search for stops and services</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

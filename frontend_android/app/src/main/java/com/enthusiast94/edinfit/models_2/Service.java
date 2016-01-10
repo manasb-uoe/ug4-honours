@@ -60,7 +60,7 @@ public class Service extends Model {
 
                 JSONArray pointsJsonArray = routeJson.getJSONArray("points");
                 List<LatLng> points = new ArrayList<>();
-                for (int j=0; i<pointsJsonArray.length(); j++) {
+                for (int j=0; j<pointsJsonArray.length(); j++) {
                     JSONObject pointJson = pointsJsonArray.getJSONObject(j);
                     points.add(new LatLng(pointJson.getDouble("latitude"),
                             pointJson.getDouble("longitude")));
@@ -117,6 +117,12 @@ public class Service extends Model {
         return new Select()
                 .from(Service.class)
                 .count();
+    }
+
+    public static List<Service> getAll() {
+        return new Select("Id", "name", "description")
+                .from(Service.class)
+                .execute();
     }
 
     public static void deleteAll() {

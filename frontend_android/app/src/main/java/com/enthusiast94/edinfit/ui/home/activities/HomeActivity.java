@@ -37,6 +37,7 @@ import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
+import com.enthusiast94.edinfit.ui.search.activities.SearchActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -208,6 +209,9 @@ public class HomeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
+        } else if (item.getItemId() == R.id.action_search) {
+            Intent startActivityIntent = new Intent(this, SearchActivity.class);
+            startActivity(startActivityIntent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -225,6 +229,12 @@ public class HomeActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggle
         actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return true;
     }
 
     private void setSettingThingsUpDialogEnabled(boolean shouldEnable) {

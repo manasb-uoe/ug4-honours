@@ -49,6 +49,9 @@
             android:name=".ui.wait_or_walk_mode.activities.SuggestionsActivity"
             android:label="@string/app_name" >
         </activity>
+        <activity
+            android:name=".ui.search.activities.SearchActivity" >
+        </activity>
 
         <!-- FacebookActivity for Login -->
         <activity

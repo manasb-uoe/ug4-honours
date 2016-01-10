@@ -2,41 +2,55 @@
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/service_search_edittext_background"
-        android:layout_margin="@dimen/spacing_small"
-        android:padding="@dimen/spacing_smaller"
-        android:focusableInTouchMode="true"
+        android:background="@color/primary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
         >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_action_search_grey"
-            android:layout_marginRight="@dimen/spacing_tiny"
-            />
-
-        <EditText
-            android:id="@+id/search_edittext"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="@string/label_enter_search_keyword"
-            android:imeOptions="actionSearch"
-            android:singleLine="true"
-            android:background="@android:color/transparent"
-            android:textColor="@android:color/black"
-            android:textColorHint="@color/dark_grey"
-            android:textSize="@dimen/font_normal_large"
-            android:inputType="text"
-            />
+            android:layout_height="40dp"
+            android:background="@drawable/service_search_edittext_background"
+            android:layout_marginRight="@dimen/spacing_small"
+            android:layout_marginLeft="@dimen/spacing_small"
+            android:padding="@dimen/spacing_smaller"
+            android:focusableInTouchMode="true"
+            >
 
-    </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_action_search_grey"
+                />
+
+            <EditText
+                android:id="@+id/search_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/search_for_stops_and_services"
+                android:imeOptions="actionSearch"
+                android:singleLine="true"
+                android:background="@android:color/transparent"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/dark_grey"
+                android:textSize="@dimen/font_normal_large"
+                android:inputType="text"
+                />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
