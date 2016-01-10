@@ -130,4 +130,11 @@ public class Service extends Model {
                 .from(Service.class)
                 .execute();
     }
+
+    public static Service findByName(String name) {
+        return new Select()
+                .from(Service.class)
+                .where("name = ?" , name)
+                .executeSingle();
+    }
 }

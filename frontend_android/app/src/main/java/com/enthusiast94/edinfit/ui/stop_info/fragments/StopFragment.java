@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.ui.stop_info.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.utils.DepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LiveDepartureView;
@@ -658,9 +660,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             @Override
             public void onClick(View v) {
-//                Intent startActivityIntent = new Intent(context, ServiceActivity.class);
-//                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
-//                context.startActivity(startActivityIntent);
+                startServiceActivity(departure.getServiceName());
             }
         }
 
@@ -738,10 +738,14 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             @Override
             public void onClick(View v) {
-//                Intent startActivityIntent = new Intent(context, ServiceActivity.class);
-//                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
-//                context.startActivity(startActivityIntent);
+                startServiceActivity(departure.getServiceName());
             }
+        }
+
+        private void startServiceActivity(String serviceName) {
+            Intent startActivityIntent = new Intent(context, ServiceActivity.class);
+            startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, serviceName);
+            context.startActivity(startActivityIntent);
         }
 
         public abstract void onSetTimeClicked();

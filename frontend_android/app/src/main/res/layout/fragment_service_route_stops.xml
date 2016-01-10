@@ -6,9 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
-    sothree:umanoDragView="@+id/drag_view"
-    sothree:umanoPanelHeight="?actionBarSize"
+    sothree:umanoPanelHeight="150dp"
     sothree:umanoShadowHeight="4dp"
+    sothree:umanoScrollableView="@+id/route_stops_recyclerview"
+    sothree:umanoFadeColor="@android:color/transparent"
+    sothree:umanoParallaxOffset="60dp"
     >
 
     <com.google.android.gms.maps.MapView
@@ -17,67 +19,13 @@
         android:layout_height="match_parent"
         />
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/route_stops_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="top"
-        >
-
-        <RelativeLayout
-            android:id="@+id/drag_view"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:paddingLeft="@dimen/spacing_normal"
-            android:paddingRight="@dimen/spacing_normal"
-            android:gravity="center_vertical"
-            >
-
-            <ImageView
-                android:id="@+id/route_imageview"
-                android:src="@drawable/ic_action_maps_directions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                />
-
-            <TextView
-                android:id="@+id/route_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_loading"
-                android:textSize="@dimen/font_large"
-                android:gravity="center_vertical"
-                android:layout_alignTop="@id/route_imageview"
-                android:layout_alignBottom="@id/route_imageview"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@+id/route_imageview"
-                android:layout_toStartOf="@+id/route_imageview" />
-
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:background="@color/divider"
-            />
-
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_refresh_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/route_stops_recyclerview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:scrollbars="vertical"
-                />
-
-        </android.support.v4.widget.SwipeRefreshLayout>
-
-    </LinearLayout>
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        android:paddingTop="@dimen/spacing_small"
+        />
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#0759B0</color>
-    <color name="primary_opaque_40">#660759B0</color>
-    <color name="primary_opaque_65">#A60759B0</color>
-    <color name="primary_dark">#054B95</color>
-    <color name="accent">#0759B0</color>
-    <color name="accent_opaque_40">#66009688</color>
+    <color name="primary">#F44336</color>
+    <color name="primary_opaque_40">#66F44336</color>
+    <color name="primary_opaque_65">#A6F44336</color>
+    <color name="primary_dark">#D32F2F</color>
+    <color name="accent">#00BCD4</color>
+    <color name="accent_opaque_40">#6600BCD4</color>
     <color name="primary_text_light">@android:color/primary_text_light</color>
     <color name="secondary_text_light">@android:color/secondary_text_light</color>
     <color name="secondary_text_light_2">#777</color>
@@ -14,6 +14,7 @@
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">@color/background_material_dark</color>
     <color name="background_grey">#EEE</color>
+    <color name="divider_lighter">#EEEEEE</color>
     <color name="divider">@color/light_grey</color>
     <color name="divider_darker">@color/grey</color>
     <color name="grey">#c1c1c1</color>
@@ -24,6 +25,7 @@
     <color name="drop_shadow_end_color">#40000000</color>
     <color name="green_selection">#dff0d8</color>
     <color name="white_opaque_60">#73FFFFFF</color>
+    <color name="white_opaque_70">#B3FFFFFF</color>
     <color name="black_opaque_60">#99000000</color>
     <color name="facebook_blue">#3b5998</color>
     <color name="google_plus_red">#d34836</color>
