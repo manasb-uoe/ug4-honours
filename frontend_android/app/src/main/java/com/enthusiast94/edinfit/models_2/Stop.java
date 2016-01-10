@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.models_2;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.SQLiteUtils;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -133,5 +134,11 @@ public class Stop extends Model {
                 .from(Stop.class)
                 .where("_id = ?", id)
                 .executeSingle();
+    }
+
+    public static void deleteAll() {
+        new Delete()
+                .from(Stop.class)
+                .execute();
     }
 }

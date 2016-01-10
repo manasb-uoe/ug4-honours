@@ -53,8 +53,10 @@ public class StopService {
     }
 
     public BaseService.Response<Void> populateStops() {
-        BaseService.Response<Void> response = new BaseService.Response<>();
+        // first delete all existing stops
+        Stop.deleteAll();
 
+        BaseService.Response<Void> response = new BaseService.Response<>();
         Request request = baseService.createTfeGetRequest("stops");
 
         try {

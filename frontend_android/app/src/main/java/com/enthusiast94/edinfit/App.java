@@ -6,6 +6,7 @@ import android.content.Context;
 import com.activeandroid.ActiveAndroid;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.DirectionsService;
+import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 
@@ -28,7 +29,7 @@ public class App extends Application {
         DirectionsService.init(this);
         UserService.init(this);
         StopService.init(this);
-//        ServiceService.init(this);
+        ServiceService.init(this);
 //        LiveBusService.init(this);
 //        WaitOrWalkService.init(this);
 //        ActivityService.init(this);

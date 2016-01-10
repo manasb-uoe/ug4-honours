@@ -23,8 +23,10 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models_2.Service;
 import com.enthusiast94.edinfit.models_2.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
@@ -137,9 +139,9 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        // populate database with stops
-        // no need to proceed if stops already exist
-        if (Stop.getCount() > 0) {
+        // populate database with stops and services
+        // no need to proceed if stops and services already exist
+        if (Stop.getCount() > 0 && Service.getCount() > 0) {
             EventBus.getDefault().post(
                     new OnStopsAndServicesPopulatedEvent(savedInstanceState));
             return;
@@ -151,7 +153,14 @@ public class HomeActivity extends AppCompatActivity {
                 .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<Void>>() {
                     @Override
                     public BaseService.Response<Void> doAsync() {
-                        return StopService.getInstance().populateStops();
+                        BaseService.Response<Void> response1 =
+                                StopService.getInstance().populateStops();
+
+                        if (!response1.isSuccessfull()) {
+                            return response1;
+                        }
+
+                        return ServiceService.getInstance().populateServices();
                     }
                 })
                 .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<Void>>() {
