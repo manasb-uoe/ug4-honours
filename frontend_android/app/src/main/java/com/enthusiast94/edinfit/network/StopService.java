@@ -126,7 +126,8 @@ public class StopService {
                         departureJson.getString("service_name"),
                         departureJson.getString("time"),
                         departureJson.getString("destination"),
-                        departureJson.getInt("day")
+                        departureJson.getInt("day"),
+                        Stop.findById(departureJson.getString("destination_stop_id"))
                 );
 
                 departure.save();
