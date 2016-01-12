@@ -29,4 +29,5 @@
     <color name="black_opaque_60">#99000000</color>
     <color name="facebook_blue">#3b5998</color>
     <color name="google_plus_red">#d34836</color>
+    <color name="green_500">#4CAF50</color>
 </resources>

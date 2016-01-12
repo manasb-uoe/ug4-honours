@@ -1,11 +1,14 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 
+import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models_2.Departure;
 import com.enthusiast94.edinfit.models_2.FavouriteStop;
 import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models_2.StopToStopJourney;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import org.json.JSONArray;
@@ -166,5 +169,66 @@ public class StopService {
 
         response.setBody(listOfPairs);
         return response;
+    }
+
+    public BaseService.Response<StopToStopJourney> getStopToStopJourneys(
+            String startStopId,
+            String finishStopId,
+            String serviceName,
+            String time) {
+        BaseService.Response<StopToStopJourney> response = new BaseService.Response<>();
+        Request request = baseService.createTfeGetRequest("stoptostop-timetable/?start_stop_id=" +
+                startStopId + "&finish_stop_id=" + finishStopId + "&date=" +
+                Helpers.getEpochFromToday24hTime(time) + "&duration=120");
+
+        Log.d(TAG, request.url().toString());
+
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
+
+            if (!okHttpResponse.isSuccessful()) {
+                response.setError(okHttpResponse.message());
+                return response;
+            }
+
+            JSONArray journeysJsonArray =
+                    new JSONObject(okHttpResponse.body().string()).getJSONArray("journeys");
+
+            if (journeysJsonArray.length() == 0) {
+                response.setError(context.getString(R.string.no_journey_found));
+                return response;
+            }
+
+            JSONObject journeyJson = journeysJsonArray.getJSONObject(0);
+
+            String serviceName1 = journeyJson.getString("service_name");
+            // only proceed if required service name matches parsed service name
+            if (!serviceName1.equals(serviceName)) {
+                response.setError(context.getString(R.string.no_journey_found));
+            }
+
+            String destination = journeyJson.getString("destination");
+
+            JSONArray departuresJsonArray = journeyJson.getJSONArray("departures");
+            List<StopToStopJourney.Departure> departures = new ArrayList<>();
+            for (int j=0; j<departuresJsonArray.length(); j++) {
+                JSONObject departureJson = departuresJsonArray.getJSONObject(j);
+                departures.add(new StopToStopJourney.Departure(
+                        Stop.findById(departureJson.getString("stop_id")),
+                        departureJson.getString("name"),
+                        departureJson.getString("time")
+                ));
+            }
+
+            StopToStopJourney journey = new StopToStopJourney(serviceName1, destination, departures);
+
+            response.setBody(journey);
+            return response;
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            response.setError(e.getMessage());
+            return response;
+        }
     }
 }

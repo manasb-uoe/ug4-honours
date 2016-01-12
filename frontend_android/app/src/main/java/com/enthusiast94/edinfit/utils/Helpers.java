@@ -169,7 +169,7 @@ public class Helpers {
         if (minutes > 60) {
             return time;
         } else if (minutes <= 1) {
-            return "due";
+            return "Due";
         } else {
             return String.format("%.0f", minutes) + " min";
         }
@@ -199,6 +199,22 @@ public class Helpers {
         }
 
         return text;
+    }
+
+    // Returns epoch time in seconds
+    public static long getEpochFromToday24hTime(String time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.UK);
+        Calendar calendar = Calendar.getInstance();
+        String dateText = simpleDateFormat.format(calendar.getTime());
+
+        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.UK);
+
+        try {
+            Date date = simpleDateFormat.parse(dateText + " " + time);
+            return date.getTime() / 1000;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static double getDistanceBetweenPoints(double lat1, double lng1, double lat2, double lng2) {

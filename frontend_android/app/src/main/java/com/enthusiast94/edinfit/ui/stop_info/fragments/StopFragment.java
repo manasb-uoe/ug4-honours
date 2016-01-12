@@ -37,6 +37,7 @@ import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
+import com.enthusiast94.edinfit.ui.service_info.activities.ServiceTimetableActivity;
 import com.enthusiast94.edinfit.utils.DepartureView;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LiveDepartureView;
@@ -660,7 +661,9 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             @Override
             public void onClick(View v) {
-                startServiceActivity(departure.getServiceName());
+                Intent startActivityIntent = new Intent(context, ServiceActivity.class);
+                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, departure.getServiceName());
+                context.startActivity(startActivityIntent);
             }
         }
 
@@ -738,14 +741,14 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
 
             @Override
             public void onClick(View v) {
-                startServiceActivity(departure.getServiceName());
+                context.startActivity(ServiceTimetableActivity.getStartActivityIntent(
+                        context,
+                        stop.get_id(),
+                        departure.getDestinationStop().get_id(),
+                        departure.getServiceName(),
+                        departure.getTime()
+                ));
             }
-        }
-
-        private void startServiceActivity(String serviceName) {
-            Intent startActivityIntent = new Intent(context, ServiceActivity.class);
-            startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, serviceName);
-            context.startActivity(startActivityIntent);
         }
 
         public abstract void onSetTimeClicked();

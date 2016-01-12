@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
+    >
+
+    <LinearLayout
+        android:id="@+id/indicator_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignBottom="@+id/info_container"
+        android:layout_alignTop="@+id/info_container"
+        android:gravity="center"
+        android:paddingLeft="@dimen/spacing_large"
+        android:paddingRight="0dp"
+        android:weightSum="12"
+        >
+
+        <View
+            android:id="@+id/top_indicator_view"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:background="@color/primary"
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            >
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:background="@drawable/route_stop_indicator"
+                android:layout_gravity="center"
+                />
+
+        </FrameLayout>
+
+        <View
+            android:id="@+id/bottom_indicator_view"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:background="@color/primary"
+            />
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/info_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/indicator_container"
+        android:layout_toEndOf="@+id/indicator_container"
+        android:paddingTop="@dimen/spacing_smaller"
+        android:paddingLeft="@dimen/spacing_large"
+        android:paddingRight="@dimen/spacing_normal"
+        android:paddingBottom="@dimen/spacing_smaller"
+        >
+
+
+        <TextView
+            android:id="@+id/stop_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Brougham Place"
+            android:singleLine="true"
+            style="@style/TextAppearance.AppCompat.Body1"
+            />
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18:09"
+            android:textColor="@color/green_500"
+            android:gravity="right"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_alignParentRight="true"
+            style="@style/TextAppearance.AppCompat.Body2"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>
