@@ -52,6 +52,9 @@
         <activity
             android:name=".ui.search.activities.SearchActivity" >
         </activity>
+        <activity
+            android:name=".ui.service_info.activities.ServiceTimetableActivity" >
+        </activity>
 
         <!-- FacebookActivity for Login -->
         <activity
