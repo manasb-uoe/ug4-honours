@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Departure;
 import com.enthusiast94.edinfit.models_2.Stop;
 import com.enthusiast94.edinfit.models_2.StopToStopJourney;
 import com.enthusiast94.edinfit.network.BaseService;
@@ -314,7 +313,7 @@ public class ServiceTimetableFragment extends Fragment {
                 Stop stop = departure.getStop();
                 stopNameTextView.setText(String.format(context.getString(
                         R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
-                timeTextView.setText(Helpers.humanizeLiveDepartureTime(departure.getTime()));
+                timeTextView.setText(departure.getTime());
 
                 // show indicators for first/last stop in the route
                 if (getAdapterPosition() == 0) {
