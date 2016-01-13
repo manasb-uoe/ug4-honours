@@ -1,6 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.events;
 
-import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models_2.Activity;
 
 /**
  * Created by manas on 31-12-2015.

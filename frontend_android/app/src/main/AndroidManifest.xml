@@ -97,7 +97,9 @@
              com.enthusiast94.edinfit.models_2.Stop,
              com.enthusiast94.edinfit.models_2.Departure,
              com.enthusiast94.edinfit.models_2.FavouriteStop,
-             com.enthusiast94.edinfit.models_2.Service"
+             com.enthusiast94.edinfit.models_2.Service,
+             com.enthusiast94.edinfit.models_2.Activity
+             "
             />
 
     </application>

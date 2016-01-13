@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models_2.Activity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,16 +33,16 @@ import java.util.Locale;
 public class ActivityDetailFragment extends Fragment {
 
     public static final String TAG = ActivityDetailFragment.class.getSimpleName();
-    private static final String EXTRA_ACTIVITY = "extraActivity";
+    private static final String EXTRA_ACTIVITY_ID = "activityId";
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
 
     private MapView mapView;
 
     private GoogleMap map;
 
-    public static ActivityDetailFragment newInstance(Activity activity) {
+    public static ActivityDetailFragment newInstance(long activityId) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_ACTIVITY, activity);
+        bundle.putLong(EXTRA_ACTIVITY_ID, activityId);
 
         ActivityDetailFragment instance = new ActivityDetailFragment();
         instance.setArguments(bundle);
@@ -83,8 +83,8 @@ public class ActivityDetailFragment extends Fragment {
         mapView.onCreate(mapViewSavedInstanceState);
         map = mapView.getMap();
 
-        // get selected activity from arguments and bind data to views
-        Activity activity = getArguments().getParcelable(EXTRA_ACTIVITY);
+        // get selected activity using the id provided in the arguments
+        Activity activity = Activity.findById(getArguments().getLong(EXTRA_ACTIVITY_ID));
 
         distanceTextView.setText(Helpers.humanizeDistance(activity.getDistance() / 1000));
         timeTextView.setText(Helpers.humanizeDurationInMillis(activity.getEnd() - activity.getStart()));

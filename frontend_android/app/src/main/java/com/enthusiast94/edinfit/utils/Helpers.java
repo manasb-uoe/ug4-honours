@@ -14,7 +14,7 @@ import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models_2.Activity;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
