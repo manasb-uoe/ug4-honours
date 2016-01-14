@@ -1,5 +1,7 @@
 package com.enthusiast94.edinfit.ui.stop_info.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +16,14 @@ import com.enthusiast94.edinfit.ui.stop_info.fragments.StopFragment;
  */
 public class StopActivity extends AppCompatActivity {
 
-    public static final String EXTRA_STOP_ID = "stopId";
+    public static final String EXTRA_STOP_ID = "stopId"; // TODO make private and use getStartActivityIntent instead
+
+    public static Intent getStartActivityIntent(Context context, String stopId) {
+        Intent startActivityIntent = new Intent(context, StopActivity.class);
+        startActivityIntent.putExtra(EXTRA_STOP_ID, stopId);
+
+        return startActivityIntent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

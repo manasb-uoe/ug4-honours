@@ -1,5 +1,7 @@
 package com.enthusiast94.edinfit.models_2;
 
+import android.text.TextUtils;
+
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -12,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -136,5 +139,12 @@ public class Service extends Model {
                 .from(Service.class)
                 .where("name = ?" , name)
                 .executeSingle();
+    }
+
+    public static List<Service> findByNames(List<String> names) {
+        return new Select()
+                .from(Service.class)
+                .where("name IN (" + TextUtils.join(",", Collections.nCopies(names.size(), "?")) + ")", names.toArray())
+                .execute();
     }
 }
