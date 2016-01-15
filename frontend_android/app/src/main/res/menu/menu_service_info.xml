@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/action_select_route"
-        android:icon="@drawable/ic_directions_white_24dp"
+        android:icon="@drawable/ic_compare_arrows_white_24dp"
         android:title="@string/label_select_route"
         app:showAsAction="always"
         />

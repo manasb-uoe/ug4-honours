@@ -13,8 +13,8 @@
         >
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="18dp"
+            android:layout_width="22dp"
+            android:layout_height="14dp"
             android:src="@drawable/ic_bus_96_zero_padding"
             android:layout_gravity="center_vertical"
             />
@@ -23,7 +23,6 @@
             android:id="@+id/service_name_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/font_normal_large"
             style="@style/Base.TextAppearance.AppCompat.Body2"
             android:text="5"
             android:layout_gravity="center_vertical"
@@ -46,9 +45,8 @@
         android:id="@+id/time_textview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textColor="@color/accent"
+        android:textColor="@color/green_500"
         android:gravity="center_vertical|right"
-        android:textSize="@dimen/font_normal_large"
         style="@style/Base.TextAppearance.AppCompat.Body2"
         android:text="28 min"
         />

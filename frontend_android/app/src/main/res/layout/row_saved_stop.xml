@@ -19,18 +19,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingLeft="@dimen/spacing_small"
+        android:paddingRight="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
+        android:paddingTop="@dimen/spacing_smaller"
         >
             <TextView
                 android:id="@+id/stop_name_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="25dp"
                 android:gravity="center_vertical"
-                android:textSize="@dimen/font_normal_large"
                 android:text="Waterloo Place"
                 style="@style/Base.TextAppearance.AppCompat.Body2"
-                android:layout_marginLeft="@dimen/spacing_small"
-                android:layout_marginRight="@dimen/spacing_small"
-                android:layout_marginTop="@dimen/spacing_smaller"
                 android:layout_marginBottom="@dimen/spacing_smaller"
                 />
 
@@ -38,16 +38,13 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/divider_height"
             android:background="@color/divider"
-            android:layout_marginBottom="@dimen/spacing_smaller"
+            android:layout_marginBottom="@dimen/spacing_small"
             />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:layout_marginBottom="@dimen/spacing_small"
             >
 
             <TextView

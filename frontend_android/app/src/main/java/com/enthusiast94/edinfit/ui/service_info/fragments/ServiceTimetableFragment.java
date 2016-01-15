@@ -266,7 +266,7 @@ public class ServiceTimetableFragment extends Fragment {
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new DepartureViewHolder(inflater.inflate(R.layout.row_sevice_timetable,
+            return new DepartureViewHolder(inflater.inflate(R.layout.row_service_timetable,
                     parent, false));
         }
 

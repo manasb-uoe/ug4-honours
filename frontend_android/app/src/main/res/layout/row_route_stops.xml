@@ -62,9 +62,10 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/indicator_container"
         android:layout_toEndOf="@+id/indicator_container"
-        android:paddingTop="@dimen/spacing_small"
+        android:paddingTop="@dimen/spacing_smaller"
         android:paddingLeft="@dimen/spacing_large"
         android:paddingRight="@dimen/spacing_normal"
+        android:paddingBottom="@dimen/spacing_smaller"
         >
 
 
@@ -74,13 +75,6 @@
             android:layout_height="wrap_content"
             android:text="Brougham Place to Chalmers Street"
             style="@style/TextAppearance.AppCompat.Body1"
-            />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:background="@color/divider_lighter"
-            android:layout_marginTop="@dimen/spacing_small"
             />
 
     </LinearLayout>

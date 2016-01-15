@@ -52,8 +52,8 @@
                     android:paddingRight="8dp"
                     fab:menu_fab_size="normal"
                     fab:menu_showShadow="true"
-                    fab:menu_colorNormal="@color/accent"
-                    fab:menu_colorPressed="@color/accent"
+                    fab:menu_colorNormal="@color/primary"
+                    fab:menu_colorPressed="@color/primary"
                     fab:menu_backgroundColor="@color/white_opaque_60"
                     >
 
@@ -61,11 +61,11 @@
                         android:id="@+id/wait_or_walk_fab"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_timer_white_24dp"
+                        android:src="@drawable/ic_directions_walk_white_24dp"
                         app:fab_size="mini"
                         app:fab_label="@string/action_wait_or_walk"
-                        app:fab_colorNormal="@color/accent"
-                        app:fab_colorPressed="@color/accent"
+                        app:fab_colorNormal="@color/green_500"
+                        app:fab_colorPressed="@color/green_500"
                         />
 
                     <com.github.clans.fab.FloatingActionButton
