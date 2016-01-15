@@ -6,51 +6,57 @@
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
         >
 
-        <LinearLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/service_search_edittext_background"
-            android:layout_marginRight="@dimen/spacing_small"
-            android:layout_marginLeft="@dimen/spacing_small"
-            android:padding="@dimen/spacing_smaller"
-            android:focusableInTouchMode="true"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
             >
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_action_search_grey"
-                />
-
-            <EditText
-                android:id="@+id/search_edittext"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/search_for_stops_and_services"
-                android:imeOptions="actionSearch"
-                android:singleLine="true"
-                android:background="@android:color/transparent"
-                android:textColor="@android:color/black"
-                android:textColorHint="@color/dark_grey"
-                android:textSize="@dimen/font_normal_large"
-                android:inputType="text"
-                />
+                android:layout_height="40dp"
+                android:background="@drawable/service_search_edittext_background"
+                android:layout_marginRight="@dimen/spacing_small"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:padding="@dimen/spacing_smaller"
+                android:focusableInTouchMode="true"
+                >
 
-        </LinearLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_action_action_search_grey"
+                    />
 
-    </android.support.v7.widget.Toolbar>
+                <EditText
+                    android:id="@+id/search_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/search_for_stops_and_services"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
+                    android:background="@android:color/transparent"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@color/dark_grey"
+                    android:textSize="@dimen/font_normal_large"
+                    android:inputType="text"
+                    />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -64,6 +70,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/search_results_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:background="@color/background_grey"
+            android:paddingBottom="@dimen/spacing_normal"
             />
 
         <LinearLayout
@@ -103,13 +118,6 @@
             android:text="@string/label_no_results"
             android:textColor="@color/dark_grey"
             android:visibility="gone"
-            />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/search_results_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
             />
 
     </FrameLayout>

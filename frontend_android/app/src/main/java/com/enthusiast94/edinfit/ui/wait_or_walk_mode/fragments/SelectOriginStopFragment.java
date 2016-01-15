@@ -21,6 +21,7 @@ import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
+import com.enthusiast94.edinfit.utils.StopView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -158,14 +159,14 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
         });
     }
 
-    private void loadStops(final LatLng userLocationLatLng) {
+    private void loadStops() {
         setRefreshIndicatorVisiblity(true);
 
         new AsyncJob.AsyncJobBuilder<List<Stop>>()
                 .doInBackground(new AsyncJob.AsyncAction<List<Stop>>() {
                     @Override
                     public List<Stop> doAsync() {
-                        return Stop.getNearby(userLocationLatLng, MAX_DISTANCE, NEARBY_STOPS_LIMIT);
+                        return Stop.getNearby(userLatLng, MAX_DISTANCE, NEARBY_STOPS_LIMIT);
                     }
                 })
                 .doWhenFinished(new AsyncJob.AsyncResultAction<List<Stop>>() {
@@ -225,7 +226,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
     public void onLastKnownLocationSuccess(Location location) {
         if (getActivity() != null) {
             userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            loadStops(userLatLng);
+            loadStops();
         }
     }
 
@@ -253,7 +254,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else {
-                return new SelectionStopViewHolder(inflater.inflate(R.layout.row_selection_stop,
+                return new StopViewHolder(inflater.inflate(R.layout.row_selection_stop,
                         parent, false));
             }
         }
@@ -263,7 +264,7 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             Object item = getItem(position);
 
             if (item instanceof Stop) {
-                ((SelectionStopViewHolder) holder).bindItem((Stop) getItem(position));
+                ((StopViewHolder) holder).bindItem((Stop) getItem(position));
             }
         }
 
@@ -301,42 +302,32 @@ public class SelectOriginStopFragment extends Fragment implements LocationProvid
             notifyDataSetChanged();
         }
 
-        private class SelectionStopViewHolder extends RecyclerView.ViewHolder
+        private class StopViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
-            private TextView stopNameTextView;
-            private TextView distanceAwayTextView;
             private Stop stop;
+            private StopView stopView;
 
-            public SelectionStopViewHolder(View itemView) {
+            public StopViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
-                distanceAwayTextView = (TextView) itemView.findViewById(R.id.distance_away_textview);
+                stopView = (StopView) itemView;
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
-                itemView.setOnLongClickListener(this);
+                stopView.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
                 this.stop = stop;
 
-                stopNameTextView.setText(String.format(getString(
-                        R.string.label_stop_name_with_direction), stop.getName(), stop.getDirection()));
-
-                LatLng stopLatLng = stop.getPosition();
-                distanceAwayTextView.setText(Helpers.humanizeDistance(
-                        Helpers.getDistanceBetweenPoints(userLatLng.latitude, userLatLng.longitude,
-                                stopLatLng.latitude, stopLatLng.longitude)));
+                stopView.bindItem(stop, false, userLatLng);
 
                 if (getAdapterPosition() - 1 == currentlySelectedStopIndex) {
-                    itemView.setBackgroundResource(R.color.green_selection);
+                    stopView.setBackgroundResource(R.color.green_selection);
                 } else {
-                    itemView.setBackgroundResource(android.R.color.transparent);
+                    stopView.setBackgroundResource(android.R.color.white);
                 }
             }
+
 
             @Override
             public void onClick(View v) {

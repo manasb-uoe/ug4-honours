@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -426,10 +425,8 @@ public class SelectDestinationStopFragment extends Fragment {
 
             private TextView stopNameTextView;
             private View topIndicatorView;
-            private View middleIndicatorView;
             private View bottomIndicatorView;
-            private ImageView downArrowImageView;
-            private ImageButton showOnMapButton;
+            private ImageButton moreOptionsButton;
             private Stop stop;
 
             public RouteStopViewHolder(View itemView) {
@@ -438,14 +435,12 @@ public class SelectDestinationStopFragment extends Fragment {
                 // find views
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
-                middleIndicatorView = itemView.findViewById(R.id.middle_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
-                downArrowImageView = (ImageView) itemView.findViewById(R.id.down_arrow_imageview);
-                showOnMapButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
+//                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);
-                showOnMapButton.setOnClickListener(this);
+//                moreOptionsButton.setOnClickListener(this);
             }
 
             public void bindItem(Stop stop) {
@@ -460,15 +455,12 @@ public class SelectDestinationStopFragment extends Fragment {
                 if (adapterPosition == 0) {
                     topIndicatorView.setVisibility(View.INVISIBLE);
                     bottomIndicatorView.setVisibility(View.VISIBLE);
-                    downArrowImageView.setVisibility(View.VISIBLE);
                 } else if (adapterPosition == stops.size() - 1) {
                     topIndicatorView.setVisibility(View.VISIBLE);
                     bottomIndicatorView.setVisibility(View.INVISIBLE);
-                    downArrowImageView.setVisibility(View.INVISIBLE);
                 } else {
                     topIndicatorView.setVisibility(View.VISIBLE);
                     bottomIndicatorView.setVisibility(View.VISIBLE);
-                    downArrowImageView.setVisibility(View.INVISIBLE);
                 }
 
                 // fade out origin stop since it is not available for selection
@@ -479,7 +471,6 @@ public class SelectDestinationStopFragment extends Fragment {
 
                     int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary_opaque_40);
                     topIndicatorView.setBackgroundColor(indicatorColor);
-                    middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);
                 } else {
                     stopNameTextView.setTextColor(
@@ -488,7 +479,6 @@ public class SelectDestinationStopFragment extends Fragment {
 
                     int indicatorColor = ContextCompat.getColor(getActivity(), R.color.primary);
                     topIndicatorView.setBackgroundColor(indicatorColor);
-                    middleIndicatorView.setBackgroundColor(indicatorColor);
                     bottomIndicatorView.setBackgroundColor(indicatorColor);
                 }
 
@@ -502,8 +492,7 @@ public class SelectDestinationStopFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                int id = v.getId();
-                if (id == itemView.getId()) {
+                if (v.getId() == itemView.getId()) {
                     // only allow selection if selected stop comes after origin stop
                     if (getAdapterPosition() - 1 > 0) {
                         currentlySelectedStopIndex = getAdapterPosition() - 1;
@@ -512,35 +501,20 @@ public class SelectDestinationStopFragment extends Fragment {
                         notifyItemChanged(previouslySelectedStopIndex + 1);
 
                         previouslySelectedStopIndex = currentlySelectedStopIndex;
+
+                        // lookup marker corresponding to selected stop, then show its info
+                        // window and move map focus to it
+                        LatLng stopLatLng = stop.getPosition();
+                        for (Marker marker : stopMarkers) {
+                            LatLng latLng = marker.getPosition();
+
+                            if (latLng.latitude == stopLatLng.latitude && latLng.longitude == stopLatLng.longitude) {
+                                marker.showInfoWindow();
+                                map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                break;
+                            }
+                        }
                     }
-                } else if (id == showOnMapButton.getId()) {
-                    AlertDialog showOnMapDialog = new AlertDialog.Builder(getActivity())
-                            .setItems(new String[]{getString(R.string.label_show_on_map)},
-                                    new DialogInterface.OnClickListener() {
-
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch (which) {
-                                                case 0:
-                                                    // lookup marker corresponding to selected stop, then show its info
-                                                    // window and move map focus to it
-                                                    LatLng stopLatLng = stop.getPosition();
-                                                    for (Marker marker : stopMarkers) {
-                                                        LatLng latLng = marker.getPosition();
-
-                                                        if (latLng.latitude == stopLatLng.latitude && latLng.longitude == stopLatLng.longitude) {
-                                                            marker.showInfoWindow();
-                                                            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                                            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                                                            break;
-                                                        }
-                                                    }
-                                                    break;
-                                            }
-                                        }
-                                    })
-                            .create();
-                    showOnMapDialog.show();
                 }
             }
         }

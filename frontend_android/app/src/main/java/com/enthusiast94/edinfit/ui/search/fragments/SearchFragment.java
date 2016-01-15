@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.home.fragments;
+package com.enthusiast94.edinfit.ui.search.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +29,7 @@ import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.UserService;
+import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.ServiceView;
@@ -318,7 +319,7 @@ public class SearchFragment extends Fragment {
             public ServiceViewHolder(View itemView) {
                 super(itemView);
 
-                serviceView = (ServiceView) itemView;
+                serviceView = (ServiceView) itemView.findViewById(R.id.service_view);
 
                 serviceView.setOnClickListener(this);
             }
@@ -331,9 +332,9 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-//                Intent startActivityIntent = new Intent(getActivity(), ServiceActivity.class);
-//                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, service.getName());
-//                startActivity(startActivityIntent);
+                Intent startActivityIntent = new Intent(getActivity(), ServiceActivity.class);
+                startActivityIntent.putExtra(ServiceActivity.EXTRA_SERVICE_NAME, service.getName());
+                startActivity(startActivityIntent);
             }
         }
 

@@ -53,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/label_last_updated"
+                android:textSize="@dimen/font_small"
                 />
 
             <TextView
@@ -61,6 +62,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/label_loading"
                 android:layout_marginLeft="@dimen/spacing_tiny"
+                android:textSize="@dimen/font_small"
                 style="@style/TextAppearance.AppCompat.Body1"
                 />
 

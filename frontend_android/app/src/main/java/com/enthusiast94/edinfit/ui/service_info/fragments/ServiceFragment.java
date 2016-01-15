@@ -458,7 +458,7 @@ public class ServiceFragment extends Fragment {
                 stopNameTextView = (TextView) itemView.findViewById(R.id.stop_name_textview);
                 topIndicatorView = itemView.findViewById(R.id.top_indicator_view);
                 bottomIndicatorView = itemView.findViewById(R.id.bottom_indicator_view);
-                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
+//                moreOptionsButton = (ImageButton) itemView.findViewById(R.id.more_options_button);
 
                 // bind event listeners
                 itemView.setOnClickListener(this);

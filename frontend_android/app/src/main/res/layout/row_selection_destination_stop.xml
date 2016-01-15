@@ -9,87 +9,80 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_normal"
+        android:layout_height="match_parent"
         >
 
-        <ImageView
-            android:id="@+id/down_arrow_imageview"
+        <LinearLayout
+            android:id="@+id/indicator_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignTop="@+id/route_indicators_container"
-            android:layout_alignBottom="@+id/route_indicators_container"
-            android:layout_marginRight="@dimen/spacing_small"
-            android:scaleType="centerCrop"
-            android:gravity="center_vertical"
-            android:src="@drawable/ic_action_arrow_down"
-            />
-
-        <LinearLayout
-            android:id="@+id/route_indicators_container"
-            android:layout_width="@dimen/route_indicators_container_width"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/down_arrow_imageview"
-            android:layout_marginRight="@dimen/spacing_normal"
-            android:layout_alignBottom="@id/stop_name_textview"
-            android:layout_alignTop="@id/stop_name_textview"
             android:orientation="vertical"
-            android:weightSum="7"
+            android:layout_alignBottom="@+id/info_container"
+            android:layout_alignTop="@+id/info_container"
+            android:gravity="center"
+            android:paddingLeft="@dimen/spacing_large"
+            android:paddingRight="0dp"
+            android:weightSum="12"
             >
 
             <View
                 android:id="@+id/top_indicator_view"
-                android:layout_width="@dimen/route_indicator_width"
+                android:layout_width="4dp"
                 android:layout_height="0dp"
-                android:layout_weight="3"
+                android:layout_weight="4"
                 android:background="@color/primary"
                 />
 
-            <View
-                android:id="@+id/middle_indicator_view"
-                android:layout_width="match_parent"
+            <FrameLayout
+                android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@color/primary"
-                android:layout_gravity="center_vertical"
-                />
+                android:layout_weight="4"
+                >
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:background="@drawable/route_stop_indicator"
+                    android:layout_gravity="center"
+                    />
+
+            </FrameLayout>
 
             <View
                 android:id="@+id/bottom_indicator_view"
-                android:layout_width="@dimen/route_indicator_width"
+                android:layout_width="4dp"
                 android:layout_height="0dp"
-                android:layout_weight="3"
+                android:layout_weight="4"
                 android:background="@color/primary"
                 />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/stop_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/route_indicators_container"
-            android:layout_alignBottom="@+id/more_options_button"
-            android:layout_toLeftOf="@+id/more_options_button"
-            android:layout_toStartOf="@+id/more_options_button"
-            />
 
-        <ImageButton
-            android:id="@+id/more_options_button"
-            android:layout_width="@dimen/nearby_stop_more_options_button_width"
-            android:layout_height="@dimen/nearby_stop_more_options_button_height"
-            android:src="@drawable/ic_action_navigation_more_vert"
+        <LinearLayout
+            android:id="@+id/info_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:background="?attr/selectableItemBackground"
-            android:layout_alignParentEnd="true"
-            android:contentDescription="@string/label_more_options"
-            />
+            android:layout_toRightOf="@+id/indicator_container"
+            android:layout_toEndOf="@+id/indicator_container"
+            android:paddingTop="@dimen/spacing_smaller"
+            android:paddingLeft="@dimen/spacing_large"
+            android:paddingRight="@dimen/spacing_normal"
+            android:paddingBottom="@dimen/spacing_smaller"
+            >
+
+
+            <TextView
+                android:id="@+id/stop_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Brougham Place to Chalmers Street"
+                style="@style/TextAppearance.AppCompat.Body1"
+                />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

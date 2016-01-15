@@ -15,7 +15,6 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         sothree:umanoDragView="@+id/drag_view"
-        sothree:umanoPanelHeight="?actionBarSize"
         sothree:umanoShadowHeight="4dp"
         >
 
@@ -32,6 +31,8 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:scrollbars="vertical"
+                android:background="@color/background_grey"
+                android:paddingBottom="@dimen/spacing_normal"
                 />
 
         </android.support.v4.widget.SwipeRefreshLayout>
@@ -49,6 +50,8 @@
                 android:layout_height="?actionBarSize"
                 android:paddingLeft="@dimen/spacing_normal"
                 android:paddingRight="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_small"
+                android:paddingBottom="@dimen/spacing_small"
                 android:gravity="center_vertical"
                 >
 

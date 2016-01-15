@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.ui.home.fragments.SearchFragment;
+import com.enthusiast94.edinfit.ui.search.fragments.SearchFragment;
 
 /**
  * Created by manas on 10-01-2016.

@@ -18,6 +18,7 @@ import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
+import com.enthusiast94.edinfit.utils.ServiceView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,7 +147,7 @@ public class SelectServiceFragment extends Fragment {
             if (viewType == HEADING_VIEW_TYPE) {
                 return new HeadingViewHolder(inflater.inflate(R.layout.row_heading, parent, false));
             } else {
-                return new SelectionServiceViewHolder(inflater.inflate(R.layout.row_selection_service,
+                return new ServiceViewHolder(inflater.inflate(R.layout.row_selection_service,
                         parent, false));
             }
         }
@@ -154,7 +155,7 @@ public class SelectServiceFragment extends Fragment {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (getItem(position) instanceof Service) {
-                ((SelectionServiceViewHolder) holder).bindItem((Service) getItem(position));
+                ((ServiceViewHolder) holder).bindItem((Service) getItem(position));
             }
         }
 
@@ -192,35 +193,29 @@ public class SelectServiceFragment extends Fragment {
             notifyDataSetChanged();
         }
 
-        private class SelectionServiceViewHolder extends RecyclerView.ViewHolder
+        private class ServiceViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
-            private TextView serviceNameTextView;
-            private TextView destinationTextView;
             private Service service;
+            private ServiceView serviceView;
 
-            public SelectionServiceViewHolder(View itemView) {
+            public ServiceViewHolder(View itemView) {
                 super(itemView);
 
-                // find views
-                serviceNameTextView = (TextView) itemView.findViewById(R.id.service_name_textview);
-                destinationTextView = (TextView) itemView.findViewById(R.id.destination_textview);
+                serviceView = (ServiceView) itemView.findViewById(R.id.service_view);
 
-                // bind event listeners
-                itemView.setOnClickListener(this);
-                itemView.setOnLongClickListener(this);
+                serviceView.setOnClickListener(this);
             }
 
             public void bindItem(Service service) {
                 this.service = service;
 
-                serviceNameTextView.setText(service.getName());
-                destinationTextView.setText(service.getDescription());
+                serviceView.bindItem(service);
 
                 if (getAdapterPosition() - 1 == currentlySelectedServiceIndex) {
                     itemView.setBackgroundResource(R.color.green_selection);
                 } else {
-                    itemView.setBackgroundResource(android.R.color.transparent);
+                    itemView.setBackgroundResource(android.R.color.white);
                 }
             }
 

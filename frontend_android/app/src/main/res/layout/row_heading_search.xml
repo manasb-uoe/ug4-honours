@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sample Heading"
-            android:textColor="@color/accent"
+            android:textColor="@color/primary_dark"
             style="@style/Base.TextAppearance.AppCompat.Body2"
             />
 
@@ -33,6 +33,8 @@
             android:layout_gravity="center_vertical"
             android:gravity="right"
             android:text="2 results"
+            android:textAllCaps="true"
+            android:textSize="@dimen/font_small"
             />
 
     </LinearLayout>
@@ -40,7 +42,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_divider_height"
-        android:background="@color/accent"
+        android:background="@color/primary_dark"
         android:layout_marginTop="@dimen/spacing_smaller"
         />
 

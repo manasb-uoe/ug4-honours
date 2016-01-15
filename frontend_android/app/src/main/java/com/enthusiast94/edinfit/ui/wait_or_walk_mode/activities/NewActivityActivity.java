@@ -1,9 +1,11 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -62,6 +64,11 @@ public class NewActivityActivity extends AppCompatActivity {
             appBar.setHomeButtonEnabled(true);
             appBar.setDisplayHomeAsUpEnabled(true);
             appBar.setTitle(R.string.label_wait_or_walk_activity);
+        }
+
+        // change status bar color to complement toolbar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.green_700));
         }
 
         // setup tabs
