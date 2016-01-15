@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.WaitOrWalkService;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent;

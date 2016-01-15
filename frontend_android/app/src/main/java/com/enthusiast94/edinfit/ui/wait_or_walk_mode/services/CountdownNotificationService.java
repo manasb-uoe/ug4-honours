@@ -14,8 +14,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Activity;
-import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownFinishedOrCancelledEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent;
@@ -25,7 +25,6 @@ import com.enthusiast94.edinfit.utils.LocationProvider;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.greenrobot.event.EventBus;
 

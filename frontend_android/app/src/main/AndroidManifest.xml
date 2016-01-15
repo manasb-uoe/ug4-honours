@@ -96,12 +96,12 @@
             />
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.enthusiast94.edinfit.models_2.User,
-             com.enthusiast94.edinfit.models_2.Stop,
-             com.enthusiast94.edinfit.models_2.Departure,
-             com.enthusiast94.edinfit.models_2.FavouriteStop,
-             com.enthusiast94.edinfit.models_2.Service,
-             com.enthusiast94.edinfit.models_2.Activity
+            android:value="com.enthusiast94.edinfit.models.User,
+             com.enthusiast94.edinfit.models.Stop,
+             com.enthusiast94.edinfit.models.Departure,
+             com.enthusiast94.edinfit.models.FavouriteStop,
+             com.enthusiast94.edinfit.models.Service,
+             com.enthusiast94.edinfit.models.Activity
              "
             />
 

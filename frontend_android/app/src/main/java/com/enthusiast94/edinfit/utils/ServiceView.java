@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Service;
+import com.enthusiast94.edinfit.models.Service;
 
 /**
  * Created by manas on 04-01-2016.

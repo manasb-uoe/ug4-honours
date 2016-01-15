@@ -15,9 +15,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Service;
-import com.enthusiast94.edinfit.models_2.Service.Route;
-import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models.Service;
+import com.enthusiast94.edinfit.models.Service.Route;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments.SelectDestinationStopFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments.SelectOriginStopFragment;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments.SelectServiceFragment;

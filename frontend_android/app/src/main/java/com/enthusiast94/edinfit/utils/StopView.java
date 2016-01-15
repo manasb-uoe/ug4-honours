@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models.Stop;
 import com.google.android.gms.maps.model.LatLng;
 
 /**

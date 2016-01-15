@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +14,12 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.User;
+import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.OnAuthenticatedEvent;
 import com.enthusiast94.edinfit.ui.login_and_signup.events.ShowSignupFragmentEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -34,7 +32,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import de.greenrobot.event.EventBus;
 

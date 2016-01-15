@@ -2,7 +2,7 @@ package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
 
-import com.enthusiast94.edinfit.models_2.Directions;
+import com.enthusiast94.edinfit.models.Directions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 

@@ -1,6 +1,6 @@
 package com.enthusiast94.edinfit.ui.login_and_signup.events;
 
-import com.enthusiast94.edinfit.models_2.User;
+import com.enthusiast94.edinfit.models.User;
 
 /**
  * Created by manas on 26-09-2015.

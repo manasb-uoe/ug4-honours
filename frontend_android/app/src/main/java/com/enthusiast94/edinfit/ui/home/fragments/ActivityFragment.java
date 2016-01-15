@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Activity;
+import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.Triplet;

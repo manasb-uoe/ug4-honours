@@ -2,7 +2,7 @@ package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
 
-import com.enthusiast94.edinfit.models_2.Service;
+import com.enthusiast94.edinfit.models.Service;
 
 import org.json.JSONArray;
 import org.json.JSONException;

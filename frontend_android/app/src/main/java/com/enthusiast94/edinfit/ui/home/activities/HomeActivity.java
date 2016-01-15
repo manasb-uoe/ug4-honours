@@ -23,8 +23,8 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Service;
-import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models.Service;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;

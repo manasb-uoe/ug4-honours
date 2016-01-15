@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Service;
+import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.ui.service_info.activities.ServiceActivity;
 
 import java.util.ArrayList;

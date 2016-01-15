@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.stop_info.activities.StopActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;

@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Stop;
-import com.enthusiast94.edinfit.models_2.StopToStopJourney;
+import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models.StopToStopJourney;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;

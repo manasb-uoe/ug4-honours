@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Activity;
+import com.enthusiast94.edinfit.models.Activity;
 
 import java.util.ArrayList;
 import java.util.List;

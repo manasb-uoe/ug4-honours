@@ -5,10 +5,10 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Departure;
-import com.enthusiast94.edinfit.models_2.FavouriteStop;
-import com.enthusiast94.edinfit.models_2.Stop;
-import com.enthusiast94.edinfit.models_2.StopToStopJourney;
+import com.enthusiast94.edinfit.models.Departure;
+import com.enthusiast94.edinfit.models.FavouriteStop;
+import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models.StopToStopJourney;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import org.json.JSONArray;
@@ -17,9 +17,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Request;
 import okhttp3.Response;

@@ -2,7 +2,7 @@ package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
 
-import com.enthusiast94.edinfit.models_2.LiveBus;
+import com.enthusiast94.edinfit.models.LiveBus;
 import com.google.gson.Gson;
 
 import org.json.JSONException;

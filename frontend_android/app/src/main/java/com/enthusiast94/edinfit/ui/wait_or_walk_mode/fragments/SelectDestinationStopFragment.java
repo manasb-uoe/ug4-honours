@@ -19,9 +19,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Service;
-import com.enthusiast94.edinfit.models_2.Service.Route;
-import com.enthusiast94.edinfit.models_2.Stop;
+import com.enthusiast94.edinfit.models.Service;
+import com.enthusiast94.edinfit.models.Service.Route;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;

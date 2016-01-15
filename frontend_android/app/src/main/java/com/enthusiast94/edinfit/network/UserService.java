@@ -3,7 +3,7 @@ package com.enthusiast94.edinfit.network;
 import android.content.Context;
 import android.util.Base64;
 
-import com.enthusiast94.edinfit.models_2.User;
+import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.utils.Helpers;
 
 import org.json.JSONException;

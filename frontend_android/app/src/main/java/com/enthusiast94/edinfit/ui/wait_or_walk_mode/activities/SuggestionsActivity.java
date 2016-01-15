@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownFinishedOrCancelledEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.ShowWalkingDirectionsFragmentEvent;

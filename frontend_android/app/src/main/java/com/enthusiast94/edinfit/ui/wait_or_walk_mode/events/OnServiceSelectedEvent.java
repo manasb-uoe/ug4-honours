@@ -1,6 +1,6 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.events;
 
-import com.enthusiast94.edinfit.models_2.Service;
+import com.enthusiast94.edinfit.models.Service;
 
 /**
  * Created by manas on 22-10-2015.

@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.models_2;
+package com.enthusiast94.edinfit.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

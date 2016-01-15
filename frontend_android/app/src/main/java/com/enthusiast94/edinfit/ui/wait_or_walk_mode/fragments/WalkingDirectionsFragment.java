@@ -13,8 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models_2.Directions;
-import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.models.Directions;
+import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;

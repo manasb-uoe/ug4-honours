@@ -2,16 +2,11 @@ package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
 
-import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Request;

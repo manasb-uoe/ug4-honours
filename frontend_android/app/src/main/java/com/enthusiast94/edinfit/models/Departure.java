@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.models_2;
+package com.enthusiast94.edinfit.models;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
