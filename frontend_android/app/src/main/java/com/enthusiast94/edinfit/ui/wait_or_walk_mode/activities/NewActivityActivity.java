@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
@@ -113,12 +114,12 @@ public class NewActivityActivity extends AppCompatActivity {
 
                     if (selectedDestinationStop != null && selectedRoute != null) {
                         // start suggestions activity
-//                        Intent startActivityIntent = new Intent(NewActivityActivity.this, SuggestionsActivity.class);
-//                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop);
-//                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_SERVICE, selectedService);
-//                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop);
-//                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ROUTE, selectedRoute);
-//                        startActivity(startActivityIntent);
+                        Intent startActivityIntent = new Intent(NewActivityActivity.this, SuggestionsActivity.class);
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ORIGIN_STOP_ID, selectedOriginStop.get_id());
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_SERVICE_NAME, selectedService.getName());
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_DESTINATION_STOP_ID, selectedDestinationStop.get_id());
+                        startActivityIntent.putExtra(SuggestionsActivity.EXTRA_SELECTED_ROUTE_DESTINATION, selectedRoute.getDestination());
+                        startActivity(startActivityIntent);
                     }
                 }
             }
@@ -159,10 +160,10 @@ public class NewActivityActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(EXTRA_CURRENT_FRAGMENT_TAG, currentFragmentTag);
-//        outState.putParcelable(EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop);
-//        outState.putParcelable(EXTRA_SELECTED_SERVICE, selectedService);
-//        outState.putParcelable(EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop);
-//        outState.putParcelable(EXTRA_SELECTED_ROUTE, selectedRoute);
+        outState.putString(EXTRA_SELECTED_ORIGIN_STOP, selectedOriginStop.get_id());
+        outState.putString(EXTRA_SELECTED_SERVICE, selectedService.getName());
+        outState.putString(EXTRA_SELECTED_DESTINATION_STOP, selectedDestinationStop.get_id());
+        outState.putString(EXTRA_SELECTED_ROUTE, selectedRoute.getDestination());
     }
 
     @Override

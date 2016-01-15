@@ -95,8 +95,6 @@ public class ActivityFragment extends Fragment {
     }
 
     private void loadActivities() {
-        setRefreshIndicatorVisiblity(true);
-
         new AsyncJob.AsyncJobBuilder<List<Activity>>()
                 .doInBackground(new AsyncJob.AsyncAction<List<Activity>>() {
                     @Override
@@ -111,12 +109,12 @@ public class ActivityFragment extends Fragment {
                             return;
                         }
 
+                        setRefreshIndicatorVisiblity(false);
+
                         ActivityFragment.this.activities = activities;
 
                         activityAdapter.notifyActivitiesChanged(activities, selectedTimespan,
                                 selectedStatistic);
-
-                        setRefreshIndicatorVisiblity(false);
                     }
                 }).create().start();
     }

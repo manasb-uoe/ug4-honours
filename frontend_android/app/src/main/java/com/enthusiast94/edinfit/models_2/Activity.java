@@ -6,6 +6,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,10 +34,7 @@ public class Activity extends Model {
         this.type = type.getValue();
         this.start = start;
         this.end = end;
-
-        Gson gson = new Gson();
-        this.points = gson.toJson(points);
-
+        setPoints(points);
         this.distance = distance;
         this.averageSpeed = averageSpeed;
     }
@@ -60,7 +58,7 @@ public class Activity extends Model {
     public List<Point> getPoints() {
         Gson gson = new Gson();
         Point[] pointsArray = gson.fromJson(points, Point[].class);
-        return Arrays.asList(pointsArray);
+        return new ArrayList<>(Arrays.asList(pointsArray));
     }
 
     public double getDistance() {
@@ -93,6 +91,35 @@ public class Activity extends Model {
 
             throw new IllegalArgumentException("No existing Type has value: " + value);
         }
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setStart(long start) {
+        this.start = start;
+    }
+
+    public void setEnd(long end) {
+        this.end = end;
+    }
+
+    public void setPoints(List<Point> points) {
+        Gson gson = new Gson();
+        this.points = gson.toJson(points);
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public void setAverageSpeed(double averageSpeed) {
+        this.averageSpeed = averageSpeed;
     }
 
     public static class Point {
