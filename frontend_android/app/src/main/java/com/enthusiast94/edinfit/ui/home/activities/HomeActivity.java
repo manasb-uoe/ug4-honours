@@ -90,6 +90,7 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.drawer_close, R.string.drawer_open);
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
 
         // handle navigation drawer item clicks to show appropriate fragments
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
