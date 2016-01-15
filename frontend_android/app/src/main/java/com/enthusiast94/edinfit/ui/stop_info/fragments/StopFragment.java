@@ -12,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,11 +23,9 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.activeandroid.query.Select;
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Directions;
-import com.enthusiast94.edinfit.models.Point;
+import com.enthusiast94.edinfit.models_2.Directions;
 import com.enthusiast94.edinfit.models_2.Departure;
 import com.enthusiast94.edinfit.models_2.FavouriteStop;
 import com.enthusiast94.edinfit.models_2.Stop;
@@ -439,7 +436,7 @@ public class StopFragment extends Fragment implements LocationProvider.LastKnowL
                         Directions directions = response.getBody();
                         PolylineOptions polylineOptions = new PolylineOptions();
 
-                        for (Point point : directions.getOverviewPoints()) {
+                        for (Directions.Point point : directions.getOverviewPoints()) {
                             polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
                         }
 

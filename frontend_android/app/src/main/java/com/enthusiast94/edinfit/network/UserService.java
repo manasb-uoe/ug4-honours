@@ -70,7 +70,7 @@ public class UserService {
                 .add("id_token", idToken)
                 .build();
 
-        return createOrAuthenticateUser("authenticate/facebook", formBody);
+        return createOrAuthenticateUser("authenticate/google", formBody);
     }
 
     /**

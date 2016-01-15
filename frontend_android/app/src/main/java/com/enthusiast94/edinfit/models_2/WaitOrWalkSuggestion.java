@@ -4,20 +4,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
-import com.enthusiast94.edinfit.models.*;
-import com.enthusiast94.edinfit.models.Departure;
-
 /**
  * Created by manas on 14-01-2016.
  */
 public class WaitOrWalkSuggestion implements Parcelable {
 
     private WaitOrWalkSuggestionType type;
-    private com.enthusiast94.edinfit.models.Stop stop;
-    private com.enthusiast94.edinfit.models.Departure upcomingDeparture;
+    private Stop stop;
+    private Departure upcomingDeparture;
     private Directions walkingDirections;
 
-    public WaitOrWalkSuggestion(WaitOrWalkSuggestionType type, com.enthusiast94.edinfit.models.Stop stop, com.enthusiast94.edinfit.models.Departure upcomingDeparture,
+    public WaitOrWalkSuggestion(WaitOrWalkSuggestionType type, Stop stop, Departure upcomingDeparture,
                                 Directions walkingDirections) {
         this.type = type;
         this.stop = stop;
@@ -25,7 +22,7 @@ public class WaitOrWalkSuggestion implements Parcelable {
         this.walkingDirections = walkingDirections;
     }
 
-    public com.enthusiast94.edinfit.models.Departure getUpcomingDeparture() {
+    public Departure getUpcomingDeparture() {
         return upcomingDeparture;
     }
 
@@ -33,7 +30,7 @@ public class WaitOrWalkSuggestion implements Parcelable {
         return walkingDirections;
     }
 
-    public com.enthusiast94.edinfit.models.Stop getStop() {
+    public Stop getStop() {
         return stop;
     }
 
@@ -41,7 +38,7 @@ public class WaitOrWalkSuggestion implements Parcelable {
         return type;
     }
 
-    public void setStop(com.enthusiast94.edinfit.models.Stop stop) {
+    public void setStop(Stop stop) {
         this.stop = stop;
     }
 
@@ -55,8 +52,8 @@ public class WaitOrWalkSuggestion implements Parcelable {
 
     public WaitOrWalkSuggestion(Parcel in) {
         type = WaitOrWalkSuggestionType.getTypeByValue(in.readInt());
-        stop = in.readParcelable(com.enthusiast94.edinfit.models.Stop.class.getClassLoader());
-        upcomingDeparture = in.readParcelable(Departure.class.getClassLoader());
+        stop = Stop.findById(in.readString());
+        upcomingDeparture = Departure.findById(in.readLong());
         walkingDirections = in.readParcelable(Directions.class.getClassLoader());
     }
 
@@ -80,8 +77,8 @@ public class WaitOrWalkSuggestion implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(type.getValue());
-        dest.writeParcelable(stop, flags);
-        dest.writeParcelable(upcomingDeparture, flags);
+        dest.writeString(stop.get_id());
+        dest.writeLong(upcomingDeparture.getId());
         dest.writeParcelable(walkingDirections, flags);
     }
 

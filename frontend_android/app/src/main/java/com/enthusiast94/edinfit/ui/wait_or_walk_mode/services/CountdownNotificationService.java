@@ -14,7 +14,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models_2.Activity;
 import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.SuggestionsActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownFinishedOrCancelledEvent;
@@ -22,6 +22,7 @@ import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnCountdownTickEvent
 import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -234,13 +235,13 @@ public class CountdownNotificationService extends android.app.Service {
                 return;
             }
 
-            List<Double> stopLocation = selectedWaitOrWalkSuggestion.getStop().getLocation();
+            LatLng stopLatLng = selectedWaitOrWalkSuggestion.getStop().getPosition();
 
             Log.d(TAG, "distance to dest: " + Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
-                    stopLocation.get(1), stopLocation.get(0)));
+                    stopLatLng.latitude, stopLatLng.longitude));
 
             if (Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
-                    stopLocation.get(1), stopLocation.get(0)) <= 20 /* 20 meters */) {
+                    stopLatLng.latitude, stopLatLng.latitude) <= 20 /* 20 meters */) {
 
                 showSuccessNotification();
                 stopSelf();

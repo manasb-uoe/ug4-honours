@@ -1,11 +1,9 @@
 package com.enthusiast94.edinfit.models_2;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 
 /**
  * Created by manas on 09-01-2016.
@@ -57,5 +55,16 @@ public class Departure extends Model {
 
     public Stop getDestinationStop() {
         return destinationStop;
+    }
+
+    /**
+     * Statics
+     */
+
+    public static Departure findById(long id) {
+        return new Select()
+                .from(Departure.class)
+                .where("Id = ?", id)
+                .executeSingle();
     }
 }

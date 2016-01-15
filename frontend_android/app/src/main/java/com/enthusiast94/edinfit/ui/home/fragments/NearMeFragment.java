@@ -392,7 +392,6 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new StopViewHolder(inflater.inflate(R.layout.row_nearby_stop, parent, false));
         }
-
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             ((StopViewHolder) holder).bindItem(nearbyStops.get(position));

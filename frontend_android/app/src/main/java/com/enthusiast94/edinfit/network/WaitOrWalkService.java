@@ -66,15 +66,10 @@ public class WaitOrWalkService {
                 return response;
             }
 
-            Gson gson = new Gson();
-            WaitOrWalkSuggestion[] waitOrWalkSuggestionsArray = gson.fromJson(
-                    new JSONObject(okHttpResponse.body().string()).getJSONArray("data").toString(), WaitOrWalkSuggestion[].class
-            );
-
-            response.setBody(new ArrayList<>(Arrays.asList(waitOrWalkSuggestionsArray)));
+            response.setBody(new ArrayList<WaitOrWalkSuggestion>());
             return response;
 
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             response.setError(e.getMessage());
             return response;

@@ -13,8 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
-import com.enthusiast94.edinfit.models.Directions;
-import com.enthusiast94.edinfit.models.Point;
+import com.enthusiast94.edinfit.models_2.Directions;
 import com.enthusiast94.edinfit.models_2.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -177,10 +176,7 @@ public class WalkingDirectionsFragment extends Fragment {
         map.clear();
 
         // add stop marker with info window containing stop name
-        LatLng stopLatLng = new LatLng(
-                waitOrWalkSuggestion.getStop().getLocation().get(1),
-                waitOrWalkSuggestion.getStop().getLocation().get(0)
-        );
+        LatLng stopLatLng = waitOrWalkSuggestion.getStop().getPosition();
 
         Marker marker= map.addMarker(new MarkerOptions()
                 .position(stopLatLng)
@@ -197,7 +193,7 @@ public class WalkingDirectionsFragment extends Fragment {
         if (directions != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
 
-            for (Point point : directions.getOverviewPoints()) {
+            for (Directions.Point point : directions.getOverviewPoints()) {
                 polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
             }
 

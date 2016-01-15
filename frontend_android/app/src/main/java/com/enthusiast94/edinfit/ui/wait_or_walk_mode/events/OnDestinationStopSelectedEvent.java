@@ -1,7 +1,7 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.events;
 
-import com.enthusiast94.edinfit.models.Route;
-import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models_2.Service;
+import com.enthusiast94.edinfit.models_2.Stop;
 
 /**
  * Created by manas on 25-10-2015.
@@ -9,9 +9,9 @@ import com.enthusiast94.edinfit.models.Stop;
 public class OnDestinationStopSelectedEvent {
 
     private Stop destinationStop;
-    private Route route;
+    private Service.Route route;
 
-    public OnDestinationStopSelectedEvent(Stop originStop, Route route) {
+    public OnDestinationStopSelectedEvent(Stop originStop, Service.Route route) {
         this.destinationStop = originStop;
         this.route = route;
     }
@@ -20,7 +20,7 @@ public class OnDestinationStopSelectedEvent {
         return destinationStop;
     }
 
-    public Route getRoute() {
+    public Service.Route getRoute() {
         return route;
     }
 }

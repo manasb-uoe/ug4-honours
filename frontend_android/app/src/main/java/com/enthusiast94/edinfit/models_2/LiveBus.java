@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.models;
+package com.enthusiast94.edinfit.models_2;
 
 import java.util.List;
 
