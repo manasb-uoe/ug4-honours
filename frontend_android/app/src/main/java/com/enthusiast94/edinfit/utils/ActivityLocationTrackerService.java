@@ -55,8 +55,6 @@ public class ActivityLocationTrackerService extends Service
         currentActivity.setEnd(System.currentTimeMillis());
         currentActivity.setPoints(points);
 
-        Log.d(TAG, "onDestroy: " + currentActivity.getPoints().size());
-
         if ((currentActivity.getEnd() - currentActivity.getStart()) > MINIMUM_ACTIVITY_DURATION &&
                 currentActivity.getPoints().size() > 1) {
 

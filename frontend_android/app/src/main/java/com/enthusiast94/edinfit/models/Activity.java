@@ -58,6 +58,11 @@ public class Activity extends Model {
     public List<Point> getPoints() {
         Gson gson = new Gson();
         Point[] pointsArray = gson.fromJson(points, Point[].class);
+
+        if (pointsArray == null) {
+            return new ArrayList<>();
+        }
+
         return new ArrayList<>(Arrays.asList(pointsArray));
     }
 

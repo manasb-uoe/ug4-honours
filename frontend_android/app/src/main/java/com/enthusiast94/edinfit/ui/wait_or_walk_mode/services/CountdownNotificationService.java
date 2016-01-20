@@ -240,7 +240,7 @@ public class CountdownNotificationService extends android.app.Service {
                     stopLatLng.latitude, stopLatLng.longitude));
 
             if (Helpers.getDistanceBetweenPoints(location.getLatitude(), location.getLongitude(),
-                    stopLatLng.latitude, stopLatLng.latitude) <= 20 /* 20 meters */) {
+                    stopLatLng.latitude, stopLatLng.longitude) <= 20 /* 20 meters */) {
 
                 showSuccessNotification();
                 stopSelf();
