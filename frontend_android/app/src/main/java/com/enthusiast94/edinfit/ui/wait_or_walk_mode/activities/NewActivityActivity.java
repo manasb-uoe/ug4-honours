@@ -9,11 +9,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.enthusiast94.edinfit.R;
@@ -37,8 +35,7 @@ public class NewActivityActivity extends AppCompatActivity {
     private static final String EXTRA_SELECTED_ROUTE = "selectedRoute";
 
     private Toolbar toolbar;
-    private Button nextButton;
-    private Button previousButton;
+    private View nextButton;
     private TabLayout tabLayout;
 
     private String currentFragmentTag;
@@ -54,8 +51,7 @@ public class NewActivityActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
-        nextButton = (Button) findViewById(R.id.next_button);
-        previousButton = (Button) findViewById(R.id.previous_button);
+        nextButton = toolbar.findViewById(R.id.next_button);
 
         // setup app bar
         setSupportActionBar(toolbar);
@@ -63,7 +59,7 @@ public class NewActivityActivity extends AppCompatActivity {
         if (appBar != null) {
             appBar.setHomeButtonEnabled(true);
             appBar.setDisplayHomeAsUpEnabled(true);
-            appBar.setTitle(R.string.label_wait_or_walk_activity);
+            appBar.setTitle(R.string.action_wait_or_walk);
         }
 
         // change status bar color to complement toolbar
@@ -132,14 +128,6 @@ public class NewActivityActivity extends AppCompatActivity {
             }
         });
 
-        previousButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                removeFragment(currentFragmentTag);
-            }
-        });
-
         if (savedInstanceState != null) {
             selectedOriginStop = savedInstanceState.getParcelable(EXTRA_SELECTED_ORIGIN_STOP);
             selectedService = savedInstanceState.getParcelable(EXTRA_SELECTED_SERVICE);
@@ -186,9 +174,7 @@ public class NewActivityActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
+        if (!removeFragment(currentFragmentTag)) {
             super.onBackPressed();
         }
     }
@@ -223,41 +209,42 @@ public class NewActivityActivity extends AppCompatActivity {
         updateUi(tag);
     }
 
-    private void removeFragment(String tag) {
-        if (getSupportFragmentManager().findFragmentByTag(tag) != null) {
-            Log.d(TAG, "Removing: " + getSupportFragmentManager().findFragmentByTag(tag).getClass().getSimpleName());
-            getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
-                    .remove(getSupportFragmentManager().findFragmentByTag(tag))
-                    .commit();
-        }
+    // returns true if fragment corresponding to provided tag was successfully removed, else
+    // returns false
+    private boolean removeFragment(String tag) {
+        if (tag.equals(SelectOriginStopFragment.TAG)) {
+            return false;
 
-        if (tag.equals(SelectServiceFragment.TAG)) {
-            currentFragmentTag = SelectOriginStopFragment.TAG;
-            updateUi(currentFragmentTag);
-        } else if (tag.equals(SelectDestinationStopFragment.TAG)) {
-            currentFragmentTag = SelectServiceFragment.TAG;
-            updateUi(currentFragmentTag);
+        } else {
+            if (getSupportFragmentManager().findFragmentByTag(tag) != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
+                        .remove(getSupportFragmentManager().findFragmentByTag(tag))
+                        .commit();
+            }
+
+            if (tag.equals(SelectServiceFragment.TAG)) {
+                currentFragmentTag = SelectOriginStopFragment.TAG;
+                updateUi(currentFragmentTag);
+
+            } else if (tag.equals(SelectDestinationStopFragment.TAG)) {
+                currentFragmentTag = SelectServiceFragment.TAG;
+                updateUi(currentFragmentTag);
+            }
+
+            return true;
         }
     }
 
+
     private void updateUi(String tag) {
         if (tag.equals(SelectOriginStopFragment.TAG)) {
-            previousButton.setEnabled(false);
-            nextButton.setEnabled(true);
-
             tabLayout.getTabAt(0).select();
 
         } else if (tag.equals(SelectServiceFragment.TAG)) {
-            previousButton.setEnabled(true);
-            nextButton.setEnabled(true);
-
             tabLayout.getTabAt(1).select();
 
         } else {
-            previousButton.setEnabled(true);
-            nextButton.setEnabled(true);
-
             tabLayout.getTabAt(2).select();
         }
     }

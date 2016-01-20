@@ -2,6 +2,7 @@ package com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -92,6 +93,12 @@ public class SuggestionsActivity extends AppCompatActivity {
             appBar.setDisplayHomeAsUpEnabled(true);
             appBar.setTitle(R.string.title_activity_wait_or_walk_result);
         }
+
+        // change status bar color to complement toolbar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.green_700));
+        }
+
 
         /**
          * Set event listeners
@@ -210,7 +217,7 @@ public class SuggestionsActivity extends AppCompatActivity {
         } else {
             actionStop.setClickable(false);
             actionStop.setForeground(
-                    new ColorDrawable(ContextCompat.getColor(this, R.color.primary_opaque_40)));
+                    new ColorDrawable(ContextCompat.getColor(this, R.color.green_500_opaque_40)));
         }
     }
 }

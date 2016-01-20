@@ -16,7 +16,7 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary"
+            android:background="@color/green_500"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
             >
@@ -29,7 +29,7 @@
                 android:clickable="false"
                 android:layout_gravity="right"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:foreground="@color/primary_opaque_40"
+                android:foreground="@color/green_500_opaque_40"
                 >
 
                 <LinearLayout
@@ -65,8 +65,9 @@
             android:id="@+id/tablayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"
-            app:tabIndicatorColor="@android:color/white"
+            android:background="@android:color/white"
+            app:tabIndicatorColor="@color/green_500"
+            app:tabSelectedTextColor="@color/green_500"
             />
 
     </android.support.design.widget.AppBarLayout>
