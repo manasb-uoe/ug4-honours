@@ -37,4 +37,6 @@
     <dimen name="route_indicator_width">4dp</dimen>
     <dimen name="app_bar_icon_width_with_text">28dp</dimen>
     <dimen name="drop_shadow_height">4dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+    <dimen name="card_corner_radius">4dp</dimen>
 </resources>

@@ -75,8 +75,8 @@
                         android:src="@drawable/ic_directions_white_24dp"
                         app:fab_size="mini"
                         app:fab_label="@string/action_get_to_somewhere"
-                        app:fab_colorNormal="@color/accent"
-                        app:fab_colorPressed="@color/accent"
+                        app:fab_colorNormal="@color/blue_500"
+                        app:fab_colorPressed="@color/blue_500"
                         />
 
                 </com.github.clans.fab.FloatingActionMenu>

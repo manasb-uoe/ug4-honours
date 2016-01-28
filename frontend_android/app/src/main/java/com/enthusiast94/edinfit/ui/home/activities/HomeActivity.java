@@ -37,6 +37,7 @@ import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
+import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyPlannerActivity;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.search.activities.SearchActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
@@ -139,7 +140,17 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO
+                final Intent startActivityIntent =
+                        new Intent(HomeActivity.this, JourneyPlannerActivity.class);
+
+                fabMenu.close(true);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(startActivityIntent);
+                    }
+                }, 300);
             }
         });
 

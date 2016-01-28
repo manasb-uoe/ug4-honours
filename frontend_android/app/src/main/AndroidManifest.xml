@@ -55,6 +55,11 @@
         <activity
             android:name=".ui.service_info.activities.ServiceTimetableActivity" >
         </activity>
+        <activity
+            android:name=".ui.journey_planner.activities.JourneyPlannerActivity"
+            android:windowSoftInputMode="adjustResize"
+            >
+        </activity>
 
         <!-- FacebookActivity for Login -->
         <activity
