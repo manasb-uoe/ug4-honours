@@ -161,7 +161,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/time_textview"
+                android:id="@+id/date_and_time_textview"
                 android:text="Departs at: Today, 15:56"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
