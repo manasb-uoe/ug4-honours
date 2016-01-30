@@ -1,7 +1,6 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.ui.journey_planner.enums.TimeMode;
@@ -65,11 +64,8 @@ public class JourneyPlannerService {
 
         Request request = baseService.createTfeGetRequest("directions/?start=" + startLatLng.latitude +
                 "," + startLatLng.longitude + "&finish=" + finishLatLng.latitude + "," +
-        finishLatLng.longitude + "&date=" + time + "&time_mode=" + timeModeText);
-        BaseService.Response<List<Journey>> response = new BaseService.Response<>();
-        Log.d(TAG, "directions/?start=" + startLatLng.latitude +
-                "," + startLatLng.longitude + "&finish=" + finishLatLng.latitude + "," +
                 finishLatLng.longitude + "&date=" + time + "&time_mode=" + timeModeText);
+        BaseService.Response<List<Journey>> response = new BaseService.Response<>();
 
         try {
             Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
@@ -86,6 +82,7 @@ public class JourneyPlannerService {
             for (int i=0; i<journeysJsonArray.length(); i++) {
                 JSONObject journeyJson = journeysJsonArray.getJSONObject(i);
                 JSONArray legsJsonArray = journeyJson.getJSONArray("legs");
+
                 List<Journey.Leg> legs = new ArrayList<>();
 
                 for (int j=0; j<legsJsonArray.length(); j++) {
@@ -118,9 +115,13 @@ public class JourneyPlannerService {
                             stopsOnRoute.add(stopsOnRouteJsonArray.getString(k));
                         }
 
-                        legs.add(new Journey.BusLeg(startPoint, finishPoint,
+                        legs.add(new Journey.BusLeg(
+                                startPoint,
+                                finishPoint,
                                 serviceJson.getString("name"),
-                                serviceJson.getString("destination"), stopsOnRoute));
+                                serviceJson.getString("destination"),
+                                stopsOnRoute,
+                                serviceJson.getString("polyline")));
                     } else {
                         break;
                     }

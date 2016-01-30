@@ -41,4 +41,5 @@ dependencies {
     compile 'com.cocosw:bottomsheet:1.+@aar'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.arasthel:asyncjob-library:1.0.3'
+    compile 'com.google.maps.android:android-maps-utils:0.4+'
 }
