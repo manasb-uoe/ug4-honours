@@ -60,6 +60,10 @@
             android:windowSoftInputMode="adjustResize"
             >
         </activity>
+        <activity
+            android:name=".ui.journey_planner.activities.JourneyDetailsActivity"
+            >
+        </activity>
 
         <!-- FacebookActivity for Login -->
         <activity

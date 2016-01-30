@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_normal"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
+    >
+
+    <TextView
+        android:id="@+id/start_time_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12:56"
+        style="@style/Base.TextAppearance.AppCompat.Body1"
+        android:layout_alignParentLeft="true"
+        android:textSize="@dimen/font_normal_large"
+        />
+
+    <TextView
+        android:id="@+id/hyphen_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="—"
+        android:layout_toRightOf="@id/start_time_textview"
+        android:layout_marginLeft="@dimen/spacing_super_tiny"
+        android:layout_marginRight="@dimen/spacing_super_tiny"
+        style="@style/Base.TextAppearance.AppCompat.Body1"
+        android:textSize="@dimen/font_normal_large"
+        />
+
+    <TextView
+        android:id="@+id/finish_time_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="13:10"
+        style="@style/Base.TextAppearance.AppCompat.Body1"
+        android:layout_toRightOf="@id/hyphen_view"
+        android:textSize="@dimen/font_normal_large"
+        />
+
+    <TextView
+        android:id="@+id/duration_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="14 min"
+        style="@style/Base.TextAppearance.AppCompat.Body1"
+        android:textSize="@dimen/font_normal_large"
+        />
+
+    <LinearLayout
+        android:id="@+id/summary_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/start_time_textview"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:gravity="center_vertical"
+        >
+
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="20dp"-->
+            <!--android:src="@drawable/ic_directions_walk_black_24dp"-->
+            <!--/>-->
+
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/ic_keyboard_arrow_right_black_24dp"-->
+            <!--/>-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="12"-->
+            <!--android:textSize="@dimen/font_normal_large"-->
+            <!--android:background="@drawable/service_name_background"-->
+            <!--style="@style/Base.TextAppearance.AppCompat.Body2"-->
+            <!--/>-->
+
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/ic_keyboard_arrow_right_black_24dp"-->
+            <!--/>-->
+
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="20dp"-->
+            <!--android:src="@drawable/ic_directions_walk_black_24dp"-->
+            <!--/>-->
+
+    </LinearLayout>
+
+</RelativeLayout>
