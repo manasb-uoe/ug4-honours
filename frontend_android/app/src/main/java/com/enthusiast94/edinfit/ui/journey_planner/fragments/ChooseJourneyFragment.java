@@ -1,11 +1,11 @@
 package com.enthusiast94.edinfit.ui.journey_planner.fragments;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.TypedValue;
@@ -20,7 +20,6 @@ import android.widget.TextView;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.utils.Helpers;
-import com.enthusiast94.edinfit.utils.LinearLayoutManager;
 import com.enthusiast94.edinfit.utils.SimpleDividerItemDecoration;
 
 import java.text.SimpleDateFormat;
