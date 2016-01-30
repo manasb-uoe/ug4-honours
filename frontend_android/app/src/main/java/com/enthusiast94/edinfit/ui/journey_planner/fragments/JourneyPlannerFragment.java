@@ -146,6 +146,12 @@ public class JourneyPlannerFragment extends Fragment {
                                             return;
                                         }
 
+                                        List<Journey> journeys = response.getBody();
+
+                                        if (journeys.size() == 0) {
+                                            return;
+                                        }
+
                                         startActivity(JourneyDetailsActivity.getStartActivityIntent(getActivity(),
                                                 (ArrayList<Journey>) response.getBody()));
                                     }
@@ -174,7 +180,9 @@ public class JourneyPlannerFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressDialog.dismiss();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     private void findViews(View view) {
