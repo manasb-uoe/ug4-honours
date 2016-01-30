@@ -149,6 +149,9 @@ public class JourneyPlannerFragment extends Fragment {
                                         List<Journey> journeys = response.getBody();
 
                                         if (journeys.size() == 0) {
+                                            Toast.makeText(getActivity(), getString(R.string.no_journeys_found)
+                                                    , Toast.LENGTH_SHORT)
+                                                    .show();
                                             return;
                                         }
 
