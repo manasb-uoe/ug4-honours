@@ -8,13 +8,13 @@
     >
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
-
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sliding_panel_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
         sothree:umanoDragView="@+id/drag_view"
+        sothree:umanoPanelHeight="?actionBarSize"
         sothree:umanoShadowHeight="4dp"
         >
 

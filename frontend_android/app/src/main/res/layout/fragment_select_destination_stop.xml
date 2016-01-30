@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
+        sothree:umanoPanelHeight="?actionBarSize"
         sothree:umanoDragView="@+id/drag_view"
         sothree:umanoShadowHeight="4dp"
         >

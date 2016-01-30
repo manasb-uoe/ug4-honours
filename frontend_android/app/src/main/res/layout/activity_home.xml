@@ -54,8 +54,7 @@
                     fab:menu_showShadow="true"
                     fab:menu_colorNormal="@color/primary"
                     fab:menu_colorPressed="@color/primary"
-                    fab:menu_backgroundColor="@color/white_opaque_60"
-                    >
+                    app:menu_backgroundColor="@color/white_opaque_80">
 
                     <com.github.clans.fab.FloatingActionButton
                         android:id="@+id/wait_or_walk_fab"
