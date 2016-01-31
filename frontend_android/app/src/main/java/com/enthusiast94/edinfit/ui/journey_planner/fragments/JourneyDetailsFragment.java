@@ -269,7 +269,7 @@ public class JourneyDetailsFragment extends Fragment {
                 durationTextView.setText(Helpers.humanizeDurationInMillisToMinutes(
                         (finishPoint.getTimestamp() - startPoint.getTimestamp()) * 1000));
                 instructionTetView.setText(Html.fromHtml("Walk from <strong> " + startPoint.getName() +
-                        "</strong> to <strong> " + finishPoint.getName() + "</strong>"));
+                        "</strong> to <strong> " + finishPoint.getName() + "</strong>."));
             }
         }
 
@@ -296,7 +296,9 @@ public class JourneyDetailsFragment extends Fragment {
                 durationTextView.setText(Helpers.humanizeDurationInMillisToMinutes(
                         (finishPoint.getTimestamp() - startPoint.getTimestamp()) * 1000));
                 instructionTetView.setText(Html.fromHtml("Board service <strong> " +
-                        busLeg.getServiceName() + "</strong>"));
+                        busLeg.getServiceName() + "</strong>. Stay on bus for <strong>" +
+                busLeg.getStopsOnRoute().size() + " stops</strong> and then leave at <strong>" +
+                finishPoint.getStop().getName() + "</strong>."));
             }
         }
     }
