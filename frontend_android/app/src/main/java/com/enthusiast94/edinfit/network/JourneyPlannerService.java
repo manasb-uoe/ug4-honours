@@ -106,7 +106,7 @@ public class JourneyPlannerService {
                     );
 
                     if (mode.equals("walk")) {
-                        legs.add(new Journey.WalkLeg(startPoint, finishPoint));
+                        legs.add(new Journey.WalkLeg(startPoint, finishPoint, null));
                     } else if (mode.equals("bus")) {
                         JSONObject serviceJson = legJson.getJSONObject("service");
                         JSONArray stopsOnRouteJsonArray = serviceJson.getJSONArray("stops_on_route");
@@ -118,10 +118,10 @@ public class JourneyPlannerService {
                         legs.add(new Journey.BusLeg(
                                 startPoint,
                                 finishPoint,
+                                serviceJson.getString("polyline"),
                                 serviceJson.getString("name"),
                                 serviceJson.getString("destination"),
-                                stopsOnRoute,
-                                serviceJson.getString("polyline")));
+                                stopsOnRoute));
                     } else {
                         break;
                     }

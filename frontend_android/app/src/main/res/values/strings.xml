@@ -162,6 +162,9 @@
     <string name="must_select_destination">You must select a destination</string>
     <string name="choose_an_option">Choose an option</string>
     <string name="no_journeys_found">No journeys found</string>
+    <string name="journey_details">Journey Details</string>
+    <string name="walk_to">Walk to</string>
+    <string name="finish">Finish</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

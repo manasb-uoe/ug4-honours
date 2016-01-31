@@ -10,20 +10,22 @@ import android.view.MenuItem;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Journey;
-import com.enthusiast94.edinfit.ui.journey_planner.fragments.JourneyDetailsFragment;
+import com.enthusiast94.edinfit.ui.journey_planner.fragments.ChooseJourneyFragment;
+
+import java.util.ArrayList;
 
 /**
- * Created by manas on 30-01-2016.
+ * Created by manas on 31-01-2016.
  */
-public class JourneyDetailsActivity extends AppCompatActivity {
+public class ChooseJourneyActivity extends AppCompatActivity {
 
-    private static final String EXTRA_JOURNEY = "journey";
+    private static final String EXTRA_JOURNEYS = "journeys";
 
     private Toolbar toolbar;
 
-    public static Intent getStartActivityIntent(Context context, Journey journey) {
-        Intent intent = new Intent(context, JourneyDetailsActivity.class);
-        intent.putExtra(EXTRA_JOURNEY, journey);
+    public static Intent getStartActivityIntent(Context context, ArrayList<Journey> journeys) {
+        Intent intent = new Intent(context, ChooseJourneyActivity.class);
+        intent.putParcelableArrayListExtra(EXTRA_JOURNEYS, journeys);
 
         return intent;
     }
@@ -31,21 +33,22 @@ public class JourneyDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_journey_details);
+        setContentView(R.layout.activity_choose_journey);
         findViews();
 
         // setup app bar
         setSupportActionBar(toolbar);
         ActionBar appBar = getSupportActionBar();
         appBar.setDisplayHomeAsUpEnabled(true);
-        appBar.setTitle(R.string.journey_details);
+        appBar.setTitle(R.string.choose_an_option);
 
-        Journey journey = getIntent().getParcelableExtra(EXTRA_JOURNEY);
+        Intent intent = getIntent();
+        ArrayList<Journey> journeys = intent.getParcelableArrayListExtra(EXTRA_JOURNEYS);
 
-        if (getSupportFragmentManager().findFragmentByTag(JourneyDetailsFragment.TAG) == null) {
+        if (getSupportFragmentManager().findFragmentByTag(ChooseJourneyFragment.TAG) == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, JourneyDetailsFragment.newInstance(journey),
-                            JourneyDetailsFragment.TAG)
+                    .replace(R.id.fragment_container, ChooseJourneyFragment.newInstance(journeys),
+                            ChooseJourneyFragment.TAG)
                     .commit();
         }
     }

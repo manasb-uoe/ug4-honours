@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sliding_panel_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    sothree:umanoPanelHeight="150dp"
+    sothree:umanoShadowHeight="4dp"
+    sothree:umanoScrollableView="@+id/nearby_stops_recyclerview"
+    sothree:umanoFadeColor="@android:color/transparent"
+    sothree:umanoParallaxOffset="60dp"
+    >
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/journey_legs_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            android:clipToPadding="false"
+            />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

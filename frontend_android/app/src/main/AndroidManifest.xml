@@ -61,6 +61,10 @@
             >
         </activity>
         <activity
+            android:name=".ui.journey_planner.activities.ChooseJourneyActivity"
+            >
+        </activity>
+        <activity
             android:name=".ui.journey_planner.activities.JourneyDetailsActivity"
             >
         </activity>

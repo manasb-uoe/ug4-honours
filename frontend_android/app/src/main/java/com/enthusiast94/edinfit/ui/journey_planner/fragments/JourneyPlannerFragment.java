@@ -26,6 +26,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.JourneyPlannerService;
+import com.enthusiast94.edinfit.ui.journey_planner.activities.ChooseJourneyActivity;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyDetailsActivity;
 import com.enthusiast94.edinfit.ui.journey_planner.enums.TimeMode;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -68,7 +69,6 @@ public class JourneyPlannerFragment extends Fragment {
     private TimeMode timeMode;      // currently selected journey time mode
     private Date date;              // currently selected journey date
     private SimpleDateFormat sdfDay;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -155,7 +155,7 @@ public class JourneyPlannerFragment extends Fragment {
                                             return;
                                         }
 
-                                        startActivity(JourneyDetailsActivity.getStartActivityIntent(getActivity(),
+                                        startActivity(ChooseJourneyActivity.getStartActivityIntent(getActivity(),
                                                 (ArrayList<Journey>) response.getBody()));
                                     }
                                 }).create().start();

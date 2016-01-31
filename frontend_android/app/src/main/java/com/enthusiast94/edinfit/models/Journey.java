@@ -83,10 +83,12 @@ public class Journey implements Parcelable {
 
         private Point startPoint;
         private Point finishPoint;
+        private String polyline;
 
-        public Leg(Point startPoint, Point finishPoint) {
+        public Leg(Point startPoint, Point finishPoint, String polyline) {
             this.startPoint = startPoint;
             this.finishPoint = finishPoint;
+            this.polyline = polyline;
         }
 
         public Point getFinishPoint() {
@@ -97,6 +99,18 @@ public class Journey implements Parcelable {
             return startPoint;
         }
 
+        public List<LatLng> getLatLngs() {
+            if (polyline != null) {
+                return PolyUtil.decode(polyline);
+            }
+
+            return null;
+        }
+
+        public void setPolyline(String polyline) {
+            this.polyline = polyline;
+        }
+
         /**
          * Parcelable implementation
          */
@@ -105,18 +119,20 @@ public class Journey implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(startPoint, flags);
             dest.writeParcelable(finishPoint, flags);
+            dest.writeString(polyline);
         }
 
         protected Leg(Parcel in) {
             startPoint = in.readParcelable(Point.class.getClassLoader());
             finishPoint = in.readParcelable(Point.class.getClassLoader());
+            polyline = in.readString();
         }
     }
 
     public static class WalkLeg extends Leg {
 
-        public WalkLeg(Point startPoint, Point finishPoint) {
-            super(startPoint, finishPoint);
+        public WalkLeg(Point startPoint, Point finishPoint, String polyline) {
+            super(startPoint, finishPoint, polyline);
         }
 
         public static final Parcelable.Creator<WalkLeg> CREATOR = new Parcelable.Creator<WalkLeg>() {
@@ -148,16 +164,14 @@ public class Journey implements Parcelable {
 
         private String serviceName;
         private String destination;
-        private String polyline;
         private List<String> stopsOnRoute;
 
-        public BusLeg(Point startPoint, Point finishPoint, String serviceName, String destination,
-                      List<String> stopsOnRoute, String polyline) {
-            super(startPoint, finishPoint);
+        public BusLeg(Point startPoint, Point finishPoint, String polyline, String serviceName, String destination,
+                      List<String> stopsOnRoute) {
+            super(startPoint, finishPoint, polyline);
             this.serviceName = serviceName;
             this.destination = destination;
             this.stopsOnRoute = stopsOnRoute;
-            this.polyline = polyline;
         }
 
         public String getServiceName() {
@@ -170,10 +184,6 @@ public class Journey implements Parcelable {
 
         public String getDestination() {
             return destination;
-        }
-
-        public List<LatLng> getLatLngs() {
-            return PolyUtil.decode(polyline);
         }
 
         public List<Stop> getStopsOnRoute() {
@@ -205,7 +215,6 @@ public class Journey implements Parcelable {
             super.writeToParcel(dest, flags);
             dest.writeString(serviceName);
             dest.writeString(destination);
-            dest.writeString(polyline);
             dest.writeStringList(stopsOnRoute);
         }
 
@@ -213,7 +222,6 @@ public class Journey implements Parcelable {
             super(in);
             serviceName = in.readString();
             destination = in.readString();
-            polyline = in.readString();
             stopsOnRoute = new ArrayList<>();
             in.readStringList(stopsOnRoute);
         }

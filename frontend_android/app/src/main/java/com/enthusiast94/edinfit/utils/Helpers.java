@@ -159,7 +159,7 @@ public class Helpers {
 
     public static String humanizeDurationInMillisToMinutes(long millis) {
         double minutes = ((millis / (1000.0 * 60.0)));
-        return String.format("%.1f", minutes) + " min";
+        return String.format("%.0f", minutes) + " min";
     }
 
     public static String humanizeLiveDepartureTime(String time) {

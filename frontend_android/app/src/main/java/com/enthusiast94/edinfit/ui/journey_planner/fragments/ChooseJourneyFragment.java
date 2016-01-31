@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.journey_planner.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,11 +17,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.Directions;
 import com.enthusiast94.edinfit.models.Journey;
+import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.DirectionsService;
+import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyDetailsActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.SimpleDividerItemDecoration;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,7 +119,8 @@ public class ChooseJourneyFragment extends Fragment {
             notifyDataSetChanged();
         }
 
-        private class JourneyViewHolder extends RecyclerView.ViewHolder {
+        private class JourneyViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener {
 
             private Journey journey;
             private TextView startTimeTextView;
@@ -122,13 +132,16 @@ public class ChooseJourneyFragment extends Fragment {
             public JourneyViewHolder(View itemView) {
                 super(itemView);
 
+                sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+
                 // find views
                 startTimeTextView = (TextView) itemView.findViewById(R.id.start_time_textview);
                 finishTimeTextView = (TextView) itemView.findViewById(R.id.finish_time_textview);
                 durationTextView = (TextView) itemView.findViewById(R.id.duration_textview);
                 summaryContainer = (LinearLayout) itemView.findViewById(R.id.summary_container);
 
-                sdf = new SimpleDateFormat("HH:mm", Locale.UK);
+                // bind event listeners
+                itemView.setOnClickListener(this);
             }
 
             public void bindItem(Journey journey) {
@@ -183,6 +196,55 @@ public class ChooseJourneyFragment extends Fragment {
                 ImageView arrowImageView = new ImageView(context);
                 arrowImageView.setImageResource(R.drawable.ic_keyboard_arrow_right_black_24dp);
                 return arrowImageView;
+            }
+
+            @Override
+            public void onClick(View v) {
+                final ProgressDialog progressDialog = new ProgressDialog(context);
+                progressDialog.setMessage(context.getString(R.string.label_please_waitt));
+                progressDialog.show();
+
+                // attach polyline to all WalkLegs in selected journey
+                AsyncJob.doInBackground(new AsyncJob.OnBackgroundJob() {
+                    @Override
+                    public void doOnBackground() {
+                        for (Journey.Leg leg : journey.getLegs()) {
+                            if (leg instanceof Journey.WalkLeg) {
+                                final BaseService.Response<Directions> directionsResponse =
+                                        DirectionsService.getInstance().getWalkingDirections(
+                                                leg.getStartPoint().getLatLng(), leg.getFinishPoint().getLatLng()
+                                        );
+                                if (!directionsResponse.isSuccessfull()) {
+                                    AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+                                        @Override
+                                        public void doInUIThread() {
+                                            progressDialog.dismiss();
+                                            Toast.makeText(context, directionsResponse.getError(), Toast.LENGTH_SHORT)
+                                                    .show();
+                                        }
+                                    });
+
+                                    return;
+                                }
+
+                                List<LatLng> latLngs = new ArrayList<>();
+                                for (Directions.Point point : directionsResponse.getBody().getOverviewPoints()) {
+                                    latLngs.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                                }
+
+                                leg.setPolyline(PolyUtil.encode(latLngs));
+                            }
+                        }
+
+                        AsyncJob.doOnMainThread(new AsyncJob.OnMainThreadJob() {
+                            @Override
+                            public void doInUIThread() {
+                                progressDialog.dismiss();
+                                context.startActivity(JourneyDetailsActivity.getStartActivityIntent(context, journey));
+                            }
+                        });
+                    }
+                });
             }
         }
     }

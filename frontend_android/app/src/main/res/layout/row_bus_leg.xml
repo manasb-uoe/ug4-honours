@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/spacing_large"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_normal"
+    >
+
+    <ImageView
+        android:id="@+id/bus_imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:paddingTop="@dimen/spacing_super_tiny"
+        android:src="@drawable/ic_directions_bus_black_24dp"
+        android:paddingRight="@dimen/spacing_normal"
+        android:layout_alignTop="@+id/start_time_textview"
+        android:layout_alignBottom="@id/start_time_textview"
+        android:layout_alignParentLeft="true"
+        />
+
+    <TextView
+        android:id="@+id/start_time_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="15:20"
+        android:layout_toRightOf="@id/bus_imageview"
+        android:textSize="@dimen/font_larger"
+        android:textColor="@color/primary_dark"
+        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="@dimen/spacing_tiny"
+        />
+
+    <TextView
+        android:id="@+id/duration_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill"
+        android:layout_alignParentRight="true"
+        android:text="15 min"
+        android:textSize="@dimen/font_small"
+        android:background="@drawable/leg_duration_background"
+        android:textColor="@color/green_500"
+        />
+
+    <TextView
+        android:id="@+id/instruction_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/start_time_textview"
+        android:text="Board service 15"
+        android:layout_alignStart="@id/start_time_textview"
+        android:layout_alignLeft="@id/start_time_textview"
+        android:layout_toLeftOf="@id/duration_textview"
+        android:layout_marginRight="@dimen/spacing_small"
+        android:layout_marginTop="@dimen/spacing_super_tiny"
+        />
+
+</RelativeLayout>
