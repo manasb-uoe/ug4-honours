@@ -301,7 +301,7 @@ public class ServiceFragment extends Fragment {
         int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
 
         polylineOptions
-                .addAll(route.getPoints())
+                .addAll(route.getLatLngs())
                 .width(polylineWidth)
                 .color(redColor);
 

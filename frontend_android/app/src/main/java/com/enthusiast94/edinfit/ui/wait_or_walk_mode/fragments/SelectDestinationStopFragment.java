@@ -327,7 +327,7 @@ public class SelectDestinationStopFragment extends Fragment {
         int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
 
         polylineOptions
-                .addAll(selectedRoute.getPoints())
+                .addAll(selectedRoute.getLatLngs())
                 .width(polylineWidth)
                 .color(primaryColor);
 

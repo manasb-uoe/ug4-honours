@@ -62,11 +62,11 @@ public class Service extends Model {
                 String destination = routeJson.getString("destination");
 
                 JSONArray pointsJsonArray = routeJson.getJSONArray("points");
-                List<LatLng> points = new ArrayList<>();
+                List<Point> points = new ArrayList<>();
                 for (int j=0; j<pointsJsonArray.length(); j++) {
                     JSONObject pointJson = pointsJsonArray.getJSONObject(j);
-                    points.add(new LatLng(pointJson.getDouble("latitude"),
-                            pointJson.getDouble("longitude")));
+                    points.add(new Point(pointJson.getString("stop_id"),
+                            pointJson.getDouble("latitude"), pointJson.getDouble("longitude")));
                 }
 
                 JSONArray stopsJsonArray = routeJson.getJSONArray("stops");
@@ -90,10 +90,10 @@ public class Service extends Model {
 
         private String destination;
         private List<Stop> stops;
-        private List<LatLng> points;
+        private List<Point> points;
 
         public Route(String destination, List<Stop> stops,
-                     List<LatLng> points) {
+                     List<Point> points) {
             this.destination = destination;
             this.stops = stops;
             this.points = points;
@@ -103,12 +103,42 @@ public class Service extends Model {
             return destination;
         }
 
-        public List<LatLng> getPoints() {
+        public List<Point> getPoints() {
             return points;
         }
 
         public List<Stop> getStops() {
             return stops;
+        }
+
+        // returns a list of LatLngs extracted from the list of Points
+        public List<LatLng> getLatLngs() {
+            List<LatLng> latLngs = new ArrayList<>();
+            for (Point point : points) {
+                latLngs.add(point.getLatLng());
+            }
+            return latLngs;
+        }
+    }
+
+    public static class Point {
+
+        private String stopId;
+        private double latitude;
+        private double longitude;
+
+        public Point(String stopId, double latitude, double longitude) {
+            this.stopId = stopId;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public String getStopId() {
+            return stopId;
+        }
+
+        public LatLng getLatLng() {
+            return new LatLng(latitude, longitude);
         }
     }
 

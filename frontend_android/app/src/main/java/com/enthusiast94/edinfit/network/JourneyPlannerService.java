@@ -3,8 +3,11 @@ package com.enthusiast94.edinfit.network;
 import android.content.Context;
 
 import com.enthusiast94.edinfit.models.Journey;
+import com.enthusiast94.edinfit.models.Service;
+import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.ui.journey_planner.enums.TimeMode;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -115,10 +118,35 @@ public class JourneyPlannerService {
                             stopsOnRoute.add(stopsOnRouteJsonArray.getString(k));
                         }
 
+                        // Find polyline from bus leg start to finish using route info stored in db
+                        // because the polyline provided by TFE API is incomplete.
+                        Stop startStop = startPoint.getStop();
+                        Stop finishStop = finishPoint.getStop();
+                        List<LatLng> polylineLatLngs = new ArrayList<>();
+                        Service service = Service.findByName(serviceJson.getString("name"));
+                        for (Service.Route route : service.getRoutes()) {
+                            if (route.getDestination().equals(serviceJson.getString("destination"))) {
+                                boolean shouldAdd = false;
+                                for (Service.Point point : route.getPoints()) {
+                                    if (point.getStopId().equals(startStop.get_id())) {
+                                        shouldAdd = true;
+                                    }
+
+                                    if (shouldAdd) {
+                                        polylineLatLngs.add(point.getLatLng());
+                                    }
+
+                                    if (point.getStopId().equals(finishStop.get_id())) {
+                                        shouldAdd = false;
+                                    }
+                                }
+                            }
+                        }
+
                         legs.add(new Journey.BusLeg(
                                 startPoint,
                                 finishPoint,
-                                serviceJson.getString("polyline"),
+                                PolyUtil.encode(polylineLatLngs),
                                 serviceJson.getString("name"),
                                 serviceJson.getString("destination"),
                                 stopsOnRoute));
