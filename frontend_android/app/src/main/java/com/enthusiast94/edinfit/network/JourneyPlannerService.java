@@ -119,7 +119,8 @@ public class JourneyPlannerService {
                         }
 
                         // Find polyline from bus leg start to finish using route info stored in db
-                        // because the polyline provided by TFE API is incomplete.
+                        // because the polyline provided by TFE API is incomplete. If such a polyline
+                        // can not be found, only then use the one provided by the API.
                         Stop startStop = startPoint.getStop();
                         Stop finishStop = finishPoint.getStop();
                         List<LatLng> polylineLatLngs = new ArrayList<>();
@@ -146,7 +147,7 @@ public class JourneyPlannerService {
                         legs.add(new Journey.BusLeg(
                                 startPoint,
                                 finishPoint,
-                                PolyUtil.encode(polylineLatLngs),
+                                polylineLatLngs.size() > 0 ? PolyUtil.encode(polylineLatLngs) : serviceJson.getString("polyline"),
                                 serviceJson.getString("name"),
                                 serviceJson.getString("destination"),
                                 stopsOnRoute));
