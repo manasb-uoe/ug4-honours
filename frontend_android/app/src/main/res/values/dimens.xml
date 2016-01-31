@@ -24,7 +24,6 @@
     <!-- Random -->
     <dimen name="toolbar_circular_progress_width">35dp</dimen>
     <dimen name="toolbar_circular_progress_height">35dp</dimen>
-    <dimen name="menu_nav_header_height">180dp</dimen>
     <dimen name="nearby_stop_more_options_button_height">35dp</dimen>
     <dimen name="nearby_stop_more_options_button_width">35dp</dimen>
     <dimen name="saved_stop_unsave_button_height">35dp</dimen>

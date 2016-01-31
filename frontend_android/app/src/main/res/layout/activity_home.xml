@@ -91,6 +91,7 @@
                 android:background="@android:color/white"
                 app:menu="@menu/menu_navigation_view"
                 app:itemBackground="@android:color/transparent"
+                app:headerLayout="@layout/menu_nav_header"
                 />
 
         </android.support.v4.widget.DrawerLayout>

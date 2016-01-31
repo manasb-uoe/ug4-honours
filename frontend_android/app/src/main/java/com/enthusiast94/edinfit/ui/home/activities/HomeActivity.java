@@ -11,6 +11,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,12 +20,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Service;
 import com.enthusiast94.edinfit.models.Stop;
+import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
@@ -122,17 +125,17 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                    final Intent startActivityIntent =
-                            new Intent(HomeActivity.this, NewActivityActivity.class);
+                final Intent startActivityIntent =
+                        new Intent(HomeActivity.this, NewActivityActivity.class);
 
-                    fabMenu.close(true);
+                fabMenu.close(true);
 
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity(startActivityIntent);
-                        }
-                    }, 300);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(startActivityIntent);
+                    }
+                }, 300);
 
             }
         });
@@ -209,14 +212,20 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawers();
+            return;
+        }
+
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
 
             // unfix orientation in case one of the fragments fixed it
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        } else {
-            super.onBackPressed();
+            return;
         }
+
+        super.onBackPressed();
     }
 
     @Override
@@ -320,6 +329,14 @@ public class HomeActivity extends AppCompatActivity {
     public void onEventMainThread(OnStopsAndServicesPopulatedEvent event) {
         setSettingThingsUpDialogEnabled(false);
 
+        // update navigation view header with authenticated user info
+        View headerView = navigationView.getHeaderView(0);
+        TextView nameTextView = (TextView) headerView.findViewById(R.id.name_textview);
+        TextView emailTextView = (TextView) headerView.findViewById(R.id.email_textview);
+        User user = UserService.getInstance().getAuthenticatedUser();
+        nameTextView.setText(user.getName());
+        emailTextView.setText(user.getEmail());
+        
         // setup viewpager
         adapter = new MainPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(adapter);
