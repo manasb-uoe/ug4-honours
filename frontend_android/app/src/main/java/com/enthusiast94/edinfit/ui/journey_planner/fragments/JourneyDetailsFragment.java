@@ -77,6 +77,8 @@ public class JourneyDetailsFragment extends Fragment {
                 updateMap(journey.getLegs());
             }
         });
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()),
+                12));
 
         // setup recycler view
         journeyLegsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -146,7 +148,7 @@ public class JourneyDetailsFragment extends Fragment {
                         .icon(BitmapDescriptorFactory.fromBitmap(startIconBitmap))
                         .position(leg.getStartPoint().getLatLng()));
 
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(leg.getStartPoint().getLatLng(), 14));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(leg.getStartPoint().getLatLng(), 14));
             } else if (i == legs.size()-1) {
                 IconGenerator iconGenerator = new IconGenerator(getActivity());
                 iconGenerator.setStyle(IconGenerator.STYLE_PURPLE);
