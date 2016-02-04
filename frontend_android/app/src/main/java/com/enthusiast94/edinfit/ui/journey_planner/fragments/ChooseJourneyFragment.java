@@ -26,6 +26,7 @@ import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.DirectionsService;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyDetailsActivity;
+import com.enthusiast94.edinfit.ui.journey_planner.services.CountdownNotificationService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.SimpleDividerItemDecoration;
 import com.google.android.gms.maps.model.LatLng;
@@ -241,6 +242,9 @@ public class ChooseJourneyFragment extends Fragment {
                             public void doInUIThread() {
                                 progressDialog.dismiss();
                                 context.startActivity(JourneyDetailsActivity.getStartActivityIntent(context, journey));
+
+                                // todo this service should be started from somewhere else
+                                context.startService(CountdownNotificationService.getStartServiceIntent(context, journey));
                             }
                         });
                     }

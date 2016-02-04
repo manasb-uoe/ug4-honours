@@ -270,7 +270,8 @@ public class Helpers {
         switch (type) {
             case WAIT_OR_WALK:
                 return context.getString(R.string.action_wait_or_walk);
-
+            case JOURNEY_PLANNER:
+                return context.getString(R.string.journey_planner);
             default:
                 throw new IllegalArgumentException("Invalid activity type: " + type.getValue());
         }

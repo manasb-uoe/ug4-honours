@@ -75,7 +75,7 @@ public class Activity extends Model {
     }
 
     public enum Type {
-        WAIT_OR_WALK("WAIT_OR_WALK");
+        WAIT_OR_WALK("WAIT_OR_WALK"), JOURNEY_PLANNER("JOURNEY_PLANNER");
 
         private String value;
 
