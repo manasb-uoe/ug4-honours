@@ -82,6 +82,8 @@ public class DisruptionsFragment extends Fragment {
     }
 
     private void loadDisruptions() {
+        setRefreshIndicatorVisiblity(true);
+
         new AsyncJob.AsyncJobBuilder<BaseService.Response<List<Disruption>>>()
                 .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<List<Disruption>>>() {
                     @Override
@@ -95,6 +97,8 @@ public class DisruptionsFragment extends Fragment {
                     return;
                 }
 
+                setRefreshIndicatorVisiblity(false);
+
                 if (!response.isSuccessfull()) {
                     Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_SHORT)
                             .show();
@@ -105,6 +109,16 @@ public class DisruptionsFragment extends Fragment {
                 disruptionsAdapter.notifyDisruptionsChanged(disruptions);
             }
         }).create().start();
+    }
+
+    private void setRefreshIndicatorVisiblity(final boolean visiblity) {
+        swipeRefreshLayout.post(new Runnable() {
+
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(visiblity);
+            }
+        });
     }
 
     private static class DisruptionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
