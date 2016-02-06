@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class FavouriteStopsFragment extends Fragment {
 
-    public static final String TAG = NearMeFragment.class.getSimpleName();
+    public static final String TAG = FavouriteStopsFragment.class.getSimpleName();
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView updatedAtTextView;

@@ -1,7 +1,6 @@
 package com.enthusiast94.edinfit.ui.home.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -9,10 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -41,12 +37,8 @@ import com.enthusiast94.edinfit.ui.home.fragments.DisruptionsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
-import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyPlannerActivity;
 import com.enthusiast94.edinfit.ui.login_and_signup.activities.LoginActivity;
 import com.enthusiast94.edinfit.ui.search.activities.SearchActivity;
-import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 
 import de.greenrobot.event.EventBus;
 
@@ -57,14 +49,11 @@ public class HomeActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private FloatingActionMenu fabMenu;
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private ProgressDialog progressDialog;
     private Handler handler;
-    private ViewPager viewPager;
-    private MainPagerAdapter adapter;
-    private int selectedPageIndex;
+    private int selectedFragmentIndex;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -84,12 +73,6 @@ public class HomeActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
-        FloatingActionButton waitOrWalkFab =
-                (FloatingActionButton) findViewById(R.id.wait_or_walk_fab);
-        FloatingActionButton journeyPlannerFab =
-                (FloatingActionButton) findViewById(R.id.journey_planner_fab);
 
         // setup toolbar with ActionBarDrawerToggle
         setSupportActionBar(toolbar);
@@ -102,59 +85,16 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public boolean onNavigationItemSelected(final MenuItem item) {
-                // close drawers after some delay to prevent lag
+                // navigate to fragment after closing drawers in order to prevent lag
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        drawerLayout.closeDrawers();
+                        navigateToFragment(getMenuItemIndex(item));
                     }
                 }, 300);
 
-                int menuItemIndex = getMenuItemIndex(item);
-                if (menuItemIndex < adapter.getCount()) {
-                    navigateToPage(getMenuItemIndex(item));
-                } else {
-                    // Todo
-                }
-
+                drawerLayout.closeDrawers();
                 return true;
-            }
-        });
-
-        // setup floating action menu item clicks
-        waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                final Intent startActivityIntent =
-                        new Intent(HomeActivity.this, NewActivityActivity.class);
-
-                fabMenu.close(true);
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(startActivityIntent);
-                    }
-                }, 300);
-
-            }
-        });
-        journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                final Intent startActivityIntent =
-                        new Intent(HomeActivity.this, JourneyPlannerActivity.class);
-
-                fabMenu.close(true);
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(startActivityIntent);
-                    }
-                }, 300);
             }
         });
 
@@ -208,7 +148,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt(SELECTED_FRAGMENT_INDEX, selectedPageIndex);
+        savedInstanceState.putInt(SELECTED_FRAGMENT_INDEX, selectedFragmentIndex);
     }
 
     @Override
@@ -286,26 +226,64 @@ public class HomeActivity extends AppCompatActivity {
         throw new IllegalArgumentException("Provided menuItem does not exist in the menu");
     }
 
-    private void navigateToPage(int position) {
-        viewPager.setCurrentItem(position);
-        onPageSelected(position);
-    }
+    private void navigateToFragment(int position) {
+        // replace current fragment with the one corresponding to provided position
+        replaceFragment(position);
 
-    private void onPageSelected(int position) {
         // update app bar title
-        setTitle(adapter.getPageTitle(position));
+        setTitle(getFragmentTitle(position));
 
         // highlight selected navigation drawer item
         navigationView.getMenu().getItem(position).setChecked(true);
 
-        // only show fab on ActivityFragment
-        if (position == 0) {
-            fabMenu.showMenuButton(true);
-        } else {
-            fabMenu.hideMenuButton(true);
+        selectedFragmentIndex = position;
+    }
+
+    private String getFragmentTitle(int position) {
+        switch (position) {
+            case 0:return getString(R.string.nearby_bus_stops);
+            case 1: return getString(R.string.favourites);
+            case 2: return getString(R.string.activity);
+            case 3: return getString(R.string.disruptions);
+            case 4: return getString(R.string.settings);
+            default:
+                throw new IllegalArgumentException("Invalid position: " + position);
+        }
+    }
+
+    private void replaceFragment(int position) {
+        Fragment fragment;
+        String tag;
+
+        switch (position) {
+            case 0:
+                fragment = new NearMeFragment();
+                tag = NearMeFragment.TAG;
+                break;
+            case 1:
+                fragment = new FavouriteStopsFragment();
+                tag = FavouriteStopsFragment.TAG;
+                break;
+            case 2:
+                fragment = new ActivityFragment();
+                tag = ActivityFragment.TAG;
+                break;
+            case 3:
+                fragment = new DisruptionsFragment();
+                tag = DisruptionsFragment.TAG;
+                break;
+            case 4:
+                fragment = new UserProfileFragment();
+                tag = UserProfileFragment.TAG;
+                break;
+            default: throw new IllegalArgumentException("Invalid position: " + position);
         }
 
-        selectedPageIndex = position;
+        if (getSupportFragmentManager().findFragmentByTag(tag) == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, fragment, tag)
+                    .commit();
+        }
     }
 
     private void goToLogin() {
@@ -337,76 +315,15 @@ public class HomeActivity extends AppCompatActivity {
         User user = UserService.getInstance().getAuthenticatedUser();
         nameTextView.setText(user.getName());
         emailTextView.setText(user.getEmail());
-        
-        // setup viewpager
-        adapter = new MainPagerAdapter(this, getSupportFragmentManager());
-        viewPager.setAdapter(adapter);
-        viewPager.setOffscreenPageLimit(2);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
 
-            @Override
-            public void onPageSelected(int position) {
-                HomeActivity.this.onPageSelected(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
-
-        // Navigate to viewpager page based on the page index in saved instance state,
-        // ensuring that the correct page is selected after configuration changes.
+        // Navigate to fragment based on the fragmnet index in saved instance state,
+        // ensuring that the correct fragment is selected after configuration changes.
         if (event.getSavedInstanceState()== null) {
-            selectedPageIndex = 0; /* default = Activity fragment */
+            selectedFragmentIndex = 0; /* default = Activity fragment */
         } else {
-            selectedPageIndex = event.getSavedInstanceState().getInt(SELECTED_FRAGMENT_INDEX);
+            selectedFragmentIndex = event.getSavedInstanceState().getInt(SELECTED_FRAGMENT_INDEX);
         }
 
-        viewPager.setCurrentItem(selectedPageIndex);
-        navigateToPage(selectedPageIndex);
-    }
-
-    private static class MainPagerAdapter extends FragmentPagerAdapter {
-
-        private static final int FRAGMENT_COUNT = 4;
-        private Context context;
-
-        public MainPagerAdapter(Context context, FragmentManager fragmentManager) {
-            super(fragmentManager);
-            this.context = context;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0: return new ActivityFragment();
-                case 1: return new NearMeFragment();
-                case 2: return new FavouriteStopsFragment();
-                case 3: return new DisruptionsFragment();
-                case 4: return new UserProfileFragment();
-                default: throw new IllegalArgumentException("Invalid position: " + position);
-            }
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0: return context.getString(R.string.activity);
-                case 1:return context.getString(R.string.nearby_bus_stops);
-                case 2: return context.getString(R.string.favourites);
-                case 3: return context.getString(R.string.disruptions);
-                case 4: return context.getString(R.string.user_profile);
-                default:
-                    throw new IllegalArgumentException("Invalid position: " + position);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return FRAGMENT_COUNT;
-        }
+        navigateToFragment(selectedFragmentIndex);
     }
 }

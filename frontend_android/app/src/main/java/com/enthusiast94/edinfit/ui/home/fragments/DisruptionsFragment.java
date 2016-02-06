@@ -33,7 +33,7 @@ import java.util.Locale;
  */
 public class DisruptionsFragment extends Fragment {
 
-    private static final String TAG = DisruptionsFragment.class.getSimpleName();
+    public static final String TAG = DisruptionsFragment.class.getSimpleName();
     private List<Disruption> disruptions;
     private RecyclerView disruptionsRecyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;

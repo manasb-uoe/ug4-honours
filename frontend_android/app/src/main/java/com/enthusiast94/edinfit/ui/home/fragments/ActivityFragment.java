@@ -1,7 +1,9 @@
 package com.enthusiast94.edinfit.ui.home.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
@@ -21,8 +23,12 @@ import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
+import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyPlannerActivity;
+import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.Triplet;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import java.text.SimpleDateFormat;
@@ -40,10 +46,9 @@ import de.greenrobot.event.EventBus;
  */
 public class ActivityFragment extends Fragment {
 
-    private static final String TAG = ActivityFragment.class.getSimpleName();
+    public static final String TAG = ActivityFragment.class.getSimpleName();
 
     private SwipeRefreshLayout swipeRefreshLayout;
-
     private ActivityAdapter activityAdapter;
     private List<Activity> activities;
     private ActivityAdapter.TimespanEnum selectedTimespan;
@@ -60,9 +65,18 @@ public class ActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_activity, container, false);
 
+        final Handler handler = new Handler();
+
+        // find views
         RecyclerView activityRecyclerView = (RecyclerView) view.findViewById(R.id.activity_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        final FloatingActionMenu fabMenu = (FloatingActionMenu) view.findViewById(R.id.fab_menu);
+        final FloatingActionButton waitOrWalkFab =
+                (FloatingActionButton) view.findViewById(R.id.wait_or_walk_fab);
+        FloatingActionButton journeyPlannerFab =
+                (FloatingActionButton) view.findViewById(R.id.journey_planner_fab);
 
+        // setup swipe refresh layout
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
@@ -72,9 +86,47 @@ public class ActivityFragment extends Fragment {
             }
         });
 
+        // setup activity recycler view
         activityRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         activityAdapter = new ActivityAdapter(getActivity());
         activityRecyclerView.setAdapter(activityAdapter);
+
+        // setup floating action menu item clicks
+        waitOrWalkFab.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                final Intent startActivityIntent =
+                        new Intent(getActivity(), NewActivityActivity.class);
+
+                fabMenu.close(true);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(startActivityIntent);
+                    }
+                }, 300);
+
+            }
+        });
+        journeyPlannerFab.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                final Intent startActivityIntent =
+                        new Intent(getActivity(), JourneyPlannerActivity.class);
+
+                fabMenu.close(true);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(startActivityIntent);
+                    }
+                }, 300);
+            }
+        });
 
         if (activities == null) {
             loadActivities();
