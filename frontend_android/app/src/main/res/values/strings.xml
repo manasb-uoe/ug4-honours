@@ -165,6 +165,8 @@
     <string name="journey_details">Journey Details</string>
     <string name="walk_to">Walk to</string>
     <string name="finish">Finish</string>
+    <string name="services_affected">Services affected:</string>
+    <string name="disruptions">Disruptions</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

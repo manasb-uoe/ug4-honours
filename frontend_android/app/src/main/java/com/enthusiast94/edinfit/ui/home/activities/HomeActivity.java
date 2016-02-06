@@ -37,6 +37,7 @@ import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnStopsAndServicesPopulatedEvent;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
+import com.enthusiast94.edinfit.ui.home.fragments.DisruptionsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.NearMeFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.UserProfileFragment;
@@ -384,7 +385,8 @@ public class HomeActivity extends AppCompatActivity {
                 case 0: return new ActivityFragment();
                 case 1: return new NearMeFragment();
                 case 2: return new FavouriteStopsFragment();
-                case 3: return new UserProfileFragment();
+                case 3: return new DisruptionsFragment();
+                case 4: return new UserProfileFragment();
                 default: throw new IllegalArgumentException("Invalid position: " + position);
             }
         }
@@ -395,7 +397,8 @@ public class HomeActivity extends AppCompatActivity {
                 case 0: return context.getString(R.string.activity);
                 case 1:return context.getString(R.string.nearby_bus_stops);
                 case 2: return context.getString(R.string.favourites);
-                case 3: return context.getString(R.string.user_profile);
+                case 3: return context.getString(R.string.disruptions);
+                case 4: return context.getString(R.string.user_profile);
                 default:
                     throw new IllegalArgumentException("Invalid position: " + position);
             }

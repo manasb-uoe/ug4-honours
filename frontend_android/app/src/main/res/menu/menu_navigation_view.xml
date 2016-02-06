@@ -17,6 +17,11 @@
             android:icon="@drawable/ic_star_white_36dp"
             />
         <item
+            android:id="@+id/action_disruptions"
+            android:title="@string/disruptions"
+            android:icon="@drawable/ic_info_outline_black_36dp"
+            />
+        <item
             android:id="@+id/action_user_profile"
             android:title="@string/user_profile"
             android:icon="@drawable/ic_person_pin_white_36dp"
