@@ -212,8 +212,9 @@ public class SuggestionsFragment extends Fragment
                             progressDialog.dismiss();
 
                             if (!response.isSuccessfull()) {
-                                Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_SHORT)
+                                Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_LONG)
                                         .show();
+                                getActivity().finish();
                                 return;
                             }
 

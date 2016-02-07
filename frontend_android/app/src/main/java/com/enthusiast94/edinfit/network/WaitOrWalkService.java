@@ -153,6 +153,7 @@ public class WaitOrWalkService {
             if (upcomingDeparture == null) {
                 response.setError("No upcoming departures for service: " + serviceName +
                         " at stop: " + currentPair.first.getName());
+                return response;
             }
 
             // retrieve walking directions from user's location to stop's location, along with
