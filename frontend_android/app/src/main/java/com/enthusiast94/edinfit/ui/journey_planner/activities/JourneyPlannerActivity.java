@@ -30,12 +30,6 @@ public class JourneyPlannerActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getString(R.string.journey_planner));
         actionBar.setDisplayHomeAsUpEnabled(true);
-        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.blue_500));
-
-        // change status bar color to complement toolbar
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.blue_700));
-        }
     }
 
     @Override

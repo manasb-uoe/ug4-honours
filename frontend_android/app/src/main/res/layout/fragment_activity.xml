@@ -30,8 +30,8 @@
         android:paddingRight="8dp"
         fab:menu_fab_size="normal"
         fab:menu_showShadow="true"
-        fab:menu_colorNormal="@color/primary"
-        fab:menu_colorPressed="@color/primary"
+        fab:menu_colorNormal="@color/accent"
+        fab:menu_colorPressed="@color/accent"
         app:menu_backgroundColor="@color/white_opaque_80">
 
         <com.github.clans.fab.FloatingActionButton
@@ -41,8 +41,8 @@
             android:src="@drawable/ic_directions_walk_white_24dp"
             app:fab_size="mini"
             app:fab_label="@string/action_wait_or_walk"
-            app:fab_colorNormal="@color/green_500"
-            app:fab_colorPressed="@color/green_500"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
             />
 
         <com.github.clans.fab.FloatingActionButton
@@ -52,8 +52,8 @@
             android:src="@drawable/ic_directions_white_24dp"
             app:fab_size="mini"
             app:fab_label="@string/action_get_to_somewhere"
-            app:fab_colorNormal="@color/blue_500"
-            app:fab_colorPressed="@color/blue_500"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
             />
 
     </com.github.clans.fab.FloatingActionMenu>

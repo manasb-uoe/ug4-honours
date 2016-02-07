@@ -297,13 +297,13 @@ public class ServiceFragment extends Fragment {
         // add route polyline to map
         PolylineOptions polylineOptions = new PolylineOptions();
 
-        int redColor = ContextCompat.getColor(getActivity(), R.color.red);
+        int polylineColor = ContextCompat.getColor(getActivity(), R.color.primary);
         int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
 
         polylineOptions
                 .addAll(route.getLatLngs())
                 .width(polylineWidth)
-                .color(redColor);
+                .color(polylineColor);
 
         routePolyline = map.addPolyline(polylineOptions);
     }

@@ -1,43 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    android:id="@+id/nav_header_container"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:foreground="?attr/selectableItemBackground"
-    android:clickable="true"
+    android:background="@color/primary_dark"
+    android:padding="@dimen/spacing_normal"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark"
     >
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/name_textview"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/light_grey"
-        android:paddingLeft="@dimen/spacing_large"
-        android:paddingTop="@dimen/spacing_normal"
-        android:paddingBottom="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_normal"
-        android:layout_marginLeft="-2dp"
-        android:gravity="bottom"
-        android:theme="@style/ThemeOverlay.AppCompat"
-        >
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:text="Manas Bajaj"
+        />
 
-        <TextView
-            android:id="@+id/name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.AppCompat.Body2"
-            android:text="Manas Bajaj"
-            />
+    <TextView
+        android:id="@+id/email_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:text="manas.bajaj@94@gmail.com"
+        />
 
-        <TextView
-            android:id="@+id/email_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:text="manas.bajaj@94@gmail.com"
-            />
-
-    </LinearLayout>
-
-</FrameLayout>
+</LinearLayout>

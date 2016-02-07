@@ -62,11 +62,6 @@ public class NewActivityActivity extends AppCompatActivity {
             appBar.setTitle(R.string.action_wait_or_walk);
         }
 
-        // change status bar color to complement toolbar
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.green_700));
-        }
-
         // setup tabs
         tabLayout.setClickable(false);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.label_step_1));

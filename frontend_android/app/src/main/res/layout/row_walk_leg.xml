@@ -20,6 +20,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@id/start_time_textview"
         android:layout_alignBottom="@id/start_time_textview"
+        android:tint="@color/primary"
         />
 
     <TextView
@@ -29,7 +30,7 @@
         android:text="15:20"
         android:layout_toRightOf="@id/walk_imageview"
         android:textSize="@dimen/font_larger"
-        android:textColor="@color/primary_dark"
+        android:textColor="@color/primary"
         android:textStyle="bold"
         android:gravity="center_vertical"
         android:layout_marginLeft="@dimen/spacing_tiny"
@@ -43,7 +44,7 @@
         android:layout_alignParentRight="true"
         android:text="15 min"
         android:textSize="@dimen/font_small"
-        android:textColor="@color/green_500"
+        android:textColor="@color/accent"
         android:background="@drawable/leg_duration_background"
         />
 

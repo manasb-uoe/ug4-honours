@@ -100,7 +100,7 @@ public class ActivityDetailFragment extends Fragment {
                 Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime)));
 
         PolylineOptions polylineOptions = new PolylineOptions();
-        int polyLineColor = ContextCompat.getColor(getActivity(), R.color.red);
+        int polyLineColor = ContextCompat.getColor(getActivity(), R.color.blue_500);
         int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
         SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", Locale.UK);
         for (int i=0; i<activity.getPoints().size(); i++) {

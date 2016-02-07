@@ -197,7 +197,7 @@ public class WalkingDirectionsFragment extends Fragment {
                 polylineOptions.add(new LatLng(point.getLatitude(), point.getLongitude()));
             }
 
-            polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.red));
+            polylineOptions.color(ContextCompat.getColor(getActivity(), R.color.blue_500));
             polylineOptions.width(getResources().getDimensionPixelOffset(R.dimen.polyline_width));
 
             map.addPolyline(polylineOptions);

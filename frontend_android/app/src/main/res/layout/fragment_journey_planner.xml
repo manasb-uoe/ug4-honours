@@ -26,7 +26,7 @@
             <View
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:background="@drawable/solid_primary_circle"
+                android:background="@drawable/solid_accent_circle"
                 />
 
             <TextView
@@ -202,6 +202,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/spacing_normal"
         android:text="@string/get_directions"
+        android:theme="@style/AccentButton"
         />
 
 </LinearLayout>

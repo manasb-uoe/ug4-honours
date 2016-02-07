@@ -30,4 +30,11 @@
         <item name="colorButtonNormal">@color/facebook_blue</item>
     </style>
 
+    <style name="AccentButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="colorButtonNormal">@color/accent</item>
+    </style>
+
+
 </resources>
