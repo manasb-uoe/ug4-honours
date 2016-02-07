@@ -85,9 +85,6 @@ public class JourneyDetailsActivity extends AppCompatActivity {
                 setActionButtonEnabled(actionStop, false);
             }
         });
-
-        setActionButtonEnabled(actionStart, true);
-        setActionButtonEnabled(actionStop, false);
     }
 
     @Override
