@@ -242,9 +242,6 @@ public class ChooseJourneyFragment extends Fragment {
                             public void doInUIThread() {
                                 progressDialog.dismiss();
                                 context.startActivity(JourneyDetailsActivity.getStartActivityIntent(context, journey));
-
-                                // todo this service should be started from somewhere else
-                                context.startService(CountdownNotificationService.getStartServiceIntent(context, journey));
                             }
                         });
                     }

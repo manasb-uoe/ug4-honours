@@ -18,6 +18,7 @@ import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyDetailsActivity;
+import com.enthusiast94.edinfit.ui.journey_planner.events.OnCountdownFinishedOrCancelledEvent;
 import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
@@ -25,6 +26,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Date;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 04-02-2016.
@@ -104,7 +107,7 @@ public class CountdownNotificationService extends Service {
         unregisterReceiver(receiver);
 
         countDownTimer.cancel();
-//        EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
+        EventBus.getDefault().post(new OnCountdownFinishedOrCancelledEvent());
 
         notificationManager.cancel(NOTIFICATION_ID_COUNTDOWN);
 
@@ -183,14 +186,10 @@ public class CountdownNotificationService extends Service {
                     .build();
 
             notificationManager.notify(NOTIFICATION_ID_COUNTDOWN, notification);
-
-//            EventBus.getDefault().post(new OnCountdownTickEvent(humanizedRemainingTime));
         }
 
         @Override
         public void onFinish() {
-//            EventBus.getDefault().post(new OnCountdownTickEvent(getString(R.string.label_none)));
-
             showFailureNotification();
 
             stopSelf();
