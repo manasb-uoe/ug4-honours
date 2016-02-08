@@ -42,6 +42,7 @@ public class FavouriteStopsFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView updatedAtTextView;
+    private TextView noFavouritesTextView;
 
     private FavouriteStopsAdapter favouriteStopsAdapter;
     private List<Pair<FavouriteStop, List<Departure>>> favouriteStopPairs;
@@ -56,12 +57,13 @@ public class FavouriteStopsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_saved_stops, container, false);
+        View view = inflater.inflate(R.layout.fragment_favourite_stops, container, false);
 
         RecyclerView favouriteStopsRecyclerView =
                 (RecyclerView) view.findViewById(R.id.favourite_stops_recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         updatedAtTextView = (TextView) view.findViewById(R.id.updated_at_textview);
+        noFavouritesTextView = (TextView) view.findViewById(R.id.no_favourite_stops_textview);
 
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -73,7 +75,16 @@ public class FavouriteStopsFragment extends Fragment {
         });
 
         favouriteStopsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        favouriteStopsAdapter = new FavouriteStopsAdapter(getActivity());
+        favouriteStopsAdapter = new FavouriteStopsAdapter(getActivity()) {
+            @Override
+            public void onFavouriteRemoved(int remainingCount) {
+                if (remainingCount == 0) {
+                    noFavouritesTextView.setVisibility(View.VISIBLE);
+                } else {
+                    noFavouritesTextView.setVisibility(View.GONE);
+                }
+            }
+        };
         favouriteStopsRecyclerView.setAdapter(favouriteStopsAdapter);
 
         return view;
@@ -82,13 +93,7 @@ public class FavouriteStopsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        if (favouriteStopPairs == null) {
-            loadFavouriteStops();
-        } else {
-            favouriteStopsAdapter.notifyFavouritesChanged(favouriteStopPairs);
-            updatedLastUpdatedTimestamp();
-        }
+        loadFavouriteStops();
     }
 
     private void loadFavouriteStops() {
@@ -119,6 +124,13 @@ public class FavouriteStopsFragment extends Fragment {
                         }
 
                         favouriteStopPairs = response.getBody();
+
+                        if (favouriteStopPairs.size() == 0) {
+                            noFavouritesTextView.setVisibility(View.VISIBLE);
+                        } else {
+                            noFavouritesTextView.setVisibility(View.GONE);
+                        }
+
                         favouriteStopsAdapter.notifyFavouritesChanged(favouriteStopPairs);
                         updatedLastUpdatedTimestamp();
                     }
@@ -140,7 +152,7 @@ public class FavouriteStopsFragment extends Fragment {
         });
     }
 
-    private static class FavouriteStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static abstract class FavouriteStopsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private Activity context;
         private LayoutInflater inflater;
@@ -264,6 +276,7 @@ public class FavouriteStopsFragment extends Fragment {
                                                 if (favouriteStopPairs.get(i).equals(favouruteStopPair)) {
                                                     favouriteStopPairs.remove(favouruteStopPair);
                                                     notifyItemRemoved(i);
+                                                    onFavouriteRemoved(favouriteStopPairs.size());
                                                     break;
                                                 }
                                             }
@@ -286,6 +299,8 @@ public class FavouriteStopsFragment extends Fragment {
             startActivityIntent.putExtra(StopActivity.EXTRA_STOP_ID, stop.get_id());
             context.startActivity(startActivityIntent);
         }
+
+        public abstract void onFavouriteRemoved(int remainingCount);
     }
 
 }
