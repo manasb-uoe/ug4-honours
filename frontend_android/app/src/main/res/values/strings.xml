@@ -169,6 +169,12 @@
     <string name="disruptions">Disruptions</string>
     <string name="journey_to_format">Journey to %1$s</string>
     <string name="activity_saved_successfully_format">%1$s activity saved successfully.</string>
+    <string name="activity_deleted_successfully_format">%1$s activity deleted successfully.</string>
+    <string name="activity_details">Activity Details</string>
+    <string name="delete_activity">Delete Activity</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="confirm_delete_activity">Are you sure you would like to delete this activity?</string>
+    <string name="delete">Delete</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

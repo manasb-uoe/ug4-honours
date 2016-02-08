@@ -1,11 +1,9 @@
 package com.enthusiast94.edinfit.ui.activity_detail.fragments;
 
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +11,6 @@ import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
-import com.enthusiast94.edinfit.ui.activity_detail.events.UpdateAppBarTitlesEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,8 +24,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 31-12-2015.
@@ -66,6 +61,9 @@ public class ActivityDetailFragment extends Fragment {
 
         // find views
         mapView = (MapView) view.findViewById(R.id.map_view);
+        TextView originDestinationTextView =
+                (TextView) view.findViewById(R.id.origin_destination_textview);
+        TextView infoTextView = (TextView) view.findViewById(R.id.info_textview);
         TextView distanceTextView = (TextView) view.findViewById(R.id.distance_textview);
         TextView timeTextView = (TextView) view.findViewById(R.id.time_textview);
         TextView speedTextView = (TextView) view.findViewById(R.id.speed_textview);
@@ -91,9 +89,9 @@ public class ActivityDetailFragment extends Fragment {
         String dateAndTime = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.UK)
                 .format(new Date(activity.getStart()));
 
-        EventBus.getDefault().post(new UpdateAppBarTitlesEvent(activity.getDescription(),
-                (String.format(getString(R.string.label_activity_info_format),
-                        Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime))));
+        originDestinationTextView.setText(activity.getDescription());
+        infoTextView.setText(String.format(getString(R.string.label_activity_info_format),
+                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime));
 
         PolylineOptions polylineOptions = new PolylineOptions();
         int polyLineColor = ContextCompat.getColor(getActivity(), R.color.blue_500);

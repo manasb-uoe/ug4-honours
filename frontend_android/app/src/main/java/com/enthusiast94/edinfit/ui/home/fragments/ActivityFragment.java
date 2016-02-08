@@ -128,13 +128,13 @@ public class ActivityFragment extends Fragment {
             }
         });
 
-        if (activities == null) {
-            loadActivities();
-        } else {
-            activityAdapter.notifyActivitiesChanged(activities, selectedTimespan, selectedStatistic);
-        }
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadActivities();
     }
 
     @Override

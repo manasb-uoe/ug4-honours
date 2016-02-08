@@ -35,6 +35,36 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/accent"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingRight="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_small"
+                android:paddingBottom="@dimen/spacing_small"
+                >
+
+                <TextView
+                    android:id="@+id/origin_destination_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Base.TextAppearance.AppCompat.Body2"
+                    android:textSize="@dimen/font_normal_large"
+                    />
+
+                <TextView
+                    android:id="@+id/info_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Base.TextAppearance.AppCompat.Body1"
+                    android:textSize="@dimen/font_small"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_marginTop="@dimen/spacing_small"
