@@ -1,4 +1,4 @@
-package com.enthusiast94.edinfit.ui.home.fragments;
+package com.enthusiast94.edinfit.ui.activity_detail.fragments;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.ui.activity_detail.events.UpdateAppBarTitlesEvent;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,6 +27,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by manas on 31-12-2015.
@@ -50,32 +53,24 @@ public class ActivityDetailFragment extends Fragment {
         return instance;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_activity_detail, container, false);
 
-        // fix orientation to portrait
-        getActivity().setRequestedOrientation(
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         // find views
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mapView = (MapView) view.findViewById(R.id.map_view);
         TextView distanceTextView = (TextView) view.findViewById(R.id.distance_textview);
         TextView timeTextView = (TextView) view.findViewById(R.id.time_textview);
         TextView speedTextView = (TextView) view.findViewById(R.id.speed_textview);
         TextView stepsTextView = (TextView) view.findViewById(R.id.steps_textview);
         TextView caloriesTextView = (TextView) view.findViewById(R.id.calories_textview);
-
-        // setup toolbar
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
 
         // setup map
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
@@ -92,12 +87,13 @@ public class ActivityDetailFragment extends Fragment {
         caloriesTextView.setText(String.valueOf(0));
         speedTextView.setText(String.format(getString(R.string.label_speed_format),
                 activity.getAverageSpeed() * (60 * 60 / (1000.0)))); // convert from m/s to km/h
-        toolbar.setTitle(activity.getDescription());
 
         String dateAndTime = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.UK)
                 .format(new Date(activity.getStart()));
-        toolbar.setSubtitle((String.format(getString(R.string.label_activity_info_format),
-                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime)));
+
+        EventBus.getDefault().post(new UpdateAppBarTitlesEvent(activity.getDescription(),
+                (String.format(getString(R.string.label_activity_info_format),
+                        Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime))));
 
         PolylineOptions polylineOptions = new PolylineOptions();
         int polyLineColor = ContextCompat.getColor(getActivity(), R.color.blue_500);

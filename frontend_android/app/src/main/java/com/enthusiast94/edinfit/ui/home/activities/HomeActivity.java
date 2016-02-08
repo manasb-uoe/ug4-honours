@@ -2,7 +2,6 @@ package com.enthusiast94.edinfit.ui.home.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,10 +27,8 @@ import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
-import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
 import com.enthusiast94.edinfit.ui.home.events.OnStopsAndServicesPopulatedEvent;
-import com.enthusiast94.edinfit.ui.home.fragments.ActivityDetailFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.ActivityFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.DisruptionsFragment;
 import com.enthusiast94.edinfit.ui.home.fragments.FavouriteStopsFragment;
@@ -155,14 +152,6 @@ public class HomeActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawers();
-            return;
-        }
-
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-
-            // unfix orientation in case one of the fragments fixed it
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             return;
         }
 
@@ -294,15 +283,6 @@ public class HomeActivity extends AppCompatActivity {
 
     public void onEventMainThread(OnDeauthenticatedEvent event) {
         goToLogin();
-    }
-
-    public void onEventMainThread(OnActivityClickedEvent event) {
-        getSupportFragmentManager().beginTransaction()
-                .addToBackStack(null)
-                .setCustomAnimations(R.anim.fade_in, 0, 0, R.anim.fade_out)
-                .add(android.R.id.content, ActivityDetailFragment.newInstance(event.getActivity().getId()),
-                        ActivityDetailFragment.TAG)
-                .commit();
     }
 
     public void onEventMainThread(OnStopsAndServicesPopulatedEvent event) {

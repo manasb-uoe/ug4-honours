@@ -68,6 +68,11 @@
             android:name=".ui.journey_planner.activities.JourneyDetailsActivity"
             >
         </activity>
+        <activity
+            android:name=".ui.activity_detail.activities.ActivityDetailActivity"
+            android:screenOrientation="portrait"
+            >
+        </activity>
 
         <!-- FacebookActivity for Login -->
         <activity

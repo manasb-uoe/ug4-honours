@@ -14,30 +14,11 @@
     sothree:umanoParallaxOffset="60dp"
     >
 
-    <LinearLayout
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-
-        <android.support.design.widget.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            >
-
-            <include layout="@layout/toolbar" />
-
-        </android.support.design.widget.AppBarLayout>
-
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/map_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-        
-    </LinearLayout>
-
+        />
 
     <ScrollView
         android:id="@+id/scroll_view"

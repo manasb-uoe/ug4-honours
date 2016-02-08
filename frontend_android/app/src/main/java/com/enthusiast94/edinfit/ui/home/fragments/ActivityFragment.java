@@ -22,7 +22,7 @@ import android.widget.TextView;
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
-import com.enthusiast94.edinfit.ui.home.events.OnActivityClickedEvent;
+import com.enthusiast94.edinfit.ui.activity_detail.activities.ActivityDetailActivity;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyPlannerActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
 import com.enthusiast94.edinfit.utils.Helpers;
@@ -725,7 +725,7 @@ public class ActivityFragment extends Fragment {
 
                     @Override
                     public void onClick(View v) {
-                        EventBus.getDefault().post(new OnActivityClickedEvent(activity));
+                        ActivityDetailActivity.start(context, activity.getId());
                     }
                 });
             }
