@@ -22,6 +22,7 @@ import com.enthusiast94.edinfit.ui.journey_planner.events.OnCountdownFinishedOrC
 import com.enthusiast94.edinfit.utils.ActivityLocationTrackerService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.enthusiast94.edinfit.utils.LocationProvider;
+import com.enthusiast94.edinfit.utils.ReverseGeocoder;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Date;
@@ -50,6 +51,8 @@ public class CountdownNotificationService extends Service {
     private NotificationBroadcastReceiver receiver;
     private LocationProvider locationProvider;
     private Intent activityLocationTrackerServiceIntent;
+    private ReverseGeocoder reverseGeocoder;
+    private String destinationName;
 
     public static Intent getStartServiceIntent(Context context, Journey journey) {
         Intent intent = new Intent(context, CountdownNotificationService.class);
@@ -66,6 +69,8 @@ public class CountdownNotificationService extends Service {
         locationProvider = new LocationProvider(this, new CheckIfUserReachedDestinationOnLocationUpdateCallback(),
                 1000);
         locationProvider.connect();
+
+        reverseGeocoder = new ReverseGeocoder(this);
 
         receiver = new NotificationBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
@@ -89,6 +94,23 @@ public class CountdownNotificationService extends Service {
         journey = intent.getParcelableExtra(EXTRA_JOURNEY);
         List<Journey.Leg> legs = journey.getLegs();
         lastLeg = legs.get(legs.size()-1);
+
+        final LatLng destinationLatLng = lastLeg.getFinishPoint().getLatLng();
+        destinationName = "(" + destinationLatLng.latitude + ", " +
+                destinationLatLng.longitude + ")";
+
+        reverseGeocoder.getPlaceName(destinationLatLng.latitude, destinationLatLng.longitude,
+                new ReverseGeocoder.ReverseGeocodeCallback() {
+            @Override
+            public void onSuccess(String placeName) {
+                destinationName = placeName;
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, error);
+            }
+        });
 
         startCountdownNotification();
 
@@ -155,7 +177,7 @@ public class CountdownNotificationService extends Service {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            String contentTitle = "Journey to Bla";
+            String contentTitle = String.format(getString(R.string.journey_to_format), destinationName);
 
             Intent stopIntent = new Intent(ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getBroadcast(
