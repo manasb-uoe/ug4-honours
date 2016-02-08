@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
@@ -80,6 +81,10 @@ public class ActivityLocationTrackerService extends Service
                                             currentActivity.save();
 
                                             Log.i(TAG, "New activity successfully sent to server");
+                                            Toast.makeText(ActivityLocationTrackerService.this,
+                                                    String.format(getString(R.string.activity_saved_successfully_format),
+                                                            Helpers.getActivityTypeText(ActivityLocationTrackerService.this,
+                                                                    currentActivity.getType())), Toast.LENGTH_LONG).show();
                                         }
 
                                         @Override
