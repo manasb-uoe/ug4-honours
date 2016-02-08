@@ -21,6 +21,16 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <TextView
+        android:id="@+id/no_activities_textview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/no_activities_found"
+        android:padding="@dimen/spacing_normal"
+        android:visibility="gone"
+        />
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/fab_menu"
         android:layout_width="match_parent"

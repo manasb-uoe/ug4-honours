@@ -50,9 +50,9 @@ public class ActivityFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private ActivityAdapter activityAdapter;
-    private List<Activity> activities;
     private ActivityAdapter.TimespanEnum selectedTimespan;
     private ActivityAdapter.StatisticEnum selectedStatistic;
+    private TextView noActivitiesTextView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +75,7 @@ public class ActivityFragment extends Fragment {
                 (FloatingActionButton) view.findViewById(R.id.wait_or_walk_fab);
         FloatingActionButton journeyPlannerFab =
                 (FloatingActionButton) view.findViewById(R.id.journey_planner_fab);
+        noActivitiesTextView = (TextView) view.findViewById(R.id.no_activities_textview);
 
         // setup swipe refresh layout
         swipeRefreshLayout.setColorSchemeResources(R.color.accent);
@@ -163,7 +164,11 @@ public class ActivityFragment extends Fragment {
 
                         setRefreshIndicatorVisiblity(false);
 
-                        ActivityFragment.this.activities = activities;
+                        if (activities.size() == 0) {
+                            noActivitiesTextView.setVisibility(View.VISIBLE);
+                        } else {
+                            noActivitiesTextView.setVisibility(View.GONE);
+                        }
 
                         activityAdapter.notifyActivitiesChanged(activities, selectedTimespan,
                                 selectedStatistic);
