@@ -122,7 +122,7 @@
                 android:scrollbars="none"
                 android:background="@color/background_grey"
                 android:clipToPadding="false"
-                android:paddingBottom="@dimen/spacing_small"
+                android:paddingBottom="@dimen/spacing_card"
                 />
 
         </android.support.v4.widget.SwipeRefreshLayout>

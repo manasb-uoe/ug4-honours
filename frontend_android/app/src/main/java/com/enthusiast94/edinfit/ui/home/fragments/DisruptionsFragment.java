@@ -63,7 +63,6 @@ public class DisruptionsFragment extends Fragment {
 
         // setup disruptions recycler view
         disruptionsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        disruptionsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         disruptionsAdapter = new DisruptionsAdapter(getActivity());
         disruptionsRecyclerView.setAdapter(disruptionsAdapter);
 
