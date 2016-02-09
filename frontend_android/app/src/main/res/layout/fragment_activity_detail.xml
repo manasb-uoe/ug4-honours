@@ -75,6 +75,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_clock_96"
                     android:layout_marginRight="@dimen/spacing_normal"
+                    android:tint="@color/primary"
                     />
 
                 <TextView
@@ -110,6 +111,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_depth_96"
                     android:layout_marginRight="@dimen/spacing_normal"
+                    android:tint="@color/primary"
                     />
 
                 <TextView
@@ -145,6 +147,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_speedometer_96"
                     android:layout_marginRight="@dimen/spacing_normal"
+                    android:tint="@color/primary"
                     />
 
                 <TextView
@@ -177,9 +180,10 @@
 
                 <ImageView
                     android:layout_width="60dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="25dp"
                     android:src="@drawable/ic_human_footprints_96"
                     android:layout_marginRight="@dimen/spacing_normal"
+                    android:tint="@color/primary"
                     />
 
                 <TextView
@@ -215,6 +219,7 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_gas_96"
                     android:layout_marginRight="@dimen/spacing_normal"
+                    android:tint="@color/primary"
                     />
 
                 <TextView
