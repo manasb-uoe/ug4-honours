@@ -44,10 +44,21 @@
         android:id="@+id/duration_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:text="14 min"
+        android:layout_toLeftOf="@+id/walk_duration_textview"
         style="@style/Base.TextAppearance.AppCompat.Body1"
         android:textSize="@dimen/font_normal_large"
+        />
+
+    <TextView
+        android:id="@+id/walk_duration_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="(5 min walk)"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/font_normal_large"
+        android:layout_marginLeft="@dimen/spacing_tiny"
         />
 
     <LinearLayout

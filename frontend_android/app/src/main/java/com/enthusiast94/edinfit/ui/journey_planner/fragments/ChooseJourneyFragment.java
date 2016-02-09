@@ -127,6 +127,7 @@ public class ChooseJourneyFragment extends Fragment {
             private TextView startTimeTextView;
             private TextView finishTimeTextView;
             private TextView durationTextView;
+            private TextView walkDurationTextView;
             private LinearLayout summaryContainer;
             private SimpleDateFormat sdf;
 
@@ -139,6 +140,7 @@ public class ChooseJourneyFragment extends Fragment {
                 startTimeTextView = (TextView) itemView.findViewById(R.id.start_time_textview);
                 finishTimeTextView = (TextView) itemView.findViewById(R.id.finish_time_textview);
                 durationTextView = (TextView) itemView.findViewById(R.id.duration_textview);
+                walkDurationTextView = (TextView) itemView.findViewById(R.id.walk_duration_textview);
                 summaryContainer = (LinearLayout) itemView.findViewById(R.id.summary_container);
 
                 // bind event listeners
@@ -155,6 +157,7 @@ public class ChooseJourneyFragment extends Fragment {
 
                 summaryContainer.removeAllViews();
                 List<Journey.Leg> legs = journey.getLegs();
+                long walkDuration = 0;
                 for (int i=0; i<legs.size(); i++) {
                     Journey.Leg leg = legs.get(i);
 
@@ -167,6 +170,9 @@ public class ChooseJourneyFragment extends Fragment {
                                 (int) Helpers.convertDpToPixel(context, 20))
                         );
                         summaryContainer.addView(walkImageView);
+
+                        walkDuration += leg.getFinishPoint().getTimestamp() -
+                                leg.getStartPoint().getTimestamp();
 
                     } else if (leg instanceof Journey.BusLeg) {
                         TextView serviceTextView = new TextView(context);
@@ -191,6 +197,9 @@ public class ChooseJourneyFragment extends Fragment {
                         summaryContainer.addView(getArrowImageView());
                     }
                 }
+
+                walkDurationTextView.setText("(" + String.format(context.getString(R.string.label_walk_duration_format),
+                        Helpers.humanizeDurationInMillisToMinutes(walkDuration * 1000)) + ")");
             }
 
             private ImageView getArrowImageView() {
