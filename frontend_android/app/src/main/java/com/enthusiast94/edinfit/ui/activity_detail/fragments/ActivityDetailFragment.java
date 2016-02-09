@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.activity_detail.fragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -75,6 +77,7 @@ public class ActivityDetailFragment extends Fragment {
                 savedInstanceState.getBundle(MAPVIEW_SAVE_STATE) : null;
         mapView.onCreate(mapViewSavedInstanceState);
         map = mapView.getMap();
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         // get selected activity using the id provided in the arguments
         Activity activity = Activity.findById(getArguments().getLong(EXTRA_ACTIVITY_ID));
@@ -108,23 +111,22 @@ public class ActivityDetailFragment extends Fragment {
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(new LatLng(point.getLatitude(), point.getLongitude()));
                 markerOptions.title(sdfTime.format(point.getTimestamp()));
-                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(
-                        Helpers.getMarkerIcon(getActivity(), R.drawable.stop_marker)));
-                markerOptions.anchor(.5f, .5f);
                 if (i ==0) {
-                    markerOptions.snippet(getString(R.string.label_start));
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(),
-                            12));
+                    IconGenerator iconGenerator = new IconGenerator(getActivity());
+                    iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
+                    Bitmap startIconBitmap = iconGenerator.makeIcon(getString(R.string.label_start));
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(startIconBitmap));
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(),
+                            14));
                 }
                 if (i == activity.getPoints().size()-1) {
-                    markerOptions.snippet(getString(R.string.label_end));
+                    IconGenerator iconGenerator = new IconGenerator(getActivity());
+                    iconGenerator.setStyle(IconGenerator.STYLE_PURPLE);
+                    Bitmap finishIconBitmap = iconGenerator.makeIcon(getString(R.string.finish));
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(finishIconBitmap));
                 }
 
-                Marker marker = map.addMarker(markerOptions);
-
-                if (i == 0) {
-                    marker.showInfoWindow();
-                }
+                map.addMarker(markerOptions);
             }
         }
         map.addPolyline(polylineOptions);
