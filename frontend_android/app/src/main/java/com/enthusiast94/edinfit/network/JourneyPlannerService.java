@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Request;
@@ -82,6 +83,7 @@ public class JourneyPlannerService {
             JSONArray journeysJsonArray =
                     new JSONObject(okHttpResponse.body().string()).getJSONArray("journeys");
 
+            journeysLoop:
             for (int i=0; i<journeysJsonArray.length(); i++) {
                 JSONObject journeyJson = journeysJsonArray.getJSONObject(i);
                 JSONArray legsJsonArray = journeyJson.getJSONArray("legs");
@@ -107,6 +109,20 @@ public class JourneyPlannerService {
                             finishJson.getLong("time"),
                             !finishJson.isNull("stop_id") ? finishJson.getString("stop_id") : null
                     );
+
+                    // make sure that journeys that do not match user's timer requirements are omitted
+                    Date requestedDate = new Date(time * 1000);
+                    if (timeMode == TimeMode.LEAVE_AFTER) {
+                        Date startDate = new Date(startPoint.getTimestamp() * 1000);
+                        if (startDate.before(requestedDate)) {
+                            continue journeysLoop;
+                        }
+                    } else {
+                        Date finishDate = new Date(finishPoint.getTimestamp() * 1000);
+                        if (finishDate.after(requestedDate)) {
+                            continue journeysLoop;
+                        }
+                    }
 
                     if (mode.equals("walk")) {
                         legs.add(new Journey.WalkLeg(startPoint, finishPoint, null));
