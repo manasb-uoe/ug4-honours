@@ -187,9 +187,8 @@ public class SuggestionsFragment extends Fragment
         } else {
             // show indeterminate progress dialog before starting calculations
             final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle(getString(R.string.label_please_waitt));
-            progressDialog.setMessage(getString(R.string.label_doing_complex_stuff));
-            progressDialog.setCancelable(false);
+            progressDialog.setMessage(getString(R.string.label_please_waitt));
+            progressDialog.setCancelable(true); // TODO this should be false maybe?
             progressDialog.show();
 
             new AsyncJob.AsyncJobBuilder<BaseService.Response<List<WaitOrWalkSuggestion>>>()

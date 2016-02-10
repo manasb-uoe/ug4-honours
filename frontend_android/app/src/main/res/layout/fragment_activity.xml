@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_directions_white_24dp"
             app:fab_size="mini"
-            app:fab_label="@string/action_get_to_somewhere"
+            app:fab_label="@string/journey_planner"
             app:fab_colorNormal="@color/accent"
             app:fab_colorPressed="@color/accent"
             />
