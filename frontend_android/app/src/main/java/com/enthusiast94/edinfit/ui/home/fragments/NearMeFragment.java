@@ -161,7 +161,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
 
                     if (latLng.latitude == stopLatLng.latitude && latLng.longitude == stopLatLng.longitude) {
                         marker.showInfoWindow();
-                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                         break;
                     }
@@ -328,7 +328,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (getActivity() != null) {
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
 
             reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
                     new ReverseGeocoder.ReverseGeocodeCallback() {

@@ -146,7 +146,7 @@ public class ServiceFragment extends Fragment {
 
                     if (latLng.latitude == stopLatLng.latitude && latLng.longitude == stopLatLng.longitude) {
                         marker.showInfoWindow();
-                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
                         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                         break;
                     }
@@ -288,7 +288,7 @@ public class ServiceFragment extends Fragment {
             } else if (i == stops.size()-1) {
                 stopMarker.setSnippet(getString(R.string.label_end));
                 stopMarker.showInfoWindow();
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 13));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 13));
             }
 
             stopMarkers.add(stopMarker);

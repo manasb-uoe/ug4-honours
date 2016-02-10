@@ -119,7 +119,7 @@ public class ServiceTimetableFragment extends Fragment {
 
                     if (latLng.latitude == stopLatLng.latitude && latLng.longitude == stopLatLng.longitude) {
                         marker.showInfoWindow();
-                        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
                         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                         break;
                     }
@@ -241,7 +241,7 @@ public class ServiceTimetableFragment extends Fragment {
 
             if (i == 0) {
                 stopMarker.showInfoWindow();
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 13));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(stopLatLng, 14));
             }
 
             stopMarkers.add(stopMarker);
