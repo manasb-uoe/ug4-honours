@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- The Google Maps Android API uses OpenGL ES version 2 to render the map.
      If OpenGL ES version 2 is not installed, map will not appear. Therefore, this is needed to
@@ -85,6 +86,8 @@
         <service android:name=".ui.wait_or_walk_mode.services.CountdownNotificationService" />
         <service android:name=".utils.ActivityLocationTrackerService" />
         <service android:name=".ui.journey_planner.services.CountdownNotificationService" />
+
+        <receiver android:name=".utils.DisruptionAlarmReceiver" />
 
         <!-- This embeds the version of Google Play services that the app was compiled with. -->
         <meta-data

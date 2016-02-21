@@ -12,6 +12,7 @@ import com.enthusiast94.edinfit.network.ServiceService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.network.WaitOrWalkService;
+import com.enthusiast94.edinfit.utils.DisruptionAlarmReceiver;
 
 /**
  * Created by manas on 26-09-2015.
@@ -27,7 +28,7 @@ public class App extends Application {
 
         context = this;
 
-        // init services
+        /* Init services */
         BaseService.init(this);
         DirectionsService.init(this);
         UserService.init(this);
@@ -37,8 +38,11 @@ public class App extends Application {
         WaitOrWalkService.init(this);
         JourneyPlannerService.init(this);
 
-        // init orm
+        /* Init ORM */
         ActiveAndroid.initialize(this);
+
+        /* Setup disruption notification alarm */
+        DisruptionAlarmReceiver.setAlarm(context);
     }
 
     public static Context getAppContext() {
