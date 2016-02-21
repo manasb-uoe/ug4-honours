@@ -136,7 +136,7 @@
     <string name="facebook_login_cancelled">Facebook login cancelled</string>
     <string name="label_activity_time">Activity Time</string>
     <string name="label_average_speed">Average Speed</string>
-    <string name="label_speed_format">%1$s kmph</string>
+    <string name="label_speed_format">%1$.2f kmph</string>
     <string name="label_view_departures">View departures</string>
     <string name="label_add_to_favourites">Add to Favourites</string>
     <string name="label_remove_from_favourites">Remove from Favourites</string>
