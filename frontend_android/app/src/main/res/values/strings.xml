@@ -107,7 +107,7 @@
     <string name="label_steps_today_format">%1$s steps today</string>
     <string name="label_stat_today_format">%1$s today</string>
     <string name="label_calories_burned_format">%1$s calories burned</string>
-    <string name="label_calories_format">%1$s calories</string>
+    <string name="label_calories_format">%1$s kcal</string>
     <string name="label_steps_format">%1$s steps</string>
     <string name="label_home_navigation">Home Navigation</string>
     <string name="label_reset">Reset</string>
@@ -186,6 +186,7 @@
     <string name="full_name">Full name</string>
     <string name="name_cannot_be_left_blank">Name cannot be left blank</string>
     <string name="user_profile_updated_successfully">User profile updated successfully</string>
+    <string name="your_daily_average_is_format">Your daily average is %1$s</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

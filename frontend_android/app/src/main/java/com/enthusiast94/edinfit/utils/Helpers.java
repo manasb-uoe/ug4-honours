@@ -314,5 +314,9 @@ public class Helpers {
         float px = dp * (metrics.densityDpi / 160f);
         return px;
     }
+
+    public static int getCaloriesBurnt(int weight /* in kg */, double distance /* in km */) {
+        return (int) (0.67 * weight * distance);
+    }
 }
 

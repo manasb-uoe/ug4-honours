@@ -12,13 +12,13 @@ import android.widget.TextView;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.ui.IconGenerator;
@@ -85,7 +85,8 @@ public class ActivityDetailFragment extends Fragment {
         distanceTextView.setText(Helpers.humanizeDistance(activity.getDistance() / 1000));
         timeTextView.setText(Helpers.humanizeDurationInMillis(activity.getEnd() - activity.getStart()));
         stepsTextView.setText(String.valueOf(Helpers.getStepsFromDistance(activity.getDistance())));
-        caloriesTextView.setText(String.valueOf(0));
+        caloriesTextView.setText(String.format("%d kcal", Helpers.getCaloriesBurnt(
+                UserService.getInstance().getAuthenticatedUser().getWeight(), activity.getDistance() / 1000.0)));
         speedTextView.setText(String.format(getString(R.string.label_speed_format),
                 activity.getAverageSpeed() * (60 * 60 / (1000.0)))); // convert from m/s to km/h
 

@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
+import com.enthusiast94.edinfit.models.User;
+import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.activity_detail.activities.ActivityDetailActivity;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyPlannerActivity;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.activities.NewActivityActivity;
@@ -34,12 +36,12 @@ import com.viewpagerindicator.CirclePageIndicator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import de.greenrobot.event.EventBus;
+import java.util.Set;
 
 /**
  * Created by manas on 01-10-2015.
@@ -189,10 +191,12 @@ public class ActivityFragment extends Fragment {
     private static class ActivityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private Context context;
+        private User user;
         private LayoutInflater inflater;
         private List<Activity> activities;
         private Map<String, ActivityTimeSpan> activityTimeSpansMap;
         private StatisticsSummary todaySummary;
+        private StatisticsSummary dailyAverageSummary;
         private TimespanEnum selectedTimeSpan;
         private StatisticEnum selectedStatistic;
 
@@ -208,6 +212,7 @@ public class ActivityFragment extends Fragment {
             this.context = context;
             inflater = LayoutInflater.from(context);
             activityTimeSpansMap = new LinkedHashMap<>();
+            user = UserService.getInstance().getAuthenticatedUser();
         }
 
         @Override
@@ -236,7 +241,7 @@ public class ActivityFragment extends Fragment {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof SummaryViewHolder) {
-                ((SummaryViewHolder) holder).bindItem(todaySummary);
+                ((SummaryViewHolder) holder).bindItem(todaySummary, dailyAverageSummary);
 
             } else if (holder instanceof SpinnerViewHolder) {
                 ((SpinnerViewHolder) holder).bindItem(selectedTimeSpan, selectedStatistic);
@@ -338,8 +343,8 @@ public class ActivityFragment extends Fragment {
 
                 switch (selectedTimeSpan) {
                     case DAY:
-                        SimpleDateFormat sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
-                        timeSpanText = sdfDay.format(activity.getStart());
+                        SimpleDateFormat sdfFullDate = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+                        timeSpanText = sdfFullDate.format(activity.getStart());
                         break;
                     case MONTH:
                         SimpleDateFormat sdfMonth = new SimpleDateFormat("MMMM", Locale.UK);
@@ -361,7 +366,11 @@ public class ActivityFragment extends Fragment {
                 }
             }
 
-            // compute statistics for each time span
+            // compute statistics for each time span along with daily averages
+            double allTimeTotalDistance = 0;
+            long allTimeTotalTime = 0;
+            SimpleDateFormat sdfDay = new SimpleDateFormat("dd", Locale.UK);
+            Set<String> daysSet = new HashSet<>();
             for (Map.Entry<String, ActivityTimeSpan> entry : activityTimeSpansMap.entrySet()) {
                 double totalDistance = 0;
                 long totalTime = 0;
@@ -369,15 +378,24 @@ public class ActivityFragment extends Fragment {
                 for (Activity activity : entry.getValue().getActivities()) {
                     totalDistance += activity.getDistance();
                     totalTime += activity.getEnd() - activity.getStart();
+                    daysSet.add(sdfDay.format(new Date(activity.getStart())));
                 }
 
-                entry.getValue().setSummary(new StatisticsSummary(totalDistance, totalTime, 0,
+                allTimeTotalDistance += totalDistance;
+                allTimeTotalTime += totalTime;
+
+                entry.getValue().setSummary(new StatisticsSummary(totalDistance, totalTime,
+                        Helpers.getCaloriesBurnt(user.getWeight(), totalDistance / 1000.0),
                         Helpers.getStepsFromDistance(totalDistance)));
             }
 
+            dailyAverageSummary = new StatisticsSummary(allTimeTotalDistance / daysSet.size(), allTimeTotalTime / daysSet.size(),
+                    Helpers.getCaloriesBurnt(user.getWeight(), allTimeTotalDistance / 1000.0) / daysSet.size(),
+                    Helpers.getStepsFromDistance(allTimeTotalDistance) / daysSet.size());
+
             // compute today's summary
-            SimpleDateFormat sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
-            String todayKey = sdfDay.format(new Date());
+            SimpleDateFormat sdfDate = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
+            String todayKey = sdfDate.format(new Date());
             if (activityTimeSpansMap.containsKey(todayKey)) {
                 todaySummary = activityTimeSpansMap.get(todayKey).getSummary();
             } else {
@@ -386,7 +404,7 @@ public class ActivityFragment extends Fragment {
 
                 for (int i=activities.size()-1; i>=0; i--) {
                     Activity activity = activities.get(i);
-                    String day = sdfDay.format(activity.getStart());
+                    String day = sdfDate.format(activity.getStart());
                     if (day.equals(todayKey)) {
                         totalDistance += activity.getDistance();
                         totalTime += activity.getEnd() - activity.getStart();
@@ -397,7 +415,8 @@ public class ActivityFragment extends Fragment {
                     }
                 }
 
-                todaySummary = new StatisticsSummary(totalDistance, totalTime, 0,
+                todaySummary = new StatisticsSummary(totalDistance, totalTime, Helpers.getCaloriesBurnt(
+                        user.getWeight(), totalDistance / 1000.0),
                         Helpers.getStepsFromDistance(totalDistance));
             }
 
@@ -462,22 +481,30 @@ public class ActivityFragment extends Fragment {
 
             private static final int NUM_PAGES = 4;
             private Context context;
-            private StatisticsSummary summary;
+            private StatisticsSummary todaySummary;
+            private StatisticsSummary dailyAverageSummary;
             private LayoutInflater inflater;
 
-            public SummaryPagerAdapter(Context context, StatisticsSummary summary) {
+            public SummaryPagerAdapter(Context context, StatisticsSummary summary,
+                                       StatisticsSummary dailyAverageSummary) {
                 this.context = context;
-                this.summary = summary;
+                this.todaySummary = summary;
+                this.dailyAverageSummary = dailyAverageSummary;
 
                 inflater = LayoutInflater.from(context);
 
-                if (this.summary == null) {
-                    this.summary = new StatisticsSummary(0, 0, 0, 0);
+                if (this.todaySummary == null) {
+                    this.todaySummary = new StatisticsSummary(0, 0, 0, 0);
+                }
+
+                if (this.dailyAverageSummary == null) {
+                    this.dailyAverageSummary = new StatisticsSummary(0, 0, 0, 0);
                 }
             }
 
-            public void updateSummary(StatisticsSummary newSummary) {
-                summary = newSummary;
+            public void updateSummary(StatisticsSummary todaySummary, StatisticsSummary dailyAverageSummary) {
+                this.todaySummary = todaySummary;
+                this.dailyAverageSummary = dailyAverageSummary;
                 notifyDataSetChanged();
             }
 
@@ -489,35 +516,45 @@ public class ActivityFragment extends Fragment {
                         (TextView) view.findViewById(R.id.average_statistic_textview);
 
                 String statisticText = null;
+                String averageStatisticText = null;
 
                 switch (position) {
                     case 0:
                         statisticText = String.format(
                                 context.getString(R.string.label_stat_today_format),
-                                Helpers.humanizeDistance(summary.getDistance() / 1000)
+                                Helpers.humanizeDistance(todaySummary.getDistance() / 1000)
                         );
+                        averageStatisticText = String.format(context.getString(R.string.your_daily_average_is_format),
+                                Helpers.humanizeDistance(dailyAverageSummary.getDistance() / 1000));
                         break;
                     case 1:
                         statisticText = String.format(
                                 context.getString(R.string.label_stat_today_format),
-                                Helpers.humanizeDurationInMillisToMinutes(summary.getTime())
+                                Helpers.humanizeDurationInMillisToMinutes(todaySummary.getTime())
                         );
+                        averageStatisticText = String.format(context.getString(R.string.your_daily_average_is_format),
+                                Helpers.humanizeDurationInMillisToMinutes(dailyAverageSummary.getTime()));
                         break;
                     case 2:
                         statisticText = String.format(
                                 context.getString(R.string.label_steps_today_format),
-                                summary.getSteps()
+                                todaySummary.getSteps()
                         );
+                        averageStatisticText = String.format(context.getString(R.string.your_daily_average_is_format),
+                                dailyAverageSummary.getSteps() + " steps");
                         break;
                     case 3:
                         statisticText = String.format(
                                 context.getString(R.string.label_calories_burned_format),
-                                summary.getCalories()
+                                todaySummary.getCalories()
                         );
+                        averageStatisticText = String.format(context.getString(R.string.your_daily_average_is_format),
+                                dailyAverageSummary.getCalories() + " kcal");
                         break;
                 }
 
                 statisticTextView.setText(statisticText);
+                averageStatTextView.setText(averageStatisticText);
 
                 container.addView(view);
 
@@ -571,7 +608,7 @@ public class ActivityFragment extends Fragment {
                         (CirclePageIndicator) itemView.findViewById(R.id.circle_pager_indicator);
 
                 // bind pager adapter
-                adapter = new SummaryPagerAdapter(context, null);
+                adapter = new SummaryPagerAdapter(context, null, null);
                 viewPager.setAdapter(adapter);
 
                 // bind pager indicator
@@ -579,8 +616,8 @@ public class ActivityFragment extends Fragment {
 
             }
 
-            public void bindItem(StatisticsSummary summary) {
-                adapter.updateSummary(summary);
+            public void bindItem(StatisticsSummary todaySummary, StatisticsSummary dailyAverageSummary) {
+                adapter.updateSummary(todaySummary, dailyAverageSummary);
             }
         }
 
