@@ -17,6 +17,7 @@ public class User extends Model {
     @Column private String email;
     @Column private long createdAt;
     @Column private String authToken;
+    @Column private int weight; /* in kg */
 
     public User() {
         super();
@@ -50,6 +51,10 @@ public class User extends Model {
         return authToken;
     }
 
+    public int getWeight() {
+        return weight;
+    }
+
     public void set_id(String _id) {
         this._id = _id;
     }
@@ -68,6 +73,10 @@ public class User extends Model {
 
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
     public static User findById(long id) {

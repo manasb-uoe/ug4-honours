@@ -6,109 +6,139 @@
     android:layout_height="match_parent"
     >
 
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
-        android:rowCount="4"
-        android:paddingLeft="@dimen/spacing_normal"
-        android:paddingRight="@dimen/spacing_normal"
+        android:background="@color/background_grey"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_normal"
+        android:gravity="center"
         >
 
-    <ImageView
-        android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_person_pin_black_48dp_large"
+            android:tint="@color/accent"
+            />
+
+        <TextView
+            android:id="@+id/name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="@dimen/font_large"
+            android:text="Manas Bajaj"
+            android:layout_marginBottom="@dimen/spacing_super_tiny"
+            android:layout_marginTop="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:id="@+id/email_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="manas.bajaj94@gmail.com"
+            />
+
+        <TextView
+            android:id="@+id/member_since_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Member since 15 December 2015"
+            />
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/edit_profile_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="fill_vertical"
-        android:src="@drawable/ic_action_social_person"
-        android:layout_marginRight="@dimen/spacing_normal"
+        android:padding="@dimen/spacing_normal"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_profile"
+            android:textSize="@dimen/font_normal_large"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_marginBottom="@dimen/spacing_tiny"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_your_account_info"
+            />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/bs_divider_color"
         />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_normal"
+        >
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_normal"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                android:id="@+id/name_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Body1"
-                />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_name"
-                style="@style/TextAppearance.AppCompat.Small"
-                />
-
-        </LinearLayout>
-
-        <ImageView
+            android:id="@+id/disruption_notifications_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="fill_vertical"
-            android:src="@drawable/ic_action_communication_email"
-            android:layout_marginRight="@dimen/spacing_normal"
-            />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_normal"
             android:orientation="vertical"
             >
 
             <TextView
-                android:id="@+id/email_textview"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Body1"
+                android:text="@string/disruption_notifications"
+                android:textSize="@dimen/font_normal_large"
+                style="@style/Base.TextAppearance.AppCompat.Body1"
+                android:layout_marginBottom="@dimen/spacing_tiny"
                 />
 
             <TextView
+                android:id="@+id/disruption_notifications_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_email"
-                style="@style/TextAppearance.AppCompat.Small"
+                android:text="@string/enabled"
                 />
 
         </LinearLayout>
 
-        <ImageView
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="fill_vertical"
-            android:src="@drawable/ic_action_action_calendar"
-            android:layout_marginRight="@dimen/spacing_normal"
-            />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/spacing_normal"
-            android:orientation="vertical"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/disruption_notifications_container"
+            android:layout_alignBottom="@id/disruption_notifications_container"
             >
 
-            <TextView
-                android:id="@+id/member_since_textview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Body1"
-                />
-
-            <TextView
+            <Switch
+                android:id="@+id/disruption_notification_toggle_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_member_since"
-                style="@style/TextAppearance.AppCompat.Small"
+                android:layout_gravity="center_vertical"
+                android:enabled="true"
                 />
 
-        </LinearLayout>
+        </FrameLayout>
 
-    </GridLayout>
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/bs_divider_color"
+        />
 
     <Button
         android:id="@+id/logout_button"

@@ -164,6 +164,37 @@ public class UserService {
         return User.findById(Long.parseLong(userId));
     }
 
+    public BaseService.Response<Void> updateUser(User user) {
+        FormBody formBody = new FormBody.Builder()
+                .add("name", user.getName())
+                .add("weight", String.valueOf(user.getWeight()))
+                .build();
+
+        Request request = baseService.createEdinFitPutRequest("users/" + user.get_id(), formBody);
+        BaseService.Response<Void> response = new BaseService.Response<>();
+
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
+
+            if (!response.isSuccessfull()) {
+                response.setError(baseService.extractEdinfitErrorMessage(okHttpResponse));
+                return response;
+            }
+
+            BaseService.Response<Void> updateResponse = updateCachedUser();
+            if (!updateResponse.isSuccessfull()) {
+                response.setError(updateResponse.getError());
+                return response;
+            }
+
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setError(e.getMessage());
+            return response;
+        }
+    }
+
     public BaseService.Response<Void> updateCachedUser() {
         final User user = getAuthenticatedUser();
 
@@ -185,6 +216,7 @@ public class UserService {
             userToUpdate.setName(userJson.getString("name"));
             userToUpdate.setEmail(userJson.getString("email"));
             userToUpdate.setCreatedAt(userJson.getLong("createdAt"));
+            userToUpdate.setWeight(userJson.getInt("weight"));
             userToUpdate.save();
 
             return response;

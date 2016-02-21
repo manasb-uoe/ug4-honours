@@ -68,6 +68,10 @@ public class BaseService {
         return createEdinfitRequestBuilder(path).post(requestBody).build();
     }
 
+    public Request createEdinFitPutRequest(String path, RequestBody requestBody) {
+        return createEdinfitRequestBuilder(path).put(requestBody).build();
+    }
+
     private Request.Builder createEdinfitRequestBuilder(String path) {
         Request.Builder builder = new Request.Builder();
         builder.url(API_BASE + "/" + path);

@@ -38,7 +38,7 @@
     <string name="label_not_found">Not found</string>
     <string name="label_last_updated">Last updated at: </string>
     <string name="lalbe_last_updated_at_format">Last updated at %1$s</string>
-    <string name="label_member_since">Member since</string>
+    <string name="label_member_since_format">Member since %1$s</string>
     <string name="label_departures">Departures</string>
     <string name="label_map">Map</string>
     <string name="label_weekday">Weekday</string>
@@ -177,6 +177,15 @@
     <string name="delete">Delete</string>
     <string name="no_activities_found">No activities found.\nUse the + button below to start a new activity.</string>
     <string name="no_favourite_stops_found">No favourite stops found.</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="change_your_account_info">Change your account info</string>
+    <string name="disruption_notifications">Disruption notifications</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="weight_in_kg">Weight in kg</string>
+    <string name="full_name">Full name</string>
+    <string name="name_cannot_be_left_blank">Name cannot be left blank</string>
+    <string name="user_profile_updated_successfully">User profile updated successfully</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
