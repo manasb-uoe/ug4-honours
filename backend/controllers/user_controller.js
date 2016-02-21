@@ -71,6 +71,7 @@ router.route("/users/:user_id")
         var name = req.body.name ? req.body.name.trim() : undefined;
         var email = req.body.email ? req.body.email.trim() : undefined;
         var password = req.body.password ? req.body.password.trim() : undefined;
+        var weight = req.body.weight ? req.body.weight.trim() : undefined;
 
         User.findById(req.params.user_id, function (err, user) {
             if (!user) return res.sendError(404, "No user found with id '" + req.params.user_id +"'");
@@ -83,13 +84,14 @@ router.route("/users/:user_id")
             if (name) user.name = name;
             if (email) user.email = email;
             if (password) user.password = password;
+            if (weight) user.weight = weight;
 
             async.series([
                 function (callback) {
                     // perform validation
                     user.validateInfo({
                         shouldValidateEmail: shouldValidateEmail,
-                        shouldValidatePassword: password != undefined // only validate password if it is provided
+                        shouldValidatePassword: password != undefined // only validate password if it is provided.
                     }, function (err) {
                         if (err)
                             return res.sendError(400, err.message);

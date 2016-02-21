@@ -3,7 +3,6 @@
  */
 
 var mongoose = require("mongoose");
-var Activity = require("../models/activity");
 var bcrypt = require("bcrypt-nodejs");
 var validator = require('validator');
 var async = require("async");
@@ -20,14 +19,12 @@ var userSchema = new mongoose.Schema({
     password: {
         type: String
     },
-    savedStops: {
-        type: [Number],
-        index: true
+    weight: {
+        type: Number
     },
     createdAt: {
         type: Number
-    },
-    activities: [Activity.schema]
+    }
 });
 
 
@@ -57,16 +54,6 @@ userSchema.methods.toJSON = function() {
     // delete password hash
     delete obj.password;
 
-    // replace activity _id with id and remove _id from each of the points
-    obj.activities.forEach(function (activity) {
-        activity.id = activity._id;
-        delete activity._id;
-
-        activity.points.forEach(function (point) {
-            delete point._id;
-        });
-    });
-
     return obj;
 };
 
@@ -76,7 +63,8 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
         shouldValidateName: true,
         shouldValidateEmail: true,
         shouldValidatePassword: true,
-        shouldValidateCreatedAt: true
+        shouldValidateCreatedAt: true,
+        shouldValidateWeight: true,
     }, options);
 
     var self = this;
@@ -123,6 +111,15 @@ userSchema.methods.validateInfo = function (options, mainCallback) {
             }
 
             return callback(null);
+        },
+        function (callback) {
+            if (settings.shouldValidateWeight) {
+                if (self.weight && self.weight < 0) {
+                    return mainCallback(new Error("Weight must greater than or equal to 0"));
+                }
+
+            return callback(null);
+            }
         },
         function () {
             if (settings.shouldValidateCreatedAt) {
