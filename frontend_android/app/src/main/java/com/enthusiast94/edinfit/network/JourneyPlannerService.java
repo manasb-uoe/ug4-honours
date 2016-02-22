@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.models.Service;
@@ -70,6 +71,8 @@ public class JourneyPlannerService {
                 "," + startLatLng.longitude + "&finish=" + finishLatLng.latitude + "," +
                 finishLatLng.longitude + "&date=" + time + "&time_mode=" + timeModeText);
         BaseService.Response<List<Journey>> response = new BaseService.Response<>();
+
+        Log.d(TAG, request.url().toString());
 
         try {
             Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();

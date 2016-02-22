@@ -177,6 +177,20 @@ public class Helpers {
         }
     }
 
+    public static Date getTimeFrom24hTimeAndDate(String time, Date date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.UK);
+        String dateText = simpleDateFormat.format(date.getTime());
+
+        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.UK);
+
+        try {
+            return simpleDateFormat.parse(dateText + " " + time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
     public static CharSequence trimTrailingWhitespace(CharSequence text) {
         while (text.charAt(text.length() - 1) == '\n') {
             text = text.subSequence(0, text.length() - 1);

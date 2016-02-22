@@ -27,7 +27,6 @@ import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.JourneyPlannerService;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.ChooseJourneyActivity;
-import com.enthusiast94.edinfit.ui.journey_planner.activities.JourneyDetailsActivity;
 import com.enthusiast94.edinfit.ui.journey_planner.enums.TimeMode;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -35,12 +34,10 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -125,7 +122,7 @@ public class JourneyPlannerFragment extends Fragment {
                                         return JourneyPlannerService.getInstance().getJourneys(
                                                 originPlace.getLatLng(),
                                                 destinationPlace.getLatLng(),
-                                                date.getTime() / 1000,
+                                                Helpers.getTimeFrom24hTimeAndDate(time, date).getTime() / 1000,
                                                 timeMode
                                         );
                                     }
