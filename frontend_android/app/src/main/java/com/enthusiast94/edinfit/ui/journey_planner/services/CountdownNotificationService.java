@@ -152,8 +152,10 @@ public class CountdownNotificationService extends Service {
         Notification notification = new Notification.Builder(CountdownNotificationService.this)
                 .setContentTitle(getString(R.string.label_success))
                 .setContentText(getString(R.string.success_reached_destination_in_time))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_maps_directions_bus)
                 .build();
+
+        notification.defaults = Notification.DEFAULT_ALL;
 
         notificationManager.notify(NOTIFICATION_ID_SUCCESS, notification);
     }
@@ -162,8 +164,10 @@ public class CountdownNotificationService extends Service {
         Notification notification = new Notification.Builder(CountdownNotificationService.this)
                 .setContentTitle(getString(R.string.label_failure))
                 .setContentText(getString(R.string.failure_could_not_reach_destination_in_time))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_stat_maps_directions_bus)
                 .build();
+
+        notification.defaults = Notification.DEFAULT_ALL;
 
         notificationManager.notify(NOTIFICATION_ID_FAILURE, notification);
     }
@@ -201,7 +205,7 @@ public class CountdownNotificationService extends Service {
             Notification notification = new Notification.Builder(CountdownNotificationService.this)
                     .setContentTitle(String.format(getString(R.string.label_time_remaining), humanizedRemainingTime))
                     .setContentText(contentTitle)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_stat_maps_directions_bus)
                     .setOngoing(true)
                     .addAction(R.drawable.ic_action_av_stop, getString(R.string.label_stop), stopPendingIntent)
                     .setContentIntent(journeyDetailsPendingIntent)

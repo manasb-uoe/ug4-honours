@@ -74,7 +74,7 @@ public class DisruptionAlarmReceiver extends BroadcastReceiver {
                                                     " " + disruption.getCategory())
                                             .setContentText(context.getString(R.string.services_affected) +
                                                     " " + disruption.getServicesAffected().toString())
-                                            .setSmallIcon(R.mipmap.ic_launcher)
+                                            .setSmallIcon(R.drawable.ic_stat_maps_directions_bus)
                                             .setContentIntent(pendingIntent)
                                             .setStyle(bigTextStyle)
                                             .setAutoCancel(true)
