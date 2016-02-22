@@ -23,12 +23,13 @@ public class User extends Model {
         super();
     }
 
-    public User(String _id, String name, String email, long createdAt, String authToken) {
+    public User(String _id, String name, String email, long createdAt, String authToken, int weight) {
         this._id = _id;
         this.name = name;
         this.email = email;
         this.createdAt = createdAt;
         this.authToken = authToken;
+        this.weight = weight;
     }
 
     public String get_id() {

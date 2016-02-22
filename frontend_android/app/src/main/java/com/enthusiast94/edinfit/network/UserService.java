@@ -129,7 +129,8 @@ public class UserService {
                     null,
                     null,
                     0,
-                    token
+                    token,
+                    0
             );
             user.save();
 
@@ -147,6 +148,7 @@ public class UserService {
             return response;
 
         } catch (IOException | JSONException e) {
+            e.printStackTrace();
             response.setError(e.getMessage());
             return response;
         }
@@ -218,7 +220,7 @@ public class UserService {
             userToUpdate.setName(userJson.getString("name"));
             userToUpdate.setEmail(userJson.getString("email"));
             userToUpdate.setCreatedAt(userJson.getLong("createdAt"));
-            userToUpdate.setWeight(userJson.getInt("weight"));
+            userToUpdate.setWeight(userJson.has("weight") ? userJson.getInt("weight") : 0);
             userToUpdate.save();
 
             return response;
