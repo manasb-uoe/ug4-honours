@@ -2,13 +2,11 @@ package com.enthusiast94.edinfit.utils;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.DisplayMetrics;
 import android.util.Patterns;
@@ -66,20 +64,6 @@ public class Helpers {
         } else {
             return null;
         }
-    }
-
-    public static void writeToPrefs(Context context, String key, String value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putString(key, value).apply();
-    }
-
-    public static String readFromPrefs(Context context, String key) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(key, null);
-    }
-
-    public static void clearPrefs(Context context) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().apply();
     }
 
     public static String getCurrentTime24h() {

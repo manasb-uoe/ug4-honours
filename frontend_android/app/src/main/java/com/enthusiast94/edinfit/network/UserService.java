@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Base64;
 
 import com.enthusiast94.edinfit.models.User;
-import com.enthusiast94.edinfit.utils.Helpers;
+import com.enthusiast94.edinfit.utils.PreferencesManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,10 +26,12 @@ public class UserService {
     private static UserService instance;
     private Context context;
     private BaseService baseService;
+    private PreferencesManager preferencesManager;
 
     private UserService(Context context) {
         this.context = context;
         baseService = BaseService.getInstance();
+        preferencesManager = PreferencesManager.getInstance();
     }
 
     public static void init(Context context) {
@@ -132,7 +134,7 @@ public class UserService {
             user.save();
 
             // persist currently authenticated user's id
-            Helpers.writeToPrefs(context, USER_ID_KEY, user.getId().toString());
+            preferencesManager.setCurrentlyAuthenticatedUserId(user.getId().toString());
 
             // now update the cached user with other user details by sending another request
             BaseService.Response<Void> updateUserResponse = updateCachedUser();
@@ -152,11 +154,11 @@ public class UserService {
     }
 
     public void deauthenticate() {
-        Helpers.clearPrefs(context);
+        preferencesManager.clearPrefs();
     }
 
     public User getAuthenticatedUser() {
-        String userId = Helpers.readFromPrefs(context, USER_ID_KEY);
+        String userId = preferencesManager.getCurrentlyAuthenticatedUserId();
         if (userId == null) {
             return null;
         }
@@ -210,7 +212,7 @@ public class UserService {
             }
 
             User userToUpdate = User.findById(Long.parseLong(
-                    Helpers.readFromPrefs(context, USER_ID_KEY)));
+                    preferencesManager.getCurrentlyAuthenticatedUserId()));
 
             JSONObject userJson = new JSONObject(okHttpResponse.body().string()).getJSONObject("data");
             userToUpdate.setName(userJson.getString("name"));
@@ -228,6 +230,6 @@ public class UserService {
     }
 
     public boolean isUserAuthenticated() {
-        return Helpers.readFromPrefs(context, USER_ID_KEY) != null;
+        return preferencesManager.getCurrentlyAuthenticatedUserId() != null;
     }
 }

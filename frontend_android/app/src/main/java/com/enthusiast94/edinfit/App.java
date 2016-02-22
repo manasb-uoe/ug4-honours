@@ -13,6 +13,7 @@ import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.network.WaitOrWalkService;
 import com.enthusiast94.edinfit.utils.DisruptionAlarmReceiver;
+import com.enthusiast94.edinfit.utils.PreferencesManager;
 
 /**
  * Created by manas on 26-09-2015.
@@ -30,6 +31,7 @@ public class App extends Application {
 
         /* Init services */
         BaseService.init(this);
+        PreferencesManager.init(this);
         DirectionsService.init(this);
         UserService.init(this);
         StopService.init(this);
