@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class Disruption {
 
+    private int id;
     private String type;
     private String category;
     private String summary;
@@ -14,14 +15,19 @@ public class Disruption {
     private String webLink;
     private long updatedAt;
 
-    public Disruption(String type, String category, String summary, List<String> servicesAffected,
+    public Disruption(int id, String type, String category, String summary, List<String> servicesAffected,
                       String webLink, long updatedAt) {
+        this.id = id;
         this.type = type;
         this.category = category;
         this.summary = summary;
         this.servicesAffected = servicesAffected;
         this.webLink = webLink;
         this.updatedAt = updatedAt;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getType() {

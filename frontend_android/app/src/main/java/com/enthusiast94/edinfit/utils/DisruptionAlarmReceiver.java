@@ -27,7 +27,8 @@ public class DisruptionAlarmReceiver extends BroadcastReceiver {
         Intent alarmIntent = new Intent(context, DisruptionAlarmReceiver.class);
         alarmIntent.setAction(ACTION_DISRUPTION_ALARM);
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
     }
 
     @Override
@@ -47,13 +48,14 @@ public class DisruptionAlarmReceiver extends BroadcastReceiver {
                                 return;
                             }
 
+                            PreferencesManager preferencesManager = PreferencesManager.getInstance();
                             NotificationManager notificationManager = (NotificationManager)
                                     context.getSystemService(Context.NOTIFICATION_SERVICE);
-                            long currentTIme = System.currentTimeMillis();
-                            for (int i=0; i<response.getBody().size(); i++) {
-                                Disruption disruption = response.getBody().get(i);
-                                long disruptionTime = disruption.getUpdatedAt() * 1000;
-                                if ((currentTIme - disruptionTime) < 3600000) {
+                            List<Disruption> disruptions = response.getBody();
+                            List<Integer> previousDisruptionIds = preferencesManager.getDisruptionIds();
+
+                            for (Disruption disruption : disruptions) {
+                                if (!previousDisruptionIds.contains(disruption.getId())) {
                                     Intent viewInBrowserIntent = new Intent(Intent.ACTION_VIEW);
                                     viewInBrowserIntent.setData(Uri.parse(disruption.getWebLink()));
                                     PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, viewInBrowserIntent, 0);
@@ -70,13 +72,16 @@ public class DisruptionAlarmReceiver extends BroadcastReceiver {
                                             .setSmallIcon(R.mipmap.ic_launcher)
                                             .setContentIntent(pendingIntent)
                                             .setStyle(bigTextStyle)
+                                            .setAutoCancel(true)
                                             .build();
 
                                     notification.defaults = Notification.DEFAULT_ALL;
 
-                                    notificationManager.notify(i, notification);
+                                    notificationManager.notify(disruption.getId(), notification);
                                 }
                             }
+
+                            preferencesManager.setDisruptionIds(disruptions);
                         }
                     }).create().start();
         }

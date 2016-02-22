@@ -4,10 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.enthusiast94.edinfit.models.Disruption;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 public class PreferencesManager {
 
     private static final String TAG = PreferencesManager.class.getSimpleName();
-    private final String USER_ID_KEY = "userIdKey";
+    private static final String USER_ID_KEY = "userIdKey";
+    private static final String DISRUPTION_IDS = "disruptionIds";
     private static PreferencesManager instance;
     private Context context;
     private SharedPreferences prefs;
@@ -37,6 +46,27 @@ public class PreferencesManager {
 
     public String getCurrentlyAuthenticatedUserId() {
         return prefs.getString(USER_ID_KEY, null);
+    }
+
+    public void setDisruptionIds(List<Disruption> disruptions) {
+        List<Integer> ids = new ArrayList<>();
+        for (Disruption disruption : disruptions) {
+            ids.add(disruption.getId());
+        }
+
+        Gson gson = new Gson();
+        prefs.edit().putString(DISRUPTION_IDS, gson.toJson(ids)).apply();
+    }
+
+    public List<Integer> getDisruptionIds() {
+        String idsString = prefs.getString(DISRUPTION_IDS, null);
+        if (idsString == null) {
+            return new ArrayList<>();
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Integer>>(){}.getType();
+        return gson.fromJson(idsString, type);
     }
 
     private void write(String key, String value) {

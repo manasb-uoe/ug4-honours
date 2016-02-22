@@ -59,6 +59,7 @@ public class DisruptionsService {
                 }
 
                 disruptions.add(new Disruption(
+                        disruptionJson.getInt("id"),
                         disruptionJson.getString("type"),
                         disruptionJson.getString("category"),
                         disruptionJson.getString("summary"),
