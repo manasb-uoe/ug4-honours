@@ -389,9 +389,13 @@ public class ActivityFragment extends Fragment {
                         Helpers.getStepsFromDistance(totalDistance)));
             }
 
-            dailyAverageSummary = new StatisticsSummary(allTimeTotalDistance / daysSet.size(), allTimeTotalTime / daysSet.size(),
-                    Helpers.getCaloriesBurnt(user.getWeight(), allTimeTotalDistance / 1000.0) / daysSet.size(),
-                    Helpers.getStepsFromDistance(allTimeTotalDistance) / daysSet.size());
+            if (daysSet.size() == 0) {
+                dailyAverageSummary = new StatisticsSummary(0, 0, 0, 0);
+            } else {
+                dailyAverageSummary = new StatisticsSummary(allTimeTotalDistance / daysSet.size(), allTimeTotalTime / daysSet.size(),
+                        Helpers.getCaloriesBurnt(user.getWeight(), allTimeTotalDistance / 1000.0) / daysSet.size(),
+                        Helpers.getStepsFromDistance(allTimeTotalDistance) / daysSet.size());
+            }
 
             // compute today's summary
             SimpleDateFormat sdfDate = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
