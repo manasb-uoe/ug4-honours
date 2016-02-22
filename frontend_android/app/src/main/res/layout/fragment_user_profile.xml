@@ -105,7 +105,7 @@
                 />
 
             <TextView
-                android:id="@+id/disruption_notifications_status"
+                android:id="@+id/disruption_notifications_status_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/enabled"
@@ -123,7 +123,7 @@
             >
 
             <Switch
-                android:id="@+id/disruption_notification_toggle_button"
+                android:id="@+id/disruption_notification_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

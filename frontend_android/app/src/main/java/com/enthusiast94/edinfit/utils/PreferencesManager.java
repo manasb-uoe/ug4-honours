@@ -17,6 +17,7 @@ public class PreferencesManager {
     private static final String TAG = PreferencesManager.class.getSimpleName();
     private static final String USER_ID_KEY = "userIdKey";
     private static final String DISRUPTION_IDS = "disruptionIds";
+    private static final String ARE_DISRUPTION_NOTIFICATIONS_ENABLED = "areDisruptionNotificationsEnabled";
     private static PreferencesManager instance;
     private Context context;
     private SharedPreferences prefs;
@@ -67,6 +68,14 @@ public class PreferencesManager {
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<Integer>>(){}.getType();
         return gson.fromJson(idsString, type);
+    }
+
+    public void setDisruptionNotificationsEnabled(boolean isEnabled) {
+        prefs.edit().putBoolean(ARE_DISRUPTION_NOTIFICATIONS_ENABLED, isEnabled).apply();
+    }
+
+    public boolean areDisruptionNotificationsEnabled() {
+        return prefs.getBoolean(ARE_DISRUPTION_NOTIFICATIONS_ENABLED, true /* enabled by default */);
     }
 
     private void write(String key, String value) {

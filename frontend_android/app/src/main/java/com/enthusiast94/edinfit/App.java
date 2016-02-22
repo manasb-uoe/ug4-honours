@@ -31,7 +31,7 @@ public class App extends Application {
 
         /* Init services */
         BaseService.init(this);
-        PreferencesManager.init(this);
+        PreferencesManager.init(this); // must be initialized before UserService
         DirectionsService.init(this);
         UserService.init(this);
         StopService.init(this);
@@ -43,8 +43,9 @@ public class App extends Application {
         /* Init ORM */
         ActiveAndroid.initialize(this);
 
-        /* Setup disruption notification alarm */
-        DisruptionAlarmReceiver.setAlarm(context);
+        /* Setup disruption notification alarm according to user's preferences */
+        DisruptionAlarmReceiver.setAlarmEnabled(context,
+                PreferencesManager.getInstance().areDisruptionNotificationsEnabled());
     }
 
     public static Context getAppContext() {

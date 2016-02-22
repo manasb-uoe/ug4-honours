@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +22,8 @@ import com.enthusiast94.edinfit.models.User;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.UserService;
 import com.enthusiast94.edinfit.ui.home.events.OnDeauthenticatedEvent;
+import com.enthusiast94.edinfit.utils.DisruptionAlarmReceiver;
+import com.enthusiast94.edinfit.utils.PreferencesManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,7 +42,10 @@ public class UserProfileFragment extends Fragment {
     private TextView memberSinceTextView;
     private Button logoutButton;
     private View editProfileContainer;
+    private Switch disruptionNotificationsSwitch;
+    private TextView disruptionNotificationStatusTextView;
     private User user;
+    private PreferencesManager preferencesManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +64,13 @@ public class UserProfileFragment extends Fragment {
         memberSinceTextView = (TextView) view.findViewById(R.id.member_since_textview);
         logoutButton = (Button) view.findViewById(R.id.logout_button);
         editProfileContainer = view.findViewById(R.id.edit_profile_container);
+        disruptionNotificationsSwitch =
+                (Switch) view.findViewById(R.id.disruption_notification_switch);
+        disruptionNotificationStatusTextView =
+                (TextView) view.findViewById(R.id.disruption_notifications_status_textview);
 
         user = UserService.getInstance().getAuthenticatedUser();
+        preferencesManager = PreferencesManager.getInstance();
 
         // bind event listeners
         View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -77,8 +89,17 @@ public class UserProfileFragment extends Fragment {
 
         logoutButton.setOnClickListener(onClickListener);
         editProfileContainer.setOnClickListener(onClickListener);
+        disruptionNotificationsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                preferencesManager.setDisruptionNotificationsEnabled(isChecked);
+                DisruptionAlarmReceiver.setAlarmEnabled(getActivity(), isChecked);
+                populatePreferences();
+            }
+        });
 
         populateUserInfo();
+        populatePreferences();
 
         return view;
     }
@@ -152,6 +173,13 @@ public class UserProfileFragment extends Fragment {
                 .setNegativeButton(R.string.label_cancel, null)
                 .create();
         alertDialog.show();
+    }
+
+    private void populatePreferences() {
+        boolean areNotificationsEnabled = preferencesManager.areDisruptionNotificationsEnabled();
+        disruptionNotificationsSwitch.setChecked(areNotificationsEnabled);
+        disruptionNotificationStatusTextView.setText(areNotificationsEnabled ? R.string.enabled :
+                R.string.disabled);
     }
 
     private void logout() {

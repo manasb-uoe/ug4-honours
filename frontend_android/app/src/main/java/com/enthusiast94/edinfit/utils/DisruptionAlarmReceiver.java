@@ -22,13 +22,18 @@ public class DisruptionAlarmReceiver extends BroadcastReceiver {
     private static String ACTION_DISRUPTION_ALARM = "disruptionAlarm";
     private static final String TAG = DisruptionAlarmReceiver.class.getSimpleName();
 
-    public static void setAlarm(Context context) {
+    public static void setAlarmEnabled(Context context, boolean isEnabled) {
         AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(context, DisruptionAlarmReceiver.class);
         alarmIntent.setAction(ACTION_DISRUPTION_ALARM);
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+
+        if (isEnabled) {
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                    AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+        } else {
+            manager.cancel(alarmPendingIntent);
+        }
     }
 
     @Override
