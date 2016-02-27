@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -27,6 +28,7 @@ import com.enthusiast94.edinfit.models.Journey;
 import com.enthusiast94.edinfit.network.BaseService;
 import com.enthusiast94.edinfit.network.JourneyPlannerService;
 import com.enthusiast94.edinfit.ui.journey_planner.activities.ChooseJourneyActivity;
+import com.enthusiast94.edinfit.ui.journey_planner.enums.RouteOption;
 import com.enthusiast94.edinfit.ui.journey_planner.enums.TimeMode;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -36,8 +38,10 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,6 +70,7 @@ public class JourneyPlannerFragment extends Fragment {
     private TimeMode timeMode;      // currently selected journey time mode
     private Date date;              // currently selected journey date
     private SimpleDateFormat sdfDay;
+    private RouteOption routeOption;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,7 +128,8 @@ public class JourneyPlannerFragment extends Fragment {
                                                 originPlace.getLatLng(),
                                                 destinationPlace.getLatLng(),
                                                 Helpers.getTimeFrom24hTimeAndDate(time, date).getTime() / 1000,
-                                                timeMode
+                                                timeMode,
+                                                routeOption
                                         );
                                     }
                                 })
@@ -157,6 +163,8 @@ public class JourneyPlannerFragment extends Fragment {
                                     }
                                 }).create().start();
                     }
+                } else if (id == optionsTextView.getId()) {
+                    showRouteOptionsDialog();
                 }
             }
         };
@@ -172,6 +180,7 @@ public class JourneyPlannerFragment extends Fragment {
         timeMode = TimeMode.LEAVE_AFTER;
         sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
         date = new Date();
+        routeOption = RouteOption.MINIMUM_WALK;
         updateDateAndTimeUi();
 
         return view;
@@ -320,6 +329,40 @@ public class JourneyPlannerFragment extends Fragment {
                 .create();
 
         dialog.show();
+    }
+
+    private void showRouteOptionsDialog() {
+        final HashMap<RouteOption, Integer> routeOptionsMap = new HashMap<>();
+        routeOptionsMap.put(RouteOption.MINIMUM_WALK, 0);
+        routeOptionsMap.put(RouteOption.SOME_WALK, 1);
+        routeOptionsMap.put(RouteOption.ONLY_WALK, 2);
+
+        final List<String> routeOptions = Arrays.asList(getString(R.string.min_walk),
+                getString(R.string.some_walk), getString(R.string.only_walk));
+
+        int checkedItemIndex = routeOptionsMap.get(routeOption);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setSingleChoiceItems(routeOptions.toArray(new String[routeOptions.size()]),
+                        checkedItemIndex, null)
+                .setTitle(R.string.route_options)
+                .setPositiveButton(R.string.label_save, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ListView listView = ((AlertDialog) dialog).getListView();
+                        for (Map.Entry<RouteOption, Integer> entry : routeOptionsMap.entrySet()) {
+                            if (entry.getValue() == listView.getCheckedItemPosition()) {
+                                routeOption = entry.getKey();
+                                break;
+                            }
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.label_cancel, null)
+                .create();
+
+        alertDialog.show();
     }
 
     private void setProgressDialogEnabled(boolean isEnabled) {

@@ -140,7 +140,23 @@ public class JourneyDetailsFragment extends Fragment {
         for (int i=0; i<legs.size(); i++) {
             Journey.Leg leg = legs.get(i);
 
-            if (i == 0) {
+            if (i == 0 && legs.size() == 1 && leg instanceof Journey.WalkLeg) {
+                IconGenerator iconGenerator = new IconGenerator(getActivity());
+                iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
+                Bitmap startIconBitmap = iconGenerator.makeIcon(getString(R.string.label_start));
+                map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromBitmap(startIconBitmap))
+                        .position(leg.getStartPoint().getLatLng()));
+
+                IconGenerator iconGenerator2 = new IconGenerator(getActivity());
+                iconGenerator2.setStyle(IconGenerator.STYLE_PURPLE);
+                Bitmap finishIconBitmap = iconGenerator2.makeIcon(getString(R.string.finish));;
+                map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromBitmap(finishIconBitmap))
+                        .position(leg.getFinishPoint().getLatLng()));
+
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(leg.getStartPoint().getLatLng(), 14));
+            } else if (i == 0) {
                 IconGenerator iconGenerator = new IconGenerator(getActivity());
                 iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
                 Bitmap startIconBitmap = iconGenerator.makeIcon(getString(R.string.label_start));

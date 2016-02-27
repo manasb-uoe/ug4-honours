@@ -3,6 +3,10 @@ package com.enthusiast94.edinfit.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,6 +52,15 @@ public class Directions implements Parcelable {
 
     public List<Point> getOverviewPoints() {
         return overviewPoints;
+    }
+
+    public String getPolyline() {
+        List<LatLng> latLngs = new ArrayList<>();
+        for (Point point : overviewPoints) {
+            latLngs.add(new LatLng(point.getLatitude(), point.getLongitude()));
+        }
+
+        return PolyUtil.encode(latLngs);
     }
 
     /**

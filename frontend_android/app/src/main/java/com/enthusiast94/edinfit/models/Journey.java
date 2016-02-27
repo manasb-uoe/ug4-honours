@@ -259,6 +259,10 @@ public class Journey implements Parcelable {
             return Stop.findById(stopId);
         }
 
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
+
         /**
          * Parcelable implementation
          */

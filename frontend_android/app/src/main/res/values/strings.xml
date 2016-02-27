@@ -187,6 +187,10 @@
     <string name="name_cannot_be_left_blank">Name cannot be left blank</string>
     <string name="user_profile_updated_successfully">User profile updated successfully</string>
     <string name="your_daily_average_is_format">Your daily average is %1$s</string>
+    <string name="route_options">Route options</string>
+    <string name="min_walk">Minmum walking</string>
+    <string name="some_walk">Some walking</string>
+    <string name="only_walk">Only walking</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>
