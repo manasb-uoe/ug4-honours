@@ -180,7 +180,7 @@ public class JourneyPlannerFragment extends Fragment {
         timeMode = TimeMode.LEAVE_AFTER;
         sdfDay = new SimpleDateFormat("dd MMM EEEE", Locale.UK);
         date = new Date();
-        routeOption = RouteOption.MINIMUM_WALK;
+        routeOption = RouteOption.LEAST_WALK;
         updateDateAndTimeUi();
 
         return view;
@@ -236,20 +236,25 @@ public class JourneyPlannerFragment extends Fragment {
     }
 
     private void updateDateAndTimeUi() {
-        String timeModeText;
-        switch (timeMode) {
-            case ARRIVE_BY:
-                timeModeText = getString(R.string.arrive_by);
-                break;
-            case LEAVE_AFTER:
-                timeModeText = getString(R.string.leave_after);
-                break;
-            default:
-                throw new IllegalStateException("Invalid time mode: " + timeMode.toString());
-        }
+        if (routeOption != RouteOption.MODERATE_WALK) {
+            String timeModeText;
+            switch (timeMode) {
+                case ARRIVE_BY:
+                    timeModeText = getString(R.string.arrive_by);
+                    break;
+                case LEAVE_AFTER:
+                    timeModeText = getString(R.string.leave_after);
+                    break;
+                default:
+                    throw new IllegalStateException("Invalid time mode: " + timeMode.toString());
+            }
 
-        dateAndTimeTextView.setText(String.format(getString(R.string.journey_date_and_time_format),
-                timeModeText, sdfDay.format(date), time));
+            dateAndTimeTextView.setText(String.format(getString(R.string.journey_date_and_time_format),
+                    timeModeText, sdfDay.format(date), time));
+        } else {
+            dateAndTimeTextView.setText(String.format(getString(
+                    R.string.journey_date_and_time_format_without_timemode), sdfDay.format(date), time));
+        }
     }
 
     private void showDateAndTimePickerDialog() {
@@ -262,6 +267,12 @@ public class JourneyPlannerFragment extends Fragment {
         final NumberPicker hourPicker = (NumberPicker) dialogView.findViewById(R.id.hour_picker);
         final NumberPicker minutePicker = (NumberPicker) dialogView.findViewById(R.id.minute_picker);
         final Spinner dateSpinner = (Spinner) dialogView.findViewById(R.id.date_spinner);
+
+        // disable time mode radio buttons if route option is set to MODERATE_WALK
+        if (routeOption == RouteOption.MODERATE_WALK) {
+            arriveByRadio.setEnabled(false);
+            leaveAfterRadio.setEnabled(false);
+        }
 
         // set initial values for radio buttons
         switch (timeMode) {
@@ -333,8 +344,8 @@ public class JourneyPlannerFragment extends Fragment {
 
     private void showRouteOptionsDialog() {
         final HashMap<RouteOption, Integer> routeOptionsMap = new HashMap<>();
-        routeOptionsMap.put(RouteOption.MINIMUM_WALK, 0);
-        routeOptionsMap.put(RouteOption.SOME_WALK, 1);
+        routeOptionsMap.put(RouteOption.LEAST_WALK, 0);
+        routeOptionsMap.put(RouteOption.MODERATE_WALK, 1);
         routeOptionsMap.put(RouteOption.ONLY_WALK, 2);
 
         final List<String> routeOptions = Arrays.asList(getString(R.string.min_walk),
@@ -357,6 +368,8 @@ public class JourneyPlannerFragment extends Fragment {
                                 break;
                             }
                         }
+
+                        updateDateAndTimeUi();
                     }
                 })
                 .setNegativeButton(R.string.label_cancel, null)

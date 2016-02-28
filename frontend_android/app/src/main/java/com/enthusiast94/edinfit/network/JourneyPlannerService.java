@@ -66,7 +66,7 @@ public class JourneyPlannerService {
             LatLng finishLatLng,
             long time /* seconds */,
             TimeMode timeMode,
-            RouteOption routeOption /* ignored if routeOption == SOME_WALK */) {
+            RouteOption routeOption /* ignored if routeOption == MODERATE_WALK */) {
 
         String timeModeText;
         switch (timeMode) {
@@ -178,7 +178,7 @@ public class JourneyPlannerService {
                 }
 
                 // make sure that journeys that do not match user's timer requirements are omitted
-                if (routeOption == RouteOption.MINIMUM_WALK) {
+                if (routeOption == RouteOption.LEAST_WALK) {
                     Date requestedDate = new Date(time * 1000);
                     Iterator<Journey> iterator = journeys.iterator();
                     while (iterator.hasNext()) {
@@ -198,7 +198,7 @@ public class JourneyPlannerService {
                     }
                 }
 
-                if (routeOption == RouteOption.SOME_WALK) {
+                if (routeOption == RouteOption.MODERATE_WALK) {
                     /**
                      * Now that we have all journeys, add more walking to them
                      */
