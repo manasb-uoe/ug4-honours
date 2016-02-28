@@ -328,7 +328,7 @@ public class NearMeFragment extends Fragment implements LocationProvider.LastKno
         userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (getActivity() != null) {
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocationLatLng, 15));
 
             reverseGeocoder.getPlaceName(userLocationLatLng.latitude, userLocationLatLng.longitude,
                     new ReverseGeocoder.ReverseGeocodeCallback() {
