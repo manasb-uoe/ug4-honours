@@ -178,7 +178,7 @@ public class ServiceTimetableFragment extends Fragment {
                 .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<StopToStopJourney>>() {
                     @Override
                     public BaseService.Response<StopToStopJourney> doAsync() {
-                        return StopService.getInstance().getStopToStopJourneys(startStopId,
+                        return StopService.getInstance().getStopToStopJourney(startStopId,
                                 finishStopId, serviceName, time);
                     }
                 })

@@ -169,7 +169,7 @@ public class StopService {
         return response;
     }
 
-    public BaseService.Response<StopToStopJourney> getStopToStopJourneys(
+    public BaseService.Response<StopToStopJourney> getStopToStopJourney(
             String startStopId,
             String finishStopId,
             String serviceName,
@@ -178,8 +178,6 @@ public class StopService {
         Request request = baseService.createTfeGetRequest("stoptostop-timetable/?start_stop_id=" +
                 startStopId + "&finish_stop_id=" + finishStopId + "&date=" +
                 Helpers.getEpochFromToday24hTime(time) + "&duration=120");
-
-        Log.d(TAG, request.url().toString());
 
         try {
             Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
@@ -221,6 +219,70 @@ public class StopService {
             StopToStopJourney journey = new StopToStopJourney(serviceName1, destination, departures);
 
             response.setBody(journey);
+            return response;
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            response.setError(e.getMessage());
+            return response;
+        }
+    }
+
+    public BaseService.Response<List<StopToStopJourney>> getStopToStopJourneys(
+            String startStopId,
+            String finishStopId,
+            String serviceName,
+            long time) {
+
+        BaseService.Response<List<StopToStopJourney>> response = new BaseService.Response<>();
+        Request request = baseService.createTfeGetRequest("stoptostop-timetable/?start_stop_id=" +
+                startStopId + "&finish_stop_id=" + finishStopId + "&date=" + time + "&duration=120");
+
+        Log.d(TAG, request.url().toString());
+
+        try {
+            Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();
+
+            if (!okHttpResponse.isSuccessful()) {
+                response.setError(okHttpResponse.message());
+                return response;
+            }
+
+            JSONArray journeysJsonArray =
+                    new JSONObject(okHttpResponse.body().string()).getJSONArray("journeys");
+
+            if (journeysJsonArray.length() == 0) {
+                response.setError(context.getString(R.string.no_journey_found));
+                return response;
+            }
+
+            List<StopToStopJourney> journeys = new ArrayList<>();
+
+            for (int i=0; i<journeysJsonArray.length(); i++) {
+                JSONObject journeyJson = journeysJsonArray.getJSONObject(i);
+
+                if (!journeyJson.getString("service_name").equals(serviceName)) {
+                    continue;
+                }
+
+                String destination = journeyJson.getString("destination");
+
+                JSONArray departuresJsonArray = journeyJson.getJSONArray("departures");
+                List<StopToStopJourney.Departure> departures = new ArrayList<>();
+                for (int j=0; j<departuresJsonArray.length(); j++) {
+                    JSONObject departureJson = departuresJsonArray.getJSONObject(j);
+                    departures.add(new StopToStopJourney.Departure(
+                            Stop.findById(departureJson.getString("stop_id")),
+                            departureJson.getString("name"),
+                            departureJson.getString("time")
+                    ));
+                }
+
+                journeys.add(new StopToStopJourney(
+                        serviceName, destination, departures));
+            }
+
+            response.setBody(journeys);
             return response;
 
         } catch (IOException | JSONException e) {
