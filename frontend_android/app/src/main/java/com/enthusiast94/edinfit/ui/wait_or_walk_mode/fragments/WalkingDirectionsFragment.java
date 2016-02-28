@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.ui.wait_or_walk_mode.fragments;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -11,10 +12,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
+import com.enthusiast94.edinfit.models.LiveBus;
 import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
+import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.LiveBusService;
 import com.enthusiast94.edinfit.ui.wait_or_walk_mode.events.OnWaitOrWalkSuggestionSelected;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,7 +32,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -47,6 +55,9 @@ public class WalkingDirectionsFragment extends Fragment {
     private GoogleMap map;
     private List<Directions.Step> directionSteps;
     private WaitOrWalkSuggestion waitOrWalkSelectedSuggestion;
+    private Handler handler;
+    private List<LiveBus> liveBuses;
+    private Map<String, Marker> liveBusMarkersMap;
 
     /**
      * The argument is non-null only when the directions action on a countdown
@@ -77,6 +88,8 @@ public class WalkingDirectionsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wait_or_walk_walking_directions, container, false);
+
+        handler = new Handler();
 
         /**
          * Find views
@@ -121,6 +134,10 @@ public class WalkingDirectionsFragment extends Fragment {
 
         if (waitOrWalkSelectedSuggestion != null) {
             updateDirections(waitOrWalkSelectedSuggestion);
+        }
+
+        if (liveBuses != null) {
+            addLiveBusesToMap();
         }
 
         return view;
@@ -169,6 +186,15 @@ public class WalkingDirectionsFragment extends Fragment {
     public void onEventMainThread(final OnWaitOrWalkSuggestionSelected event) {
         waitOrWalkSelectedSuggestion = event.getWaitOrWalkSuggestion();
         updateDirections(waitOrWalkSelectedSuggestion);
+
+        handler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                loadLiveBuses();
+                handler.postDelayed(this, 20000);
+            }
+        });
     }
 
     private void updateDirections(final WaitOrWalkSuggestion waitOrWalkSuggestion) {
@@ -208,6 +234,65 @@ public class WalkingDirectionsFragment extends Fragment {
             // update directions list
             directionSteps = directions.getSteps();
             directionsAdapter.notifyDirectionsChanged();
+        }
+    }
+
+    private void loadLiveBuses() {
+        new AsyncJob.AsyncJobBuilder<BaseService.Response<List<LiveBus>>>()
+                .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<List<LiveBus>>>() {
+                    @Override
+                    public BaseService.Response<List<LiveBus>> doAsync() {
+                        return LiveBusService.getInstance().getLiveBuses(
+                                waitOrWalkSelectedSuggestion.getUpcomingDeparture().getServiceName());
+                    }
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<List<LiveBus>>>() {
+                    @Override
+                    public void onResult(BaseService.Response<List<LiveBus>> response) {
+                        if (getActivity() == null) {
+                            return;
+                        }
+
+                        if (!response.isSuccessfull()) {
+                            Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+
+                        liveBuses = response.getBody();
+                        addLiveBusesToMap();
+                    }
+                }).create().start();
+    }
+
+    private void addLiveBusesToMap() {
+        if (liveBusMarkersMap == null) {
+            liveBusMarkersMap = new HashMap<>();
+        }
+
+        for (LiveBus liveBus : liveBuses) {
+            Marker liveBusMarkerOld = null;
+
+            if (liveBusMarkersMap.containsKey(liveBus.getVehicleId())) {
+                liveBusMarkerOld = liveBusMarkersMap.get(liveBus.getVehicleId());
+            }
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .title("#" + liveBus.getVehicleId() + " to " + liveBus.getDestination())
+                    .position(new LatLng(liveBus.getLatitude(), liveBus.getLongitude()))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.bus_marker));
+            Marker liveBusMarkerNew = map.addMarker(markerOptions);
+
+            if (liveBusMarkerOld != null) {
+                if (liveBusMarkerOld.isInfoWindowShown()) {
+                    liveBusMarkerNew.showInfoWindow();
+                }
+
+                liveBusMarkerOld.remove();
+            }
+
+            liveBusMarkersMap.remove(liveBus.getVehicleId());
+            liveBusMarkersMap.put(liveBus.getVehicleId(), liveBusMarkerNew);
         }
     }
 
