@@ -1,6 +1,7 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Directions;
@@ -86,6 +87,7 @@ public class JourneyPlannerService {
             Request request = baseService.createTfeGetRequest("directions/?start=" + startLatLng.latitude +
                     "," + startLatLng.longitude + "&finish=" + finishLatLng.latitude + "," +
                     finishLatLng.longitude + "&date=" + time + "&time_mode=" + timeModeText);
+            Log.d(TAG, request.url().toString());
 
             try {
                 Response okHttpResponse = baseService.getHttpClient().newCall(request).execute();

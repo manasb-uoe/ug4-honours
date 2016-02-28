@@ -192,6 +192,7 @@
     <string name="min_walk">Least walking</string>
     <string name="some_walk">A lot of walking</string>
     <string name="only_walk">Only walking</string>
+    <string name="no_bus_journeys_found_so_showing_only_walking_journes">No bus jurneys found, so only showing walking journeys.</string>
 
     <!-- Success messages -->
     <string name="success_logged_in_as_base">Logged in as:\u0020</string>

@@ -143,9 +143,13 @@ public class JourneyPlannerFragment extends Fragment {
                                         setProgressDialogEnabled(false);
 
                                         if (!response.isSuccessfull()) {
-                                            Toast.makeText(getActivity(), response.getError()
-                                                    , Toast.LENGTH_SHORT)
-                                                    .show();
+                                            Toast.makeText(getActivity(),
+                                                    getString(R.string.no_bus_journeys_found_so_showing_only_walking_journes),
+                                                    Toast.LENGTH_LONG).show();
+
+                                            routeOption = RouteOption.ONLY_WALK;
+                                            updateDateAndTimeUi();
+                                            getDirectionsButton.performClick();
                                             return;
                                         }
 
