@@ -4,12 +4,14 @@ import android.content.Context;
 
 import com.enthusiast94.edinfit.models.Directions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -59,9 +61,36 @@ public class DirectionsService {
                 return response;
             }
 
-            Gson gson = new Gson();
-            Directions directions = gson.fromJson(new JSONObject(okHttpResponse.body().string())
-                    .getJSONObject("data").toString(), Directions.class);
+            Directions directions = new Directions();
+            JSONObject dataJson = new JSONObject(okHttpResponse.body().string()).getJSONObject("data");
+
+            directions.setDistance(dataJson.getInt("distance"));
+            directions.setDuration(dataJson.getLong("duration"));
+            directions.setDistanceText(dataJson.getString("distanceText"));
+            directions.setDurationText(dataJson.getString("durationText"));
+
+            List<Directions.Step> steps = new ArrayList<>();
+            JSONArray stepsJsonArray = dataJson.getJSONArray("steps");
+            for (int i=0; i<stepsJsonArray.length(); i++) {
+                JSONObject stepJson = stepsJsonArray.getJSONObject(i);
+                JSONObject startPointJson = stepJson.getJSONObject("startLocation");
+                JSONObject endLocationJson = stepJson.getJSONObject("endLocation");
+
+                steps.add(new Directions.Step(
+                        stepJson.getInt("distance"),
+                        stepJson.getString("distanceText"),
+                        stepJson.getLong("duration"),
+                        stepJson.getString("durationText"),
+                        new Directions.Point(startPointJson.getDouble("latitude"), startPointJson.getDouble("longitude")),
+                        new Directions.Point(endLocationJson.getDouble("latitude"), endLocationJson.getDouble("longitude")),
+                        stepJson.getString("instruction"),
+                        !stepJson.isNull("maneuver") ? stepJson.getString("maneuver") : null,
+                        stepJson.getString("points")
+                ));
+            }
+
+            directions.setSteps(steps);
+            directions.setOverviewPoints(dataJson.getString("overviewPoints"));
 
             response.setBody(directions);
             return response;

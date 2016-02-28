@@ -19,7 +19,9 @@ public class Directions implements Parcelable {
     private long duration;
     private String durationText;
     private List<Step> steps;
-    private List<Point> overviewPoints;
+    private String overviewPoints;
+
+    public Directions() {}
 
     public Directions(int distance, String distanceText, long duration, String durationText,
                       List<Step> steps) {
@@ -51,16 +53,41 @@ public class Directions implements Parcelable {
     }
 
     public List<Point> getOverviewPoints() {
-        return overviewPoints;
+        List<LatLng> latLngs = PolyUtil.decode(overviewPoints);
+        List<Point> points = new ArrayList<>();
+        for (LatLng latLng : latLngs) {
+            points.add(new Directions.Point(latLng.latitude, latLng.longitude));
+        }
+
+        return points;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public void setDistanceText(String distanceText) {
+        this.distanceText = distanceText;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public void setDurationText(String durationText) {
+        this.durationText = durationText;
+    }
+
+    public void setSteps(List<Step> steps) {
+        this.steps = steps;
+    }
+
+    public void setOverviewPoints(String overviewPoints) {
+        this.overviewPoints = overviewPoints;
     }
 
     public String getPolyline() {
-        List<LatLng> latLngs = new ArrayList<>();
-        for (Point point : overviewPoints) {
-            latLngs.add(new LatLng(point.getLatitude(), point.getLongitude()));
-        }
-
-        return PolyUtil.encode(latLngs);
+        return overviewPoints;
     }
 
     /**
@@ -73,7 +100,7 @@ public class Directions implements Parcelable {
         duration = in.readLong();
         durationText = in.readString();
         steps = in.createTypedArrayList(Step.CREATOR);
-        overviewPoints = in.createTypedArrayList(Point.CREATOR);
+        overviewPoints = in.readString();
     }
 
     public static final Creator<Directions> CREATOR = new Creator<Directions>() {
@@ -100,7 +127,7 @@ public class Directions implements Parcelable {
         dest.writeLong(duration);
         dest.writeString(durationText);
         dest.writeTypedList(steps);
-        dest.writeTypedList(overviewPoints);
+        dest.writeString(overviewPoints);
     }
 
     public static class Step implements Parcelable {
@@ -113,16 +140,19 @@ public class Directions implements Parcelable {
         private Point endLocation;
         private String instruction;
         private String maneuver;
-        private List<Point> points;
+        private String points;
 
         public Step(int distance, String distanceText, long duration, String durationText,
-                    Point startLocation, Point endLocation, List<Point> points) {
+                    Point startLocation, Point endLocation, String instruction, String maneuver,
+                    String points) {
             this.distance = distance;
             this.distanceText = distanceText;
             this.duration = duration;
             this.durationText = durationText;
             this.startLocation = startLocation;
             this.endLocation = endLocation;
+            this.instruction = instruction;
+            this.maneuver = maneuver;
             this.points = points;
         }
 
@@ -159,6 +189,12 @@ public class Directions implements Parcelable {
         }
 
         public List<Point> getPoints() {
+            List<LatLng> latLngs = PolyUtil.decode(points);
+            List<Point> points = new ArrayList<>();
+            for (LatLng latLng : latLngs) {
+                points.add(new Directions.Point(latLng.latitude, latLng.longitude));
+            }
+
             return points;
         }
 
@@ -175,7 +211,7 @@ public class Directions implements Parcelable {
             endLocation = in.readParcelable(Point.class.getClassLoader());
             instruction = in.readString();
             maneuver = in.readString();
-            points = in.createTypedArrayList(Point.CREATOR);
+            points = in.readString();
         }
 
         public static final Creator<Step> CREATOR = new Creator<Step>() {
@@ -205,7 +241,7 @@ public class Directions implements Parcelable {
             dest.writeParcelable(endLocation, flags);
             dest.writeString(instruction);
             dest.writeString(maneuver);
-            dest.writeTypedList(points);
+            dest.writeString(points);
         }
     }
 

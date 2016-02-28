@@ -5,10 +5,8 @@
 var express = require("express");
 var authenticationMiddleware = require("../middleware/authentication");
 var GoogleMapsApi = require("googlemaps");
-var polyline = require("polyline");
 var config = require("../config");
 var helpers = require("../utils/helpers");
-
 var router = express.Router();
 var googleMapsApi = new GoogleMapsApi({
     key: config.googleMapsApiKey,
@@ -82,31 +80,14 @@ function getDirections(origin, destination, mode, callback) {
                         longitude: step.end_location.lng
                     },
                     instruction: step.html_instructions,
-                    maneuver: step.maneuver
+                    maneuver: step.maneuver,
+                    points: step.polyline.points
                 };
-
-                outputStep.points = [];
-
-                var decodedPoints = polyline.decode(step.polyline.points);
-                decodedPoints.forEach(function (decodedPoint) {
-                    outputStep.points.push({
-                        latitude: decodedPoint[0],
-                        longitude: decodedPoint[1]
-                    });
-                });
 
                 output.steps.push(outputStep);
             });
 
-            output.overviewPoints = [];
-
-            var decodedOverviewPoints = polyline.decode(data.routes[0].overview_polyline.points);
-            decodedOverviewPoints.forEach(function (decodedPoint) {
-                output.overviewPoints.push({
-                    latitude: decodedPoint[0],
-                    longitude: decodedPoint[1]
-                });
-            });
+            output.overviewPoints = data.routes[0].overview_polyline.points;
 
             return callback(null, output);
         }
