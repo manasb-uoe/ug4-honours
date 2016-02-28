@@ -3,6 +3,7 @@ package com.enthusiast94.edinfit.ui.service_info.fragments;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -16,9 +17,11 @@ import android.widget.Toast;
 
 import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
+import com.enthusiast94.edinfit.models.LiveBus;
 import com.enthusiast94.edinfit.models.Stop;
 import com.enthusiast94.edinfit.models.StopToStopJourney;
 import com.enthusiast94.edinfit.network.BaseService;
+import com.enthusiast94.edinfit.network.LiveBusService;
 import com.enthusiast94.edinfit.network.StopService;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -33,7 +36,9 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by manas on 12-01-2016.
@@ -55,6 +60,9 @@ public class ServiceTimetableFragment extends Fragment {
     private StopToStopJourney journey;
     private List<Marker> stopMarkers;
     private Polyline routePolyline;
+    private List<LiveBus> liveBuses;
+    private Map<String, Marker> liveBusMarkersMap;
+    private Handler handler;
 
     public static ServiceTimetableFragment newInstance(
             String startStopId,
@@ -83,6 +91,8 @@ public class ServiceTimetableFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_service_timetable, container, false);
+
+        handler = new Handler();
 
         // find views
         RecyclerView departuresRecyclerView =
@@ -134,6 +144,10 @@ public class ServiceTimetableFragment extends Fragment {
         } else {
             departuresAdapter.notifyDeparturesChanged(journey.getDepartures());
             updateMap(journey.getDepartures());
+
+            if (liveBuses != null) {
+                addLiveBusesToMap();
+            }
         }
 
         return view;
@@ -198,6 +212,15 @@ public class ServiceTimetableFragment extends Fragment {
                         journey = response.getBody();
                         departuresAdapter.notifyDeparturesChanged(journey.getDepartures());
                         updateMap(journey.getDepartures());
+
+                        handler.post(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                loadLiveBuses();
+                                handler.postDelayed(this, 20000);
+                            }
+                        });
                     }
                 }).create().start();
     }
@@ -250,6 +273,64 @@ public class ServiceTimetableFragment extends Fragment {
         }
 
         routePolyline = map.addPolyline(polylineOptions);
+    }
+
+    private void loadLiveBuses() {
+        new AsyncJob.AsyncJobBuilder<BaseService.Response<List<LiveBus>>>()
+                .doInBackground(new AsyncJob.AsyncAction<BaseService.Response<List<LiveBus>>>() {
+                    @Override
+                    public BaseService.Response<List<LiveBus>> doAsync() {
+                        return LiveBusService.getInstance().getLiveBuses(journey.getServiceName());
+                    }
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<BaseService.Response<List<LiveBus>>>() {
+                    @Override
+                    public void onResult(BaseService.Response<List<LiveBus>> response) {
+                        if (getActivity() == null) {
+                            return;
+                        }
+
+                        if (!response.isSuccessfull()) {
+                            Toast.makeText(getActivity(), response.getError(), Toast.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+
+                        liveBuses = response.getBody();
+                        addLiveBusesToMap();
+                    }
+                }).create().start();
+    }
+
+    private void addLiveBusesToMap() {
+        if (liveBusMarkersMap == null) {
+            liveBusMarkersMap = new HashMap<>();
+        }
+
+        for (LiveBus liveBus : liveBuses) {
+            Marker liveBusMarkerOld = null;
+
+            if (liveBusMarkersMap.containsKey(liveBus.getVehicleId())) {
+                liveBusMarkerOld = liveBusMarkersMap.get(liveBus.getVehicleId());
+            }
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .title("#" + liveBus.getVehicleId() + " to " + liveBus.getDestination())
+                    .position(new LatLng(liveBus.getLatitude(), liveBus.getLongitude()))
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.bus_marker));
+            Marker liveBusMarkerNew = map.addMarker(markerOptions);
+
+            if (liveBusMarkerOld != null) {
+                if (liveBusMarkerOld.isInfoWindowShown()) {
+                    liveBusMarkerNew.showInfoWindow();
+                }
+
+                liveBusMarkerOld.remove();
+            }
+
+            liveBusMarkersMap.remove(liveBus.getVehicleId());
+            liveBusMarkersMap.put(liveBus.getVehicleId(), liveBusMarkerNew);
+        }
     }
 
     private static abstract class DeparturesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
