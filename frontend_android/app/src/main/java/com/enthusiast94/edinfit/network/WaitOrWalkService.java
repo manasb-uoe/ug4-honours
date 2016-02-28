@@ -1,7 +1,6 @@
 package com.enthusiast94.edinfit.network;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.Pair;
 
 import com.enthusiast94.edinfit.models.Departure;
@@ -12,13 +11,8 @@ import com.enthusiast94.edinfit.models.WaitOrWalkSuggestion;
 import com.enthusiast94.edinfit.utils.Helpers;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by manas on 11-11-2015.
@@ -134,7 +128,6 @@ public class WaitOrWalkService {
 
         for (int i=0; i<stopDeparturesPair.size(); i++) {
             Pair<Stop, List<Departure>> currentPair =  stopDeparturesPair.get(i);
-            Log.d(TAG, currentPair.first.getName());
 
             if (shouldStopProcessing || i == 0 /* exclude last stop */) {
                 continue;
@@ -161,9 +154,6 @@ public class WaitOrWalkService {
             long remainingTimeForDepartureMillis =
                     Helpers.getRemainingTimeMillisFromNow(upcomingDeparture.getTime());
 
-            Log.d(TAG, "upcoming: " + upcomingDeparture.getTime());
-            Log.d(TAG, "remaining time: " + Helpers.humanizeDurationInMillisToMinutes(remainingTimeForDepartureMillis));
-
             BaseService.Response<Directions> directionsResponse = DirectionsService.getInstance()
                     .getWalkingDirections(userLocation, currentPair.first.getPosition());
 
@@ -173,7 +163,6 @@ public class WaitOrWalkService {
             }
 
             Directions walkingDirections = directionsResponse.getBody();
-            Log.d(TAG, "walk duration: " + walkingDirections.getDurationText());
             if (walkingDirections.getDuration() * 1000 <= remainingTimeForDepartureMillis) {
                 waitOrWalkSuggestions.add(new WaitOrWalkSuggestion(
                         WaitOrWalkSuggestion.WaitOrWalkSuggestionType.WALK,
