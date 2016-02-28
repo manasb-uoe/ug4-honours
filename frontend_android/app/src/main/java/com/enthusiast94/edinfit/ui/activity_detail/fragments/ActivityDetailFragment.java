@@ -1,5 +1,6 @@
 package com.enthusiast94.edinfit.ui.activity_detail.fragments;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.arasthel.asyncjob.AsyncJob;
 import com.enthusiast94.edinfit.R;
 import com.enthusiast94.edinfit.models.Activity;
 import com.enthusiast94.edinfit.network.UserService;
@@ -25,6 +27,7 @@ import com.google.maps.android.ui.IconGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -37,8 +40,8 @@ public class ActivityDetailFragment extends Fragment {
     private static final String MAPVIEW_SAVE_STATE = "mapViewSaveState";
 
     private MapView mapView;
-
     private GoogleMap map;
+    private ProgressDialog progressDialog;
 
     public static ActivityDetailFragment newInstance(long activityId) {
         Bundle bundle = new Bundle();
@@ -63,14 +66,14 @@ public class ActivityDetailFragment extends Fragment {
 
         // find views
         mapView = (MapView) view.findViewById(R.id.map_view);
-        TextView originDestinationTextView =
+        final TextView originDestinationTextView =
                 (TextView) view.findViewById(R.id.origin_destination_textview);
-        TextView infoTextView = (TextView) view.findViewById(R.id.info_textview);
-        TextView distanceTextView = (TextView) view.findViewById(R.id.distance_textview);
-        TextView timeTextView = (TextView) view.findViewById(R.id.time_textview);
-        TextView speedTextView = (TextView) view.findViewById(R.id.speed_textview);
-        TextView stepsTextView = (TextView) view.findViewById(R.id.steps_textview);
-        TextView caloriesTextView = (TextView) view.findViewById(R.id.calories_textview);
+        final TextView infoTextView = (TextView) view.findViewById(R.id.info_textview);
+        final TextView distanceTextView = (TextView) view.findViewById(R.id.distance_textview);
+        final TextView timeTextView = (TextView) view.findViewById(R.id.time_textview);
+        final TextView speedTextView = (TextView) view.findViewById(R.id.speed_textview);
+        final TextView stepsTextView = (TextView) view.findViewById(R.id.steps_textview);
+        final TextView caloriesTextView = (TextView) view.findViewById(R.id.calories_textview);
 
         // setup map
         Bundle mapViewSavedInstanceState = savedInstanceState != null ?
@@ -80,58 +83,70 @@ public class ActivityDetailFragment extends Fragment {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(Helpers.getEdinburghLatLng(getActivity()), 12));
 
         // get selected activity using the id provided in the arguments
-        Activity activity = Activity.findById(getArguments().getLong(EXTRA_ACTIVITY_ID));
+        new AsyncJob.AsyncJobBuilder<Activity>()
+                .doInBackground(new AsyncJob.AsyncAction<Activity>() {
+                    @Override
+                    public Activity doAsync() {
+                        return Activity.findById(getArguments().getLong(EXTRA_ACTIVITY_ID));
+                    }
+                })
+                .doWhenFinished(new AsyncJob.AsyncResultAction<Activity>() {
+                    @Override
+                    public void onResult(Activity activity) {
+                        distanceTextView.setText(Helpers.humanizeDistance(activity.getDistance() / 1000));
+                        timeTextView.setText(Helpers.humanizeDurationInMillis(activity.getEnd() - activity.getStart()));
+                        stepsTextView.setText(String.valueOf(Helpers.getStepsFromDistance(activity.getDistance())));
+                        caloriesTextView.setText(String.format("%d kcal", Helpers.getCaloriesBurnt(
+                                UserService.getInstance().getAuthenticatedUser().getWeight(), activity.getDistance() / 1000.0)));
+                        speedTextView.setText(String.format(getString(R.string.label_speed_format),
+                                activity.getAverageSpeed() * (60 * 60 / (1000.0)))); // convert from m/s to km/h
 
-        distanceTextView.setText(Helpers.humanizeDistance(activity.getDistance() / 1000));
-        timeTextView.setText(Helpers.humanizeDurationInMillis(activity.getEnd() - activity.getStart()));
-        stepsTextView.setText(String.valueOf(Helpers.getStepsFromDistance(activity.getDistance())));
-        caloriesTextView.setText(String.format("%d kcal", Helpers.getCaloriesBurnt(
-                UserService.getInstance().getAuthenticatedUser().getWeight(), activity.getDistance() / 1000.0)));
-        speedTextView.setText(String.format(getString(R.string.label_speed_format),
-                activity.getAverageSpeed() * (60 * 60 / (1000.0)))); // convert from m/s to km/h
+                        String dateAndTime = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.UK)
+                                .format(new Date(activity.getStart()));
 
-        String dateAndTime = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.UK)
-                .format(new Date(activity.getStart()));
+                        originDestinationTextView.setText(activity.getDescription());
+                        infoTextView.setText(String.format(getString(R.string.label_activity_info_format),
+                                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime));
 
-        originDestinationTextView.setText(activity.getDescription());
-        infoTextView.setText(String.format(getString(R.string.label_activity_info_format),
-                Helpers.getActivityTypeText(getActivity(), activity.getType()), dateAndTime));
+                        PolylineOptions polylineOptions = new PolylineOptions();
+                        int polyLineColor = ContextCompat.getColor(getActivity(), R.color.blue_500);
+                        int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
+                        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", Locale.UK);
+                        List<Activity.Point> points = activity.getPoints();
 
-        PolylineOptions polylineOptions = new PolylineOptions();
-        int polyLineColor = ContextCompat.getColor(getActivity(), R.color.blue_500);
-        int polylineWidth = getResources().getDimensionPixelOffset(R.dimen.polyline_width);
-        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", Locale.UK);
-        for (int i=0; i<activity.getPoints().size(); i++) {
-            Activity.Point point = activity.getPoints().get(i);
-            polylineOptions
-                    .add(new LatLng(point.getLatitude(), point.getLongitude()))
-                    .width(polylineWidth)
-                    .color(polyLineColor);
+                        for (int i=0; i<points.size(); i++) {
+                            Activity.Point point = points.get(i);
+                            polylineOptions
+                                    .add(new LatLng(point.getLatitude(), point.getLongitude()))
+                                    .width(polylineWidth)
+                                    .color(polyLineColor);
 
-            if (i == 0 || i == activity.getPoints().size()-1) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(point.getLatitude(), point.getLongitude()));
-                markerOptions.title(sdfTime.format(point.getTimestamp()));
-                if (i ==0) {
-                    IconGenerator iconGenerator = new IconGenerator(getActivity());
-                    iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
-                    Bitmap startIconBitmap = iconGenerator.makeIcon(getString(R.string.label_start));
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(startIconBitmap));
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(),
-                            14));
-                }
-                if (i == activity.getPoints().size()-1) {
-                    IconGenerator iconGenerator = new IconGenerator(getActivity());
-                    iconGenerator.setStyle(IconGenerator.STYLE_PURPLE);
-                    Bitmap finishIconBitmap = iconGenerator.makeIcon(getString(R.string.finish));
-                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(finishIconBitmap));
-                }
+                            if (i == 0 || i == points.size()-1) {
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.position(new LatLng(point.getLatitude(), point.getLongitude()));
+                                markerOptions.title(sdfTime.format(point.getTimestamp()));
+                                if (i ==0) {
+                                    IconGenerator iconGenerator = new IconGenerator(getActivity());
+                                    iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
+                                    Bitmap startIconBitmap = iconGenerator.makeIcon(getString(R.string.label_start));
+                                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(startIconBitmap));
+                                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(markerOptions.getPosition(),
+                                            15));
+                                }
+                                if (i == points.size()-1) {
+                                    IconGenerator iconGenerator = new IconGenerator(getActivity());
+                                    iconGenerator.setStyle(IconGenerator.STYLE_PURPLE);
+                                    Bitmap finishIconBitmap = iconGenerator.makeIcon(getString(R.string.finish));
+                                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(finishIconBitmap));
+                                }
 
-                map.addMarker(markerOptions);
-            }
-        }
-        map.addPolyline(polylineOptions);
+                                map.addMarker(markerOptions);
+                            }
+                        }
+                        map.addPolyline(polylineOptions);
 
+                    }
+                }).create().start();
 
         return view;
     }
@@ -162,11 +177,29 @@ public class ActivityDetailFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    private void setLoading(boolean isLoading) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage(getString(R.string.label_loading));
+            progressDialog.setCancelable(false);
+        }
+
+        if (isLoading) {
+            progressDialog.show();
+        } else {
+            progressDialog.hide();
+        }
     }
 }
