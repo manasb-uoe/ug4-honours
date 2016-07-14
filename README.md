@@ -1,4 +1,4 @@
-# EdinFit - A Public Transport Android Application That Keeps You Fit
+# EdinFit
 
 ## Goal
 The goal of this project was to make use of the newly-released Open Data API (https://tfe-opendata.readme.io/) made available by Transport for Edinburgh, to create a public transport mobile application that takes users from one place to another, while keeping them fit.
