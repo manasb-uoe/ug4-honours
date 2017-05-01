@@ -1,6 +1,6 @@
 # EdinFit
 
-## *The final dissertation can be viewed [here](https://github.com/enthusiast94/ug4-honours/blob/master/main.pdf)*.
+## *The final dissertation can be viewed [here](https://github.com/enthusiast94/ug4-honours/blob/master/main.pdf)*. It is also listed on the ['Outstanding Dissertations'](https://project-archive.inf.ed.ac.uk/ug4/2016-outstanding.html) page hosted by the university.
 
 ## Goal
 The goal of this project was to make use of the newly-released Open Data API (https://tfe-opendata.readme.io/) made available by Transport for Edinburgh, to create a public transport mobile application that takes users from one place to another, while keeping them fit.
